@@ -12,17 +12,17 @@ add_subdirectory (external)
 
 include_directories(
 	src/
-	external/imgui-1.90.4/examples/libs/glfw
-	external/glfw-3.4/include/
-	external/glm-1.0.1/
-	external/glew-2.2.0/include/
+	external/imgui/examples/libs/glfw
+	external/glfw/include/
+	external/glm/
+	external/glew/include/
 	.
 )
 
 set(ALL_LIBS
 	${OPENGL_LIBRARY}
 	glfw
-	GLEW_220
+	GLEW
 )
 
 add_definitions(
