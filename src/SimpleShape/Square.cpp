@@ -3,6 +3,10 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 Square::Square(DrawMode aDrawmode)
 {
     mDrawmode = aDrawmode;
@@ -54,9 +58,18 @@ void Square::Draw(Shader *shader)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
+    // get matrix's uniform location and set matrix
+    unsigned int transformLoc = glGetUniformLocation(shader->shaderProgramID, "transform");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform.getTransform()));
+
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, sizeof(SquareSpace::indices), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
+}
+
+Transform &Square::getTransform()
+{
+    return transform;
 }
 
 Square::~Square()

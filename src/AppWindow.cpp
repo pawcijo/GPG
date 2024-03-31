@@ -47,6 +47,10 @@ namespace AppWindow
         glViewport(0, 0, width, height);
 
         glfwSetFramebufferSizeCallback(mWindow, framebuffer_size_callback);
+        glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+
+        glEnable(GL_DEPTH_TEST);
 
         return 0;
     }

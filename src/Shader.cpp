@@ -163,7 +163,7 @@ Shader::Shader(std::string vertex_file_path, std::string fragment_file_path, std
 
 Shader::~Shader()
 {
-	printf("Shader program removed");
+	printf("Shader program removed. \n");
 	glDeleteProgram(shaderProgramID);
 }
 

@@ -10,7 +10,9 @@ Some text bla bla bla .
 (might need more TODO check on clean system)
 
 
-## TODO:
+## TODO/DONE:
+** **
+**30.03.24**
 - ✅ Update GLEW 
 - ✅ Update GLFW
 - ✅ Update ImGui
@@ -18,7 +20,22 @@ Some text bla bla bla .
 - ✅ App Class
 - ✅ Shader Class
 - ✅ Move external to git-submodules
-- [ ] Transform class
+- ✅ Transform class
+- ✅ Camera class
+** **
+**31.03.24**
+- ✅ Quaternion in camera
+- ✅ Make transform work 
+- ✅ Make camera work
+- ✅ Add switch for wire render mode
+- ✅ Added texture loading 
+- ✅ Added Box(Cube)
+**1.04.24**
+- [ ] Add switch for Orthographic or perspective projection
+- [ ] Texture class
+
+
+Maybe: ?
 - [ ] Add ignore
 
 
