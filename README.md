@@ -8,8 +8,10 @@ Some text bla bla bla .
 - ✅ Update ImGui
 - ✅ Window Class
 - ✅ App Class
+- ✅ Shader Class
+- [ ] Transform class
 - [ ] Add ignore
-- [ ] Move external to gitsubmodules
+- [ ] Move external to git-submodules
 
 
 

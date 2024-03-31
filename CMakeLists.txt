@@ -37,6 +37,8 @@ add_executable(OPGLPlayground
 	main.cpp
 	src/AppWindow.cpp
 	src/App.cpp
+	src/Shader.cpp
+	src/SimpleShape/Square.cpp
 )
 
 target_link_libraries(OPGLPlayground

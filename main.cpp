@@ -4,11 +4,10 @@
 int main()
 {
 
-      AppWindow::AppWindow appWindow(1600,900);
-      App app(appWindow);
+    AppWindow::AppWindow appWindow(1600, 900);
+    App app(appWindow);
 
-      app.Run();
+    app.Run();
 
     return 0;
 }
-
