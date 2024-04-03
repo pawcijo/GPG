@@ -4,7 +4,6 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-
 #include <AppWindow.h>
 #include <SimpleShape/Box.h>
 #include <Camera.h>
@@ -28,10 +27,8 @@ static glm::vec3 globalCameraPosition;
 static float globalCameraYaw;
 static float globalCameraPitch;
 
-void CursorPositonCallback(GLFWwindow* window, double xpos, double ypos);
-void MouseClickCallback(GLFWwindow* window, int button, int action, int mods);
-
-
+void CursorPositonCallback(GLFWwindow *window, double xpos, double ypos);
+void MouseClickCallback(GLFWwindow *window, int button, int action, int mods);
 
 class App
 {
@@ -55,6 +52,14 @@ class App
     bool firstMouse = true;
     double lastY;
     double lastX;
+
+    bool show_ortho = true;
+    float ortho_left = -15;
+    float ortho_right = 15;
+    float ortho_bottom = -15;
+    float ortho_top = 15;
+    float ortho_zNear = -100;
+    float ortho_zFar = 100;
 
     float cameraSpeed = 3;
 

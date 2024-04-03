@@ -31,12 +31,34 @@ Some text bla bla bla .
 - ✅ Added texture loading 
 - ✅ Added Box(Cube)
 **1.04.24**
-- [ ] Add switch for Orthographic or perspective projection
+- ✅ Add switch for Orthographic or perspective projection
+
+**2.04.24**
+- ✅ Imgui works
+
+**3.04.24**
+- ✅ Imgui control for camera proporties 
+
+
+TODO:
 - [ ] Texture class
+- [ ] Save configuration
+- [ ] Model class
+- [ ] Scene Hierarchy with classes (weak, shared ptrs ?)
+- [ ] Collison on CPU: (Collider Class,
+                        AABB collider,
+                        OBB Collider (HARD),
+                        Sphere collider,
+                        Point collider)
+- [ ] Move collison to cpu
+- [ ] Load fonts to display at screen
+- [ ] FPS counter + Text display 
 
 
 Maybe: ?
 - [ ] Add ignore
+- [ ] Cloth after dealing with simple collison 
+- [ ] Bouncing material (Like slime in minecraft)
 
 
 

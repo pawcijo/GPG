@@ -150,12 +150,20 @@ App::App(AppWindow::AppWindow &appWindow) : mAppWindow(appWindow),
                                             box_shader(std::make_unique<Shader>("shaders/boxShader.vs", "shaders/boxShader.fs")),
                                             camera(glm::vec3(CAMERA_DEFAULT_POSTITION), glm::vec3(CAMERA_DEFAULT_WORLD_UP), 276, -25)
 {
-    ImGui_ImplGlfw_RestoreCallbacks(appWindow.GetWindow());
+    auto window = appWindow.GetWindow();
+    ImGui_ImplGlfw_RestoreCallbacks(window);
 
     stbi_set_flip_vertically_on_load(true);
 
-    glfwSetCursorPosCallback(appWindow.GetWindow(), CursorPositonCallback);
-    glfwSetMouseButtonCallback(appWindow.GetWindow(), MouseClickCallback);
+    glfwSetCursorPosCallback(window, CursorPositonCallback);
+    glfwSetMouseButtonCallback(window, MouseClickCallback);
+
+    glfwSetWindowFocusCallback(window, ImGui_ImplGlfw_WindowFocusCallback);
+    glfwSetCursorEnterCallback(window, ImGui_ImplGlfw_CursorEnterCallback);
+    glfwSetScrollCallback(window, ImGui_ImplGlfw_ScrollCallback);
+    glfwSetKeyCallback(window, ImGui_ImplGlfw_KeyCallback);
+    glfwSetCharCallback(window, ImGui_ImplGlfw_CharCallback);
+    glfwSetMonitorCallback(ImGui_ImplGlfw_MonitorCallback);
 }
 
 void App::Run()
@@ -168,7 +176,7 @@ void App::Run()
 
     mBoxes[0]->getTransform().translate(glm::vec3(2.0, 0, 0.0));
 
-    mBoxes[2]->getTransform().translate(glm::vec3(0.0f, -1.f, 0.0f));
+    mBoxes[2]->getTransform().translate(glm::vec3(0.0f, -0.55f, 0.0f));
     mBoxes[2]->getTransform().setScale(10.0f, 10.0f, 10.0f);
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
@@ -201,8 +209,23 @@ void App::Run()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("duuupsko");
-        ImGui::SetWindowSize({300, 700});
+        ImGui::Begin("Camera Settings");
+        if (ImGui::CollapsingHeader("Orthograpic"))
+        {
+            ImGui::SliderFloat("Left", &ortho_left, -100.0f, 100.0f);
+            ImGui::SliderFloat("Right", &ortho_right, -100.0f, 100.0f);
+            ImGui::SliderFloat("Bottom", &ortho_bottom, -100.0f, 100.0f);
+            ImGui::SliderFloat("Top", &ortho_top, -100.0f, 100.0f);
+            ImGui::SliderFloat("Near", &ortho_zNear, -100.0f, 100.0f);
+            ImGui::SliderFloat("Far", &ortho_zFar, -100.0f, 200.0f);
+        }
+
+        if (ImGui::CollapsingHeader("Perspective"))
+        {
+
+            ImGui::SliderFloat("Zoom", &camera.Zoom, 0.0f, 90.0f);
+        }
+
         ImGui::End();
 
         ImGui::Render();
@@ -227,16 +250,18 @@ void App::SetViewAndPerspective(Camera &aCamera, Shader &aShader)
     if (cameraMode == Perspective)
     {
         projection = glm::perspective(
-            aCamera.Zoom, (float)mAppWindow.GetWidth() / (float)mAppWindow.Getheight(),
+            glm::radians(aCamera.Zoom), (float)mAppWindow.GetWidth() / (float)mAppWindow.Getheight(),
             0.1f, 10000.0f);
     }
     else
     {
 
-        float min = -pow(1, camera.Zoom);
-        float max = pow(1, camera.Zoom);
-        // printf("Zoom : %f\n",aCamera.Zoom);
-        projection = glm::ortho((double)min, (double)max, (double)min, (double)max, 5.0, 100.0);
+        projection = glm::ortho((double)ortho_left,
+                                (double)ortho_right,
+                                (double)ortho_bottom,
+                                (double)ortho_top,
+                                (double)ortho_zNear,
+                                (double)ortho_zFar);
     }
 
     view = aCamera.GetViewMatrix();
