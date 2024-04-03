@@ -1,4 +1,5 @@
 
+
 #include <App.h>
 
 #include <iostream>
@@ -62,33 +63,49 @@ void App::ProcessKey()
         camera.Position +=
             glm::normalize(glm::cross(camera.Front, camera.Up)) * speed;
     }
+
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    {
+        camera.Position += speed * camera.Up;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    {
+        camera.Position -= speed * camera.Up;
+    }
 }
 
 void App::ProcessMouse()
 {
+
     if (processMouseMovement)
     {
 
-        if (mouseCallBack)
+        if (Middle_Mouse_Hold)
         {
-            if (mouseToUpdate)
+            mouseToUpdate = false;
+            if (firstMouse)
             {
-                mouseToUpdate = false;
-                if (firstMouse)
-                {
-                    lastX = mousePosX;
-                    lastY = mousePosY;
-                    firstMouse = false;
-                }
-
-                float xoffset = mousePosX - lastX;
-                float yoffset =
-                    lastY - mousePosY; // reversed since y-coordinates go from bottom to top
-
                 lastX = mousePosX;
                 lastY = mousePosY;
+                firstMouse = false;
+            }
 
-                camera.ProcessMouseMovement(xoffset, yoffset);
+            float xoffset = mousePosX - initialMousePosX;
+            // reversed since y-coordinates go from bottom to top
+            float yoffset = initialMousePosY - mousePosY;
+
+            float xoffset_2 = mousePosX - mousePosX;
+            // reversed since y-coordinates go from bottom to top
+            float yoffset_2 = mousePosY - mousePosY;
+
+            lastX = mousePosX;
+            lastY = mousePosY;
+
+            // if (abs(xoffset_2) > 0.1 || abs(yoffset_2) > 0.1)
+            {
+                // printf("Offset x: %f offset Y %f \n", xoffset, yoffset);
+                camera.ProcessMouseMovement(-1.0 * xoffset, -1.0 * yoffset);
             }
         }
     }
@@ -130,12 +147,15 @@ void App::SwitchDrawMode()
 App::App(AppWindow::AppWindow &appWindow) : mAppWindow(appWindow),
                                             shader(std::make_unique<Shader>("shaders/shader.vs", "shaders/shader.fs")),
                                             shader_test(std::make_unique<Shader>("shaders/test.vs", "shaders/test.fs")),
-                                            box_shader(std::make_unique<Shader>("shaders/boxShader.vs", "shaders/boxShader.fs"))
+                                            box_shader(std::make_unique<Shader>("shaders/boxShader.vs", "shaders/boxShader.fs")),
+                                            camera(glm::vec3(CAMERA_DEFAULT_POSTITION), glm::vec3(CAMERA_DEFAULT_WORLD_UP), 276, -25)
 {
-
-    glfwSetCursorPosCallback(mAppWindow.GetWindow(), cursor_position_callback);
+    ImGui_ImplGlfw_RestoreCallbacks(appWindow.GetWindow());
 
     stbi_set_flip_vertically_on_load(true);
+
+    glfwSetCursorPosCallback(appWindow.GetWindow(), CursorPositonCallback);
+    glfwSetMouseButtonCallback(appWindow.GetWindow(), MouseClickCallback);
 }
 
 void App::Run()
@@ -144,9 +164,17 @@ void App::Run()
 
     mBoxes.push_back(new Box("resources/textures/clown.png", DrawMode::EDefault));
     mBoxes.push_back(new Box("resources/textures/clown_2.png", DrawMode::EDefault));
+    mBoxes.push_back(new Box("resources/textures/box.jpg", DrawMode::EDefault));
 
     mBoxes[0]->getTransform().translate(glm::vec3(2.0, 0, 0.0));
 
+    mBoxes[2]->getTransform().translate(glm::vec3(0.0f, -1.f, 0.0f));
+    mBoxes[2]->getTransform().setScale(10.0f, 10.0f, 10.0f);
+
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+    int counter = 0;
+    bool prawda = true;
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
@@ -159,7 +187,6 @@ void App::Run()
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-
         SetViewAndPerspective(camera, *box_shader);
 
         auto shaderPtr = box_shader.get();
@@ -168,11 +195,30 @@ void App::Run()
 
             box->Draw(box_shader.get());
         }
+
+        // New frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::Begin("duuupsko");
+        ImGui::SetWindowSize({300, 700});
+        ImGui::End();
+
+        ImGui::Render();
+
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
     printf("Close App.\n");
+    glfwDestroyWindow(window);
     glfwTerminate();
 }
 
@@ -186,11 +232,13 @@ void App::SetViewAndPerspective(Camera &aCamera, Shader &aShader)
     }
     else
     {
-        projection = glm::ortho(
-            (float)0.0, (float)mAppWindow.GetWidth() / (float)mAppWindow.Getheight(),
-            0.1f, 10000.0f);
+
+        float min = -pow(1, camera.Zoom);
+        float max = pow(1, camera.Zoom);
+        // printf("Zoom : %f\n",aCamera.Zoom);
+        projection = glm::ortho((double)min, (double)max, (double)min, (double)max, 5.0, 100.0);
     }
-    
+
     view = aCamera.GetViewMatrix();
 
     aShader.use();
@@ -198,9 +246,26 @@ void App::SetViewAndPerspective(Camera &aCamera, Shader &aShader)
     aShader.setMat4("view", view);
 }
 
-void cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
+void CursorPositonCallback(GLFWwindow *window, double xpos, double ypos)
 {
-    mouseToUpdate = true;
+
+    ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
     mousePosX = xpos;
     mousePosY = ypos;
+}
+
+void MouseClickCallback(GLFWwindow *window, int button, int action, int mods)
+{
+
+    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_3) == GLFW_PRESS)
+    {
+
+        Middle_Mouse_Hold = true;
+        glfwGetCursorPos(window, &initialMousePosX, &initialMousePosY);
+    }
+    else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_3) == GLFW_RELEASE)
+    {
+        Middle_Mouse_Hold = false;
+    }
 }

@@ -63,11 +63,11 @@ Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float u
 
 glm::mat4 Camera::GetViewMatrix()
 {
-    printf("Pitch %f  yaw %f Position : x: %f y: %f z: %f  \n", Pitch, Yaw, Position.x, Position.y, Position.z);
+    // printf("Pitch %f  yaw %f Position : x: %f y: %f z: %f  \n", Pitch, Yaw, Position.x, Position.y, Position.z);
     return glm::lookAt(Position, Position + Front, Up);
 }
 
-void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch)
+void Camera::ProcessMouseMovement(float xoffset, float yoffset)
 {
 
     xoffset *= MouseSensitivity;
@@ -77,13 +77,12 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPi
     Pitch += yoffset;
 
     // Make sure that when pitch is out of bounds, screen doesn't get flipped
-    if (constrainPitch)
-    {
-        if (Pitch > 89.0f)
-            Pitch = 89.0f;
-        if (Pitch < -89.0f)
-            Pitch = -89.0f;
-    }
+
+    if (Pitch > 89.0f)
+        Pitch = 89.0f;
+    if (Pitch < -89.0f)
+        Pitch = -89.0f;
+
     // Update Front, Right and Up Vectors using the updated Eular angles
     updateCameraVectors();
 }

@@ -18,7 +18,7 @@ const float CAMERA_DEFAULT_YAW(24.0f);
 const float CAMERA_DEFAULT_PITCH(14.0f);
 
 const float CAMERA_DEFAULT_SPEED(0.20f);
-const float CAMERA_DEFAULT_MOUSE_SENSIVITY(0.1f);
+const float CAMERA_DEFAULT_MOUSE_SENSIVITY(0.005f);
 const float CAMERA_DEFAULT_ZOOM(45.0f);
 
 
@@ -56,7 +56,7 @@ public:
   Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch);
   Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch);
 
-  void ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
+  void ProcessMouseMovement(float xoffset, float yoffset);
   void ProcessMouseScroll(float yoffset);
 
   void updateCameraVectors();

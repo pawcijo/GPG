@@ -1,3 +1,7 @@
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 #include "AppWindow.h"
 
 #include <iostream>
@@ -21,9 +25,11 @@ namespace AppWindow
     int AppWindow::init(int width, int height)
     {
 
+        const char *glsl_version = "#version 450";
+
         glfwInit();
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
@@ -35,6 +41,21 @@ namespace AppWindow
             return -1;
         }
         glfwMakeContextCurrent(mWindow);
+        glfwSwapInterval(1);
+
+#pragma region IMGUI
+        // IMGUI
+        // setup Imgui
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO &io = ImGui::GetIO();
+        (void)io;
+
+        ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
+        ImGui_ImplOpenGL3_Init(glsl_version);
+
+// -------------------------------------------------------
+#pragma endregion IMGUI
 
         // Initialize GLEW
         bool gl3w_err = glewInit() != 0;
@@ -47,8 +68,7 @@ namespace AppWindow
         glViewport(0, 0, width, height);
 
         glfwSetFramebufferSizeCallback(mWindow, framebuffer_size_callback);
-        glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
+        // glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         glEnable(GL_DEPTH_TEST);
 

@@ -12,7 +12,8 @@ add_subdirectory (external)
 
 include_directories(
 	src/
-	external/imgui/examples/libs/glfw
+	external/imgui/
+	external/imgui/backends/
 	external/glfw/include/
 	external/glm/
 	external/glew/include/
@@ -43,6 +44,15 @@ add_executable(OPGLPlayground
 	src/SimpleShape/Square.cpp
 	src/SimpleShape/Box.cpp
 	src/stb_image.cpp
+	external/imgui/imgui.cpp
+	external/imgui/imgui_draw.cpp
+	external/imgui/imgui_tables.cpp
+	external/imgui/imgui_widgets.cpp
+	external/imgui/imgui_demo.cpp
+	external/imgui/backends/imgui_impl_glfw.cpp 
+	external/imgui/backends/imgui_impl_opengl3.cpp
+	
+
 )
 
 target_link_libraries(OPGLPlayground
