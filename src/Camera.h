@@ -17,7 +17,7 @@ const glm::vec3 CAMERA_DAFAULT_FRONT(0.0f, 0.0f, 1.0f);
 const float CAMERA_DEFAULT_YAW(24.0f);
 const float CAMERA_DEFAULT_PITCH(14.0f);
 
-const float CAMERA_DEFAULT_SPEED(0.20f);
+const float CAMERA_DEFAULT_SPEED(3.0f);
 const float CAMERA_DEFAULT_MOUSE_SENSIVITY(0.005f);
 const float CAMERA_DEFAULT_ZOOM(45.0f);
 
@@ -28,19 +28,18 @@ enum CameraMode{
 };
 
 struct OrthographicSettings{
-
   float left = -15;
   float right = 15;
   float bottom = -15;
   float top = 15;
   float zNear = -100;
   float zFar = 100;
-
 };
 
 
 class Camera
 {
+  CameraMode cameraMode;
 
 public:
   //Camera Attributes
@@ -58,13 +57,19 @@ public:
   //ortho view
   OrthographicSettings orthographicSettings;
 
-
   //Camera options
   float MovementSpeed;
   float MouseSensitivity;
   float Zoom;
 
+  //Camera view and project
+  glm::mat4 mView;
+  glm::mat4 mProjection;
+
+
   glm::mat4 GetViewMatrix();
+  CameraMode GetCameraMode();
+
 
   Camera();
   ~Camera() = default;
@@ -74,9 +79,9 @@ public:
   void ProcessMouseMovement(float xoffset, float yoffset);
   void ProcessMouseScroll(float yoffset);
 
+  void SetCameraMode(CameraMode cameraModa);
+  
+
   void updateCameraVectors();
 
-
-private:
-  //Calculates the front vector from the Camera's (updated) Eular Angles
 };

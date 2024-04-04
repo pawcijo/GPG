@@ -38,6 +38,12 @@ class App
     std::unique_ptr<Shader> box_shader;
     std::unique_ptr<Shader> color_pick_shader;
 
+    //Render options
+    DrawMode mDrawMode = DrawMode::EDefault;
+
+    //Window
+    AppWindow::AppWindow &mAppWindow;
+
     // Time related
     float deltaTime = 0.0f; //
     float lastFrame = 0.0f;
@@ -47,27 +53,18 @@ class App
     bool F2_Pressed = false;
 
     // Camera
-    Camera camera;
-    glm::mat4 view;
-    glm::mat4 projection;
+    Camera mCamera;
     bool firstMouse = true;
     double lastY;
     double lastX;
 
-    bool show_ortho = true;
 
-    int selectedObject = -1;
-
-    float cameraSpeed = 3;
-
-    CameraMode cameraMode = Perspective;
-
-    void SetViewAndPerspective(Camera &aCamera);
-
-    AppWindow::AppWindow &mAppWindow;
+    //App objects
+    //TODO AppObject class 
     std::vector<Box *> mBoxes;
-    DrawMode mDrawMode = DrawMode::EDefault;
-
+    int selectedObject = -1;
+   
+    void SetViewAndPerspective(Camera &aCamera);
     void SwitchDrawMode();
     void SwitchCameraMode();
 

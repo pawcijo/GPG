@@ -44,6 +44,7 @@ add_executable(OPGLPlayground
 	src/SimpleShape/Square.cpp
 	src/SimpleShape/Box.cpp
 	src/stb_image.cpp
+	src/Physics/AABB.cpp
 	external/imgui/imgui.cpp
 	external/imgui/imgui_draw.cpp
 	external/imgui/imgui_tables.cpp
@@ -52,7 +53,6 @@ add_executable(OPGLPlayground
 	external/imgui/backends/imgui_impl_glfw.cpp 
 	external/imgui/backends/imgui_impl_opengl3.cpp
 	
-
 )
 
 target_link_libraries(OPGLPlayground

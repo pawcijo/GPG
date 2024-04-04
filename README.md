@@ -39,6 +39,9 @@ Some text bla bla bla .
 **3.04.24**
 - ✅ Imgui control for camera proporties 
 
+**4.04.24**
+- ✅ Color picking to grab object (Boxes for now)
+- ✅ AABB
 
 TODO:
 - [ ] Texture class
@@ -46,13 +49,14 @@ TODO:
 - [ ] Model class
 - [ ] Scene Hierarchy with classes (weak, shared ptrs ?)
 - [ ] Collison on CPU: (Collider Class,
-                        AABB collider,
+                        AABB collider (✅),
                         OBB Collider (HARD),
                         Sphere collider,
-                        Point collider)
+                        Point collider (✅))
 - [ ] Move collison to cpu
 - [ ] Load fonts to display at screen
 - [ ] FPS counter + Text display 
+- [ ] More robust time (deltaTime)
 
 
 Maybe: ?

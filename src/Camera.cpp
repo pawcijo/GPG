@@ -28,7 +28,8 @@ Camera::Camera() : Position(CAMERA_DEFAULT_POSTITION),
                    MovementSpeed(CAMERA_DEFAULT_SPEED),
                    Pitch(CAMERA_DEFAULT_PITCH),
                    MouseSensitivity(CAMERA_DEFAULT_MOUSE_SENSIVITY),
-                   Zoom(CAMERA_DEFAULT_ZOOM)
+                   Zoom(CAMERA_DEFAULT_ZOOM),
+                   cameraMode(Perspective)
 {
     updateCameraVectors();
 }
@@ -44,7 +45,8 @@ Camera::Camera(glm::vec3 position,
                               Position(position),
                               WorldUp(worldUp),
                               Yaw(yaw),
-                              Pitch(pitch)
+                              Pitch(pitch),
+                              cameraMode(Perspective)
 {
     updateCameraVectors();
 }
@@ -85,6 +87,16 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset)
 
     // Update Front, Right and Up Vectors using the updated Eular angles
     updateCameraVectors();
+}
+
+void Camera::SetCameraMode(CameraMode aCameraMode)
+{
+  cameraMode = aCameraMode;
+}
+
+CameraMode Camera::GetCameraMode()
+{
+    return cameraMode;
 }
 
 void Camera::ProcessMouseScroll(float yoffset)

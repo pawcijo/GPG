@@ -8,7 +8,6 @@ namespace AppWindow
 {
     class AppWindow
     {
-
         GLFWwindow *mWindow;
         unsigned int mWidth;
         unsigned int mHeight;

@@ -44,34 +44,34 @@ void App::ProcessKey()
         F2_Pressed = false;
     }
 
-    float speed = deltaTime * cameraSpeed;
+    float speed = deltaTime * mCamera.MovementSpeed ;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        camera.Position += speed * camera.Front;
+        mCamera.Position += speed * mCamera.Front;
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        camera.Position -= speed * camera.Front;
+        mCamera.Position -= speed * mCamera.Front;
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        camera.Position -=
-            glm::normalize(glm::cross(camera.Front, camera.Up)) * speed;
+        mCamera.Position -=
+            glm::normalize(glm::cross(mCamera.Front, mCamera.Up)) * speed;
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        camera.Position +=
-            glm::normalize(glm::cross(camera.Front, camera.Up)) * speed;
+        mCamera.Position +=
+            glm::normalize(glm::cross(mCamera.Front, mCamera.Up)) * speed;
     }
 
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
-        camera.Position += speed * camera.Up;
+        mCamera.Position += speed * mCamera.Up;
     }
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
     {
-        camera.Position -= speed * camera.Up;
+        mCamera.Position -= speed * mCamera.Up;
     }
 }
 
@@ -105,7 +105,7 @@ void App::ProcessMouse()
             // if (abs(xoffset_2) > 0.1 || abs(yoffset_2) > 0.1)
             {
                 // printf("Offset x: %f offset Y %f \n", xoffset, yoffset);
-                camera.ProcessMouseMovement(-1.0 * xoffset, -1.0 * yoffset);
+                mCamera.ProcessMouseMovement(-1.0 * xoffset, -1.0 * yoffset);
             }
         }
     }
@@ -113,13 +113,13 @@ void App::ProcessMouse()
 
 void App::SwitchCameraMode()
 {
-    if (Perspective == cameraMode)
+    if (Perspective == mCamera.GetCameraMode())
     {
-        cameraMode = Orthographic;
+       mCamera.SetCameraMode(Orthographic);
     }
     else
     {
-        cameraMode = Perspective;
+        mCamera.SetCameraMode(Perspective);
     }
 }
 
@@ -149,7 +149,7 @@ App::App(AppWindow::AppWindow &appWindow) : mAppWindow(appWindow),
                                             shader_test(std::make_unique<Shader>("shaders/test.vs", "shaders/test.fs")),
                                             box_shader(std::make_unique<Shader>("shaders/boxShader.vs", "shaders/boxShader.fs")),
                                             color_pick_shader(std::make_unique<Shader>("shaders/colorPick.vs", "shaders/colorPick.fs")),
-                                            camera(glm::vec3(CAMERA_DEFAULT_POSTITION), glm::vec3(CAMERA_DEFAULT_WORLD_UP), 276, -25)
+                                            mCamera(glm::vec3(CAMERA_DEFAULT_POSTITION), glm::vec3(CAMERA_DEFAULT_WORLD_UP), 276, -25)
 {
     auto window = appWindow.GetWindow();
     ImGui_ImplGlfw_RestoreCallbacks(window);
@@ -159,6 +159,7 @@ App::App(AppWindow::AppWindow &appWindow) : mAppWindow(appWindow),
     glfwSetCursorPosCallback(window, CursorPositonCallback);
     glfwSetMouseButtonCallback(window, MouseClickCallback);
 
+    //Imgui Callbacks
     glfwSetWindowFocusCallback(window, ImGui_ImplGlfw_WindowFocusCallback);
     glfwSetCursorEnterCallback(window, ImGui_ImplGlfw_CursorEnterCallback);
     glfwSetScrollCallback(window, ImGui_ImplGlfw_ScrollCallback);
@@ -208,11 +209,13 @@ void App::Run()
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+        //TODO make deltaTime work more robust
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        SetViewAndPerspective(camera);
+        SetViewAndPerspective(mCamera);
 
         for (int i = 0; i < mBoxes.size(); i++)
         {
@@ -247,6 +250,7 @@ void App::Run()
             box->Draw(box_shader.get(),this);
         }
 
+#pragma region Imgui
         {
             // New frame
             ImGui_ImplOpenGL3_NewFrame();
@@ -256,18 +260,18 @@ void App::Run()
             ImGui::Begin("Camera Settings");
             if (ImGui::CollapsingHeader("Orthograpic"))
             {
-                ImGui::SliderFloat("Left", &camera.orthographicSettings.left, -100.0f, 100.0f);
-                ImGui::SliderFloat("Right", &camera.orthographicSettings.right, -100.0f, 100.0f);
-                ImGui::SliderFloat("Bottom", &camera.orthographicSettings.bottom, -100.0f, 100.0f);
-                ImGui::SliderFloat("Top", &camera.orthographicSettings.top, -100.0f, 100.0f);
-                ImGui::SliderFloat("Near", &camera.orthographicSettings.zNear, -100.0f, 100.0f);
-                ImGui::SliderFloat("Far", &camera.orthographicSettings.zFar, -100.0f, 200.0f);
+                ImGui::SliderFloat("Left", &mCamera.orthographicSettings.left, -100.0f, 100.0f);
+                ImGui::SliderFloat("Right", &mCamera.orthographicSettings.right, -100.0f, 100.0f);
+                ImGui::SliderFloat("Bottom", &mCamera.orthographicSettings.bottom, -100.0f, 100.0f);
+                ImGui::SliderFloat("Top", &mCamera.orthographicSettings.top, -100.0f, 100.0f);
+                ImGui::SliderFloat("Near", &mCamera.orthographicSettings.zNear, -100.0f, 100.0f);
+                ImGui::SliderFloat("Far", &mCamera.orthographicSettings.zFar, -100.0f, 200.0f);
             }
 
             if (ImGui::CollapsingHeader("Perspective"))
             {
 
-                ImGui::SliderFloat("Fov", &camera.Zoom, 0.0f, 90.0f);
+                ImGui::SliderFloat("Fov", &mCamera.Zoom, 0.0f, 90.0f);
             }
             ImGui::Text("Selected object %i", selectedObject);
 
@@ -277,13 +281,16 @@ void App::Run()
 
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         }
+        
+#pragma endregion Imgui
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
+    ImGui::DestroyContext(NULL);
 
     printf("Close App.\n");
     glfwDestroyWindow(window);
@@ -292,31 +299,30 @@ void App::Run()
 
 void App::SetViewAndPerspective(Camera &aCamera)
 {
-    if (cameraMode == Perspective)
+    if (aCamera.GetCameraMode() == Perspective)
     {
-        projection = glm::perspective(
+        aCamera.mProjection = glm::perspective(
             glm::radians(aCamera.Zoom), (float)mAppWindow.GetWidth() / (float)mAppWindow.Getheight(),
             0.1f, 10000.0f);
     }
     else
     {
-
-        projection = glm::ortho((double)camera.orthographicSettings.left,
-                                (double)camera.orthographicSettings.right,
-                                (double)camera.orthographicSettings.bottom,
-                                (double)camera.orthographicSettings.top,
-                                (double)camera.orthographicSettings.zNear,
-                                (double)camera.orthographicSettings.zFar);
+        aCamera.mProjection = glm::ortho((double)mCamera.orthographicSettings.left,
+                                (double)mCamera.orthographicSettings.right,
+                                (double)mCamera.orthographicSettings.bottom,
+                                (double)mCamera.orthographicSettings.top,
+                                (double)mCamera.orthographicSettings.zNear,
+                                (double)mCamera.orthographicSettings.zFar);
     }
 
-    view = aCamera.GetViewMatrix();
+    auto view  = aCamera.GetViewMatrix();
 
     box_shader->use();
-    box_shader->setMat4("projection", projection);
+    box_shader->setMat4("projection", aCamera.mProjection );
     box_shader->setMat4("view", view);
 
     color_pick_shader->use();
-    color_pick_shader->setMat4("projection", projection);
+    color_pick_shader->setMat4("projection", aCamera.mProjection );
     color_pick_shader->setMat4("view", view);
 }
 
