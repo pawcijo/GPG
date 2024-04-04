@@ -27,6 +27,17 @@ enum CameraMode{
   Orthographic
 };
 
+struct OrthographicSettings{
+
+  float left = -15;
+  float right = 15;
+  float bottom = -15;
+  float top = 15;
+  float zNear = -100;
+  float zFar = 100;
+
+};
+
 
 class Camera
 {
@@ -43,6 +54,10 @@ public:
   float Yaw;
   float Pitch;
   bool firstMove = false;
+
+  //ortho view
+  OrthographicSettings orthographicSettings;
+
 
   //Camera options
   float MovementSpeed;

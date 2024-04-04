@@ -212,18 +212,18 @@ void App::Run()
         ImGui::Begin("Camera Settings");
         if (ImGui::CollapsingHeader("Orthograpic"))
         {
-            ImGui::SliderFloat("Left", &ortho_left, -100.0f, 100.0f);
-            ImGui::SliderFloat("Right", &ortho_right, -100.0f, 100.0f);
-            ImGui::SliderFloat("Bottom", &ortho_bottom, -100.0f, 100.0f);
-            ImGui::SliderFloat("Top", &ortho_top, -100.0f, 100.0f);
-            ImGui::SliderFloat("Near", &ortho_zNear, -100.0f, 100.0f);
-            ImGui::SliderFloat("Far", &ortho_zFar, -100.0f, 200.0f);
+            ImGui::SliderFloat("Left", &camera.orthographicSettings.left, -100.0f, 100.0f);
+            ImGui::SliderFloat("Right", &camera.orthographicSettings.right, -100.0f, 100.0f);
+            ImGui::SliderFloat("Bottom", &camera.orthographicSettings.bottom, -100.0f, 100.0f);
+            ImGui::SliderFloat("Top", &camera.orthographicSettings.top, -100.0f, 100.0f);
+            ImGui::SliderFloat("Near", &camera.orthographicSettings.zNear, -100.0f, 100.0f);
+            ImGui::SliderFloat("Far", &camera.orthographicSettings.zFar, -100.0f, 200.0f);
         }
 
         if (ImGui::CollapsingHeader("Perspective"))
         {
 
-            ImGui::SliderFloat("Zoom", &camera.Zoom, 0.0f, 90.0f);
+            ImGui::SliderFloat("Fov", &camera.Zoom, 0.0f, 90.0f);
         }
 
         ImGui::End();
@@ -256,12 +256,12 @@ void App::SetViewAndPerspective(Camera &aCamera, Shader &aShader)
     else
     {
 
-        projection = glm::ortho((double)ortho_left,
-                                (double)ortho_right,
-                                (double)ortho_bottom,
-                                (double)ortho_top,
-                                (double)ortho_zNear,
-                                (double)ortho_zFar);
+        projection = glm::ortho((double)camera.orthographicSettings.left,
+                                (double)camera.orthographicSettings.right,
+                                (double)camera.orthographicSettings.bottom,
+                                (double)camera.orthographicSettings.top,
+                                (double)camera.orthographicSettings.zNear,
+                                (double)camera.orthographicSettings.zFar);
     }
 
     view = aCamera.GetViewMatrix();

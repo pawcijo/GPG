@@ -54,12 +54,7 @@ class App
     double lastX;
 
     bool show_ortho = true;
-    float ortho_left = -15;
-    float ortho_right = 15;
-    float ortho_bottom = -15;
-    float ortho_top = 15;
-    float ortho_zNear = -100;
-    float ortho_zFar = 100;
+
 
     float cameraSpeed = 3;
 
