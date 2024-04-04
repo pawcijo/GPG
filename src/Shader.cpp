@@ -1,6 +1,9 @@
 #include "Shader.h"
 #include <vector>
 
+#define GL_SILENCE_DEPRECATION
+
+
 // constructor reads and builds the shader
 Shader::Shader(std::string vertex_file_path, std::string fragment_file_path, std::string compute_file_path)
 {
@@ -18,7 +21,7 @@ Shader::Shader(std::string vertex_file_path, std::string fragment_file_path, std
 	GLuint ComputeShaderID;
 	if (!compute_file_path.empty())
 	{
-		ComputeShaderID = glCreateShader(GL_COMPUTE_SHADER);
+		//ComputeShaderID = glCreateShader(GL_COMPUTE_SHADER);
 	}
 
 	// Read the Vertex Shader code from the files
@@ -98,6 +101,7 @@ Shader::Shader(std::string vertex_file_path, std::string fragment_file_path, std
 
 	if (!compute_file_path.empty())
 	{
+		/*
 		// Compile Compute Shader
 		printf("Compiling shader : %s\n", compute_file_path.c_str());
 		char const *ComputeSourcePointer = ComputeShaderCode.c_str();
@@ -113,6 +117,7 @@ Shader::Shader(std::string vertex_file_path, std::string fragment_file_path, std
 			glGetShaderInfoLog(ComputeShaderID, InfoLogLength, NULL, &ComputeShaderErrorMessage[0]);
 			printf("%s\n", &ComputeShaderErrorMessage[0]);
 		}
+		*/
 	}
 
 	// Link the program
@@ -120,16 +125,19 @@ Shader::Shader(std::string vertex_file_path, std::string fragment_file_path, std
 	GLuint ProgramID = glCreateProgram();
 	if (!vertex_file_path.empty())
 	{
+		printf("Link vertex\n");
 		glAttachShader(ProgramID, VertexShaderID);
 	}
 	if (!fragment_file_path.empty())
 	{
+		printf("Link fragment\n");
 		glAttachShader(ProgramID, FragmentShaderID);
 	}
 	if (!compute_file_path.empty())
 	{
-		glAttachShader(ProgramID, ComputeShaderID);
+		//glAttachShader(ProgramID, ComputeShaderID);
 	}
+	printf("Link  program\n");
 	glLinkProgram(ProgramID);
 
 	// Check the program
@@ -152,12 +160,15 @@ Shader::Shader(std::string vertex_file_path, std::string fragment_file_path, std
 		glDetachShader(ProgramID, FragmentShaderID);
 		glDeleteShader(FragmentShaderID);
 	}
+	/*
 	if (!compute_file_path.empty())
 	{
 		glDetachShader(ProgramID, ComputeShaderID);
 		glDeleteShader(ComputeShaderID);
 	}
+	*/
 
+	printf("End init shader\n");
 	shaderProgramID = ProgramID;
 }
 

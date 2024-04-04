@@ -25,11 +25,11 @@ namespace AppWindow
     int AppWindow::init(int width, int height)
     {
 
-        const char *glsl_version = "#version 450";
+        const char *glsl_version = "#version 410";
 
         glfwInit();
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
@@ -57,13 +57,15 @@ namespace AppWindow
 // -------------------------------------------------------
 #pragma endregion IMGUI
 
-        // Initialize GLEW
-        bool gl3w_err = glewInit() != 0;
-        if (gl3w_err)
+#ifndef __APPLE__
+        //  Setup GLEW
+        GLenum status = glewInit();
+
+        if (status != GLEW_OK)
         {
-            fprintf(stderr, "Failed to initialize GLEW\n");
-            glfwTerminate();
+            std::cerr << "GLEW failed to initialize!" << std::endl;
         }
+#endif
 
         glViewport(0, 0, width, height);
 

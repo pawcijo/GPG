@@ -1,5 +1,12 @@
+#ifdef __APPLE__
+/* Defined before OpenGL and GLUT includes to avoid deprecation messages */
+#define GL_SILENCE_DEPRECATION
+#endif
+
 #include <AppWindow.h>
 #include <App.h>
+
+
 
 int main()
 {

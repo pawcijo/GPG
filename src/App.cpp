@@ -150,8 +150,12 @@ App::App(AppWindow::AppWindow &appWindow) : mAppWindow(appWindow),
                                             box_shader(std::make_unique<Shader>("shaders/boxShader.vs", "shaders/boxShader.fs")),
                                             camera(glm::vec3(CAMERA_DEFAULT_POSTITION), glm::vec3(CAMERA_DEFAULT_WORLD_UP), 276, -25)
 {
+     printf("Start Window init\n");
     auto window = appWindow.GetWindow();
+
+    printf("Imgui callback\n");
     ImGui_ImplGlfw_RestoreCallbacks(window);
+    printf("Imgui callback2\n");
 
     stbi_set_flip_vertically_on_load(true);
 
@@ -164,6 +168,7 @@ App::App(AppWindow::AppWindow &appWindow) : mAppWindow(appWindow),
     glfwSetKeyCallback(window, ImGui_ImplGlfw_KeyCallback);
     glfwSetCharCallback(window, ImGui_ImplGlfw_CharCallback);
     glfwSetMonitorCallback(ImGui_ImplGlfw_MonitorCallback);
+    printf("End Window init\n");
 }
 
 void App::Run()

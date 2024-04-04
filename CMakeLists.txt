@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
  
 # Compile external dependencies 
 add_subdirectory (external)
@@ -23,7 +24,8 @@ include_directories(
 set(ALL_LIBS
 	${OPENGL_LIBRARY}
 	glfw
-	GLEW
+	OpenGL::GL 
+	GLEW::GLEW
 )
 
 add_definitions(
