@@ -10,24 +10,46 @@
 #include <stb_image.h>
 #include <filesystem>
 
-Box::Box(std::filesystem::path texturePath, DrawMode aDrawmode)
+#include <ctime> // For time()
+
+#include <App.h>
+
+Box::Box(std::filesystem::path texturePath, DrawMode aDrawmode, Shader *nomralShader, Shader *pickingShader,unsigned int uniqueId)
 {
     mDrawmode = aDrawmode;
+    objectId = uniqueId;
+    {
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
 
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
+        glBindVertexArray(VAO);
 
-    glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(BoxSpace::vertices), BoxSpace::vertices, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(BoxSpace::vertices), BoxSpace::vertices, GL_STATIC_DRAW);
+        // position attribute
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+        glEnableVertexAttribArray(0);
+        // texture coord attribute
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+    }
 
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(0);
-    // texture coord attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
+    // color pick
+    {
+        glGenVertexArrays(1, &color_pick_VAO);
+        glGenBuffers(1, &color_pick_VBO);
+
+        glBindVertexArray(color_pick_VAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, color_pick_VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(BoxSpace::vertices), BoxSpace::vertices, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+        glEnableVertexAttribArray(0);
+    }
+
+    pickingColorID = glGetUniformLocation(pickingShader->shaderProgramID, "PickingColor");
 
     // load and create a texture
     // -------------------------
@@ -54,7 +76,6 @@ Box::Box(std::filesystem::path texturePath, DrawMode aDrawmode)
         std::cout << "Texture failed to load at path: " << texturePath.c_str() << std::endl;
         stbi_image_free(data);
     }
-
 }
 
 void Box::SetDrawMode(DrawMode drawMode)
@@ -62,10 +83,18 @@ void Box::SetDrawMode(DrawMode drawMode)
     mDrawmode = drawMode;
 }
 
-void Box::Draw(Shader *shader)
+void Box::Draw(Shader *shader,App *app)
 {
-
     glUseProgram(shader->shaderProgramID);
+
+    if(objectId == app->selectedObject)
+    {
+        shader->setBool("isSelected",true);
+
+    }
+    else{
+         shader->setBool("isSelected",false);
+    }
 
     if (mDrawmode == DrawMode::EWireFrame)
     {
@@ -81,7 +110,7 @@ void Box::Draw(Shader *shader)
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform.getTransform()));
 
     glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, funnyTexture);
+    glBindTexture(GL_TEXTURE_2D, funnyTexture);
 
     // Draw mesh
     glBindVertexArray(VAO);
@@ -90,6 +119,29 @@ void Box::Draw(Shader *shader)
 
     // CLEAR
     glActiveTexture(GL_TEXTURE0);
+}
+
+void Box::Draw_Color(Shader *shader, AppWindow::AppWindow &window)
+{
+    glUseProgram(shader->shaderProgramID);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    // get matrix's uniform location and set matrix
+    unsigned int transformLoc = glGetUniformLocation(shader->shaderProgramID, "transform");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform.getTransform()));
+
+    // Convert "i", the integer mesh ID, into an RGB color
+    int r = (objectId & 0x000000FF) >> 0;
+    int g = (objectId & 0x0000FF00) >> 8;
+    int b = (objectId & 0x00FF0000) >> 16;
+
+    // OpenGL expects colors to be in [0,1], so divide by 255.
+    glUniform4f(pickingColorID, r / 255.0f, b / 255.0f, b / 255.0f, 1.0f);
+
+    // Draw mesh
+    glBindVertexArray(color_pick_VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
 }
 
 Transform &Box::getTransform()

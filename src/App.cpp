@@ -148,6 +148,7 @@ App::App(AppWindow::AppWindow &appWindow) : mAppWindow(appWindow),
                                             shader(std::make_unique<Shader>("shaders/shader.vs", "shaders/shader.fs")),
                                             shader_test(std::make_unique<Shader>("shaders/test.vs", "shaders/test.fs")),
                                             box_shader(std::make_unique<Shader>("shaders/boxShader.vs", "shaders/boxShader.fs")),
+                                            color_pick_shader(std::make_unique<Shader>("shaders/colorPick.vs", "shaders/colorPick.fs")),
                                             camera(glm::vec3(CAMERA_DEFAULT_POSTITION), glm::vec3(CAMERA_DEFAULT_WORLD_UP), 276, -25)
 {
     auto window = appWindow.GetWindow();
@@ -170,11 +171,26 @@ void App::Run()
 {
     auto window = mAppWindow.GetWindow();
 
-    mBoxes.push_back(new Box("resources/textures/clown.png", DrawMode::EDefault));
-    mBoxes.push_back(new Box("resources/textures/clown_2.png", DrawMode::EDefault));
-    mBoxes.push_back(new Box("resources/textures/box.jpg", DrawMode::EDefault));
+    mBoxes.push_back(new Box("resources/textures/clown.png",
+                             DrawMode::EDefault,
+                             box_shader.get(),
+                             color_pick_shader.get(), 0));
+    mBoxes.push_back(new Box("resources/textures/clown_2.png",
+                             DrawMode::EDefault,
+                             box_shader.get(),
+                             color_pick_shader.get(), 1));
+    mBoxes.push_back(new Box("resources/textures/box.jpg",
+                             DrawMode::EDefault,
+                             box_shader.get(),
+                             color_pick_shader.get(), 2));
+
+    mBoxes.push_back(new Box("resources/textures/juanP.jpg",
+                             DrawMode::EDefault,
+                             box_shader.get(),
+                             color_pick_shader.get(), 3));
 
     mBoxes[0]->getTransform().translate(glm::vec3(2.0, 0, 0.0));
+    mBoxes[3]->getTransform().translate(glm::vec3(4.0, 0, 0.0));
 
     mBoxes[2]->getTransform().translate(glm::vec3(0.0f, -0.55f, 0.0f));
     mBoxes[2]->getTransform().setScale(10.0f, 10.0f, 10.0f);
@@ -189,49 +205,78 @@ void App::Run()
         ProcessKey();
         ProcessMouse();
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        SetViewAndPerspective(camera, *box_shader);
+
+        SetViewAndPerspective(camera);
+
+        for (int i = 0; i < mBoxes.size(); i++)
+        {
+
+            mBoxes[i]->Draw_Color(color_pick_shader.get(), mAppWindow);
+        }
+
+        glFlush();
+        glFinish();
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT))
+        {
+            unsigned char data[4];
+            glReadPixels(mousePosX, mAppWindow.Getheight() - mousePosY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+            int pickedID =
+                data[0] +
+                data[1] * 256 +
+                data[2] * 256 * 256;
+
+            selectedObject = pickedID;
+        }
+
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         auto shaderPtr = box_shader.get();
         for (Box *box : mBoxes)
         {
 
-            box->Draw(box_shader.get());
+            box->Draw(box_shader.get(),this);
         }
 
-        // New frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        ImGui::Begin("Camera Settings");
-        if (ImGui::CollapsingHeader("Orthograpic"))
         {
-            ImGui::SliderFloat("Left", &camera.orthographicSettings.left, -100.0f, 100.0f);
-            ImGui::SliderFloat("Right", &camera.orthographicSettings.right, -100.0f, 100.0f);
-            ImGui::SliderFloat("Bottom", &camera.orthographicSettings.bottom, -100.0f, 100.0f);
-            ImGui::SliderFloat("Top", &camera.orthographicSettings.top, -100.0f, 100.0f);
-            ImGui::SliderFloat("Near", &camera.orthographicSettings.zNear, -100.0f, 100.0f);
-            ImGui::SliderFloat("Far", &camera.orthographicSettings.zFar, -100.0f, 200.0f);
+            // New frame
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            ImGui::Begin("Camera Settings");
+            if (ImGui::CollapsingHeader("Orthograpic"))
+            {
+                ImGui::SliderFloat("Left", &camera.orthographicSettings.left, -100.0f, 100.0f);
+                ImGui::SliderFloat("Right", &camera.orthographicSettings.right, -100.0f, 100.0f);
+                ImGui::SliderFloat("Bottom", &camera.orthographicSettings.bottom, -100.0f, 100.0f);
+                ImGui::SliderFloat("Top", &camera.orthographicSettings.top, -100.0f, 100.0f);
+                ImGui::SliderFloat("Near", &camera.orthographicSettings.zNear, -100.0f, 100.0f);
+                ImGui::SliderFloat("Far", &camera.orthographicSettings.zFar, -100.0f, 200.0f);
+            }
+
+            if (ImGui::CollapsingHeader("Perspective"))
+            {
+
+                ImGui::SliderFloat("Fov", &camera.Zoom, 0.0f, 90.0f);
+            }
+            ImGui::Text("Selected object %i", selectedObject);
+
+            ImGui::End();
+
+            ImGui::Render();
+
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         }
-
-        if (ImGui::CollapsingHeader("Perspective"))
-        {
-
-            ImGui::SliderFloat("Fov", &camera.Zoom, 0.0f, 90.0f);
-        }
-
-        ImGui::End();
-
-        ImGui::Render();
-
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -245,7 +290,7 @@ void App::Run()
     glfwTerminate();
 }
 
-void App::SetViewAndPerspective(Camera &aCamera, Shader &aShader)
+void App::SetViewAndPerspective(Camera &aCamera)
 {
     if (cameraMode == Perspective)
     {
@@ -266,9 +311,13 @@ void App::SetViewAndPerspective(Camera &aCamera, Shader &aShader)
 
     view = aCamera.GetViewMatrix();
 
-    aShader.use();
-    aShader.setMat4("projection", projection);
-    aShader.setMat4("view", view);
+    box_shader->use();
+    box_shader->setMat4("projection", projection);
+    box_shader->setMat4("view", view);
+
+    color_pick_shader->use();
+    color_pick_shader->setMat4("projection", projection);
+    color_pick_shader->setMat4("view", view);
 }
 
 void CursorPositonCallback(GLFWwindow *window, double xpos, double ypos)
@@ -293,4 +342,9 @@ void MouseClickCallback(GLFWwindow *window, int button, int action, int mods)
     {
         Middle_Mouse_Hold = false;
     }
+}
+
+App::~App()
+{
+    printf("App destroyed \n");
 }

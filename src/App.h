@@ -36,6 +36,7 @@ class App
     std::unique_ptr<Shader> shader;
     std::unique_ptr<Shader> shader_test;
     std::unique_ptr<Shader> box_shader;
+    std::unique_ptr<Shader> color_pick_shader;
 
     // Time related
     float deltaTime = 0.0f; //
@@ -55,12 +56,13 @@ class App
 
     bool show_ortho = true;
 
+    int selectedObject = -1;
 
     float cameraSpeed = 3;
 
     CameraMode cameraMode = Perspective;
 
-    void SetViewAndPerspective(Camera &aCamera, Shader &aShader);
+    void SetViewAndPerspective(Camera &aCamera);
 
     AppWindow::AppWindow &mAppWindow;
     std::vector<Box *> mBoxes;
@@ -74,5 +76,8 @@ class App
 
 public:
     App(AppWindow::AppWindow &window);
+    ~App();
     void Run();
+
+    friend class Box;
 };
