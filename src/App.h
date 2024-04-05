@@ -21,7 +21,11 @@ static double initialMousePosX = 0.0;
 static double initialMousePosY = 0.0;
 
 // MOUSE BUTTONS
+static bool Left_Mouse_click = false;
 static bool Middle_Mouse_Hold = false;
+
+// Color Picking
+static bool mCanPick = true;
 
 static glm::vec3 globalCameraPosition;
 static float globalCameraYaw;
@@ -38,10 +42,10 @@ class App
     std::unique_ptr<Shader> box_shader;
     std::unique_ptr<Shader> color_pick_shader;
 
-    //Render options
+    // Render options
     DrawMode mDrawMode = DrawMode::EDefault;
 
-    //Window
+    // Window
     AppWindow::AppWindow &mAppWindow;
 
     // Time related
@@ -58,12 +62,11 @@ class App
     double lastY;
     double lastX;
 
-
-    //App objects
-    //TODO AppObject class 
+    // App objects
+    // TODO AppObject class
     std::vector<Box *> mBoxes;
     int selectedObject = -1;
-   
+
     void SetViewAndPerspective(Camera &aCamera);
     void SwitchDrawMode();
     void SwitchCameraMode();

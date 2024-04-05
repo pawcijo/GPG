@@ -44,7 +44,7 @@ void App::ProcessKey()
         F2_Pressed = false;
     }
 
-    float speed = deltaTime * mCamera.MovementSpeed ;
+    float speed = deltaTime * mCamera.MovementSpeed;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
         mCamera.Position += speed * mCamera.Front;
@@ -115,7 +115,7 @@ void App::SwitchCameraMode()
 {
     if (Perspective == mCamera.GetCameraMode())
     {
-       mCamera.SetCameraMode(Orthographic);
+        mCamera.SetCameraMode(Orthographic);
     }
     else
     {
@@ -159,7 +159,7 @@ App::App(AppWindow::AppWindow &appWindow) : mAppWindow(appWindow),
     glfwSetCursorPosCallback(window, CursorPositonCallback);
     glfwSetMouseButtonCallback(window, MouseClickCallback);
 
-    //Imgui Callbacks
+    // Imgui Callbacks
     glfwSetWindowFocusCallback(window, ImGui_ImplGlfw_WindowFocusCallback);
     glfwSetCursorEnterCallback(window, ImGui_ImplGlfw_CursorEnterCallback);
     glfwSetScrollCallback(window, ImGui_ImplGlfw_ScrollCallback);
@@ -209,8 +209,7 @@ void App::Run()
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-        //TODO make deltaTime work more robust
+        // TODO make deltaTime work more robust
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -227,9 +226,11 @@ void App::Run()
         glFinish();
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT))
+        if (Left_Mouse_click && mCanPick)
         {
             unsigned char data[4];
+
+            // Assuming screen starts from left and window is somewhere up the ground
             glReadPixels(mousePosX, mAppWindow.Getheight() - mousePosY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
             int pickedID =
@@ -238,6 +239,7 @@ void App::Run()
                 data[2] * 256 * 256;
 
             selectedObject = pickedID;
+            mCanPick = false;
         }
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -247,7 +249,7 @@ void App::Run()
         for (Box *box : mBoxes)
         {
 
-            box->Draw(box_shader.get(),this);
+            box->Draw(box_shader.get(), this);
         }
 
 #pragma region Imgui
@@ -281,7 +283,7 @@ void App::Run()
 
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         }
-        
+
 #pragma endregion Imgui
 
         glfwSwapBuffers(window);
@@ -308,21 +310,21 @@ void App::SetViewAndPerspective(Camera &aCamera)
     else
     {
         aCamera.mProjection = glm::ortho((double)mCamera.orthographicSettings.left,
-                                (double)mCamera.orthographicSettings.right,
-                                (double)mCamera.orthographicSettings.bottom,
-                                (double)mCamera.orthographicSettings.top,
-                                (double)mCamera.orthographicSettings.zNear,
-                                (double)mCamera.orthographicSettings.zFar);
+                                         (double)mCamera.orthographicSettings.right,
+                                         (double)mCamera.orthographicSettings.bottom,
+                                         (double)mCamera.orthographicSettings.top,
+                                         (double)mCamera.orthographicSettings.zNear,
+                                         (double)mCamera.orthographicSettings.zFar);
     }
 
-    auto view  = aCamera.GetViewMatrix();
+    auto view = aCamera.GetViewMatrix();
 
     box_shader->use();
-    box_shader->setMat4("projection", aCamera.mProjection );
+    box_shader->setMat4("projection", aCamera.mProjection);
     box_shader->setMat4("view", view);
 
     color_pick_shader->use();
-    color_pick_shader->setMat4("projection", aCamera.mProjection );
+    color_pick_shader->setMat4("projection", aCamera.mProjection);
     color_pick_shader->setMat4("view", view);
 }
 
@@ -347,6 +349,18 @@ void MouseClickCallback(GLFWwindow *window, int button, int action, int mods)
     else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_3) == GLFW_RELEASE)
     {
         Middle_Mouse_Hold = false;
+    }
+
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
+    {
+        Left_Mouse_click = true;
+
+    }
+
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_RELEASE)
+    {
+        Left_Mouse_click = false;
+        mCanPick = true;
     }
 }
 
