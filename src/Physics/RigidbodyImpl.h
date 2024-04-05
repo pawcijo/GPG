@@ -1,12 +1,39 @@
 #pragma once
 
-#include "AABB.h"
+#include "OBB.h"
+#include "Sphere.h"
 #include "Rigidbody.h"
+
+#include "Common.h"
 
 #include <glm/glm.hpp>
 
-class AABBRigidBody : public Rigidbody
+bool AlmostEqualRelativeAndAbs(float A, float B, float maxDiff, float maxRelDiff = FLT_EPSILON)
 {
+	// Check if the numbers are really close -- needed when comparing numbers near zero.
+	float diff = fabs(A - B);
+	if (diff <= maxDiff)
+	{
+		return true;
+	}
+
+	A = fabs(A);
+	B = fabs(B);
+	float largest = (B > A) ? B : A;
+
+	if (diff <= largest * maxRelDiff)
+	{
+		return true;
+	}
+	return false;
+}
+
+#define CMP_ABS(x, y) \
+	AlmostEqualRelativeAndAbs(x, y, 0.005f)
+
+class RigidbodyImpl : public Rigidbody
+{
+public:
     glm::vec3 position;
     glm::vec3 velocity;
 
@@ -29,25 +56,26 @@ class AABBRigidBody : public Rigidbody
     // Static friction
     float friction;
 
-    AABB box;
+    OBB box;
+	Sphere sphere;
 
 public:
-    inline AABBRigidBody() : cor(0.5f), mass(1.0f),
+    inline RigidbodyImpl() : cor(0.5f), mass(1.0f),
                              staticFriction(0.5f),
                              dynamicFriction(0.3f),
                              friction(0.6f)
     {
-        type = RigidBodyType::base;
+        type = RigidBodyType::EBase;
     }
 
-    inline AABBRigidBody(RigidBodyType aType) : cor(0.5f), mass(1.0f),
+    inline RigidbodyImpl(RigidBodyType aType) : cor(0.5f), mass(1.0f),
                                                 staticFriction(0.5f),
                                                 dynamicFriction(0.3f),
                                                 friction(0.6f)
     {
         type = aType;
     }
-    virtual ~AABBRigidBody() {}
+    virtual ~RigidbodyImpl() {}
 
     virtual void Update(float dt);
 
@@ -64,5 +92,4 @@ public:
 };
 
 
-CollisionResult FindCollisionFeatures(AABBRigidBody& ra, AABBRigidBody& rb);
-void ApplyImpulse(AABBRigidBody& A, AABBRigidBody& B, const CollisionResult& M, int c);
+void ApplyImpulse(RigidbodyImpl& A, RigidbodyImpl& B, const CollisionResult& M, int c);

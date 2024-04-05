@@ -7,10 +7,10 @@
 enum RigidBodyType
 {
 
-    base = 0,
-    Point,
-    Box,
-    Sphere,
+    EBase = 0,
+    EPoint,
+    EBox,
+    ESphere,
 };
 
 //TODO MOVE TO another file
@@ -24,18 +24,16 @@ public:
 
     inline Rigidbody()
     {
-        type = base;
+        type = EBase;
     };
 
     virtual inline ~Rigidbody() {}
     virtual inline void ApplyForces() {}
 
-    // TODO REPLACE WITH OBB when written
-    virtual inline void SolveConstraints(const std::vector<AABB> &constraints) {}
 
     inline bool HasVolume()
     {
         //TODO can be also sphere 
-        return type = RigidBodyType::Box;
+        return type = RigidBodyType::EBox;
     }
 };
