@@ -2,6 +2,20 @@
 
 #include <glm/glm.hpp>
 
+#include <vector>
+
+struct CollisionResult
+{
+    bool colliding;
+    glm::vec3 normal;
+    float depth;
+    std::vector<glm::vec3> contacts;
+};
+
+glm::vec3 MultiplyVector(const glm::vec3& vec, const glm::mat4& mat);
+glm::vec3 MultiplyVector(const glm::vec3& vec, const glm::mat3& mat);
+
+
 
 class AABB{
 

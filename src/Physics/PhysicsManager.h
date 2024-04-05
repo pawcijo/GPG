@@ -3,18 +3,14 @@
 #include <vector>
 #include <AABB.h>
 
-typedef struct CollisionResult
-{
-    bool colliding;
-    glm::vec3 normal;
-    float depth;
-    std::vector<glm::vec3> contacts;
-};
 
-void ResetCollisionResult(CollisionResult* result);
+void ResetCollisionResult(CollisionResult *result);
 
 class PhysicsManager
 {
+    float LinearProjectionPercent; // [0.2 to 0.8], Smaller = less jitter / more penetration
+    float PenetrationSlack;        // [0.01 to 0.1],  Samller = more accurate
+    int ImpulseIteration;
 
     std::vector<AABB> colliders1;
     std::vector<AABB> colliders2;

@@ -45,6 +45,7 @@ add_executable(OPGLPlayground
 	src/SimpleShape/Box.cpp
 	src/stb_image.cpp
 	src/Physics/AABB.cpp
+	src/Physics/AABBRigidbody.cpp
 	external/imgui/imgui.cpp
 	external/imgui/imgui_draw.cpp
 	external/imgui/imgui_tables.cpp
