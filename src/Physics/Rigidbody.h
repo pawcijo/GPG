@@ -37,6 +37,6 @@ public:
     inline bool HasVolume()
     {
         //TODO can be also sphere 
-        return type == RigidBodyType::EBox && type == RigidBodyType::ESphere ;
+        return type == RigidBodyType::EBox || type == RigidBodyType::ESphere ;
     }
 };

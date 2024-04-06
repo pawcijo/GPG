@@ -194,13 +194,12 @@ void App::ResetPhyscis()
     bodies[1]->position = glm::vec3(0, 1, 0);
     bodies[1]->mass = 5.0f;
 
-
     bodies.push_back(new RigidbodyImpl(EBox));
 
     groundBox = bodies[2];
-    *groundBox = RigidbodyImpl(EBox);
-    groundBox->position = glm::vec3(0, -1, 0);
-    groundBox->box.size = glm::vec3(50, 1, 50);
+
+    groundBox->position = glm::vec3(0, -0.5f, 0) * glm::vec3(1, 0.5f, 1);
+    groundBox->box.size = glm::vec3(50, 1, 50) * 0.25f;
     groundBox->mass = 0.0f;
     groundBox->SynchCollisionVolumes();
 
@@ -210,7 +209,6 @@ void App::ResetPhyscis()
         bodies[i]->SynchCollisionVolumes();
         physicsManager.AddRigidbody(bodies[i]);
     }
-
 }
 
 void App::Run()
@@ -236,6 +234,7 @@ void App::Run()
                              color_pick_shader.get(), 3));
 
     mBoxes[0]->getTransform().translate(glm::vec3(2.0, 0, 0.0));
+
     mBoxes[3]->getTransform().translate(glm::vec3(4.0, 0, 0.0));
 
     mBoxes[2]->getTransform().setPosition(groundBox->position);
@@ -332,6 +331,11 @@ void App::Run()
             mBoxes[1]->getTransform().setPosition(bodies[1]->position.x, bodies[1]->position.y, bodies[1]->position.z);
             ImGui::Text("Ground box object posiiton: [%f][%f][%f] ", groundBox->position.x, groundBox->position.y, groundBox->position.z);
             mBoxes[2]->getTransform().setPosition(groundBox->position.x, groundBox->position.y, groundBox->position.z);
+
+            if (ImGui::Button("Reset Physics"))
+            {
+                ResetPhyscis();
+            }
 
             ImGui::End();
 

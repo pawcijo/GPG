@@ -1,6 +1,8 @@
 #include <AppWindow.h>
 #include <App.h>
 
+//#define DYNAMIC_FRICTION true
+
 int main()
 {
 

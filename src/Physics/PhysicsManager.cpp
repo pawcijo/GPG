@@ -33,15 +33,18 @@ void PhysicsManager::Update(float deltaTime)
 				{
 					continue;
 				}
+				
 				ResetCollisionResult(&result);
 				if (bodies[i]->HasVolume() && bodies[j]->HasVolume())
 				{
 					RigidbodyImpl *m1 = (RigidbodyImpl *)bodies[i];
 					RigidbodyImpl *m2 = (RigidbodyImpl *)bodies[j];
 					result = FindCollisionFeatures(*m1, *m2);
+					
 				}
 				if (result.colliding)
 				{
+					
 #if 0 
 					bool isDuplicate = false;
 					for (int k = 0, kSize = colliders1.size(); k < kSize; ++k) {
