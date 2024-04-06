@@ -13,12 +13,12 @@ bool AlmostEqualRelativeAndAbs(float A, float B, float maxDiff, float maxRelDiff
 class RigidbodyImpl : public Rigidbody
 {
 public:
-    glm::vec3 position;
-    glm::vec3 velocity;
+    glm::vec3 position{0, 0, 0};
+    glm::vec3 velocity{0, 0, 0};
 
-    glm::vec3 torques;
+    glm::vec3 torques{0, 0, 0};
 
-    glm::vec3 forces;
+    glm::vec3 forces{0, 0, 0};
 
     float mass;
     float cor; // Coefficient of restitution
@@ -62,8 +62,6 @@ public:
     }
     virtual ~RigidbodyImpl() {}
 
-    
-
     float InvMass();
 
     virtual void ApplyForces();
@@ -77,5 +75,5 @@ public:
 #endif
 };
 
-CollisionResult FindCollisionFeatures(RigidbodyImpl& ra, RigidbodyImpl& rb);
+CollisionResult FindCollisionFeatures(RigidbodyImpl &ra, RigidbodyImpl &rb);
 void ApplyImpulse(RigidbodyImpl &A, RigidbodyImpl &B, const CollisionResult &M, int c);

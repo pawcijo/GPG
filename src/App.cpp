@@ -194,11 +194,15 @@ void App::ResetPhyscis()
     bodies[1]->position = glm::vec3(0, 1, 0);
     bodies[1]->mass = 5.0f;
 
-    groundBox = RigidbodyImpl(EBox);
-    groundBox.position = glm::vec3(0, -1, 0);
-    groundBox.box.size = glm::vec3(50, 1, 50);
-    groundBox.mass = 0.0f;
-    groundBox.SynchCollisionVolumes();
+
+    bodies.push_back(new RigidbodyImpl(EBox));
+
+    groundBox = bodies[2];
+    *groundBox = RigidbodyImpl(EBox);
+    groundBox->position = glm::vec3(0, -1, 0);
+    groundBox->box.size = glm::vec3(50, 1, 50);
+    groundBox->mass = 0.0f;
+    groundBox->SynchCollisionVolumes();
 
     for (int i = 0; i < bodies.size(); ++i)
     {
@@ -207,7 +211,6 @@ void App::ResetPhyscis()
         physicsManager.AddRigidbody(bodies[i]);
     }
 
-    physicsManager.AddRigidbody(&groundBox);
 }
 
 void App::Run()
@@ -235,9 +238,9 @@ void App::Run()
     mBoxes[0]->getTransform().translate(glm::vec3(2.0, 0, 0.0));
     mBoxes[3]->getTransform().translate(glm::vec3(4.0, 0, 0.0));
 
-    mBoxes[2]->getTransform().setPosition(groundBox.position);
+    mBoxes[2]->getTransform().setPosition(groundBox->position);
 
-    mBoxes[2]->getTransform().setScale(groundBox.box.size.x,groundBox.box.size.y,groundBox.box.size.z);
+    mBoxes[2]->getTransform().setScale(groundBox->box.size.x, groundBox->box.size.y, groundBox->box.size.z);
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     int counter = 0;
@@ -327,8 +330,8 @@ void App::Run()
             mBoxes[0]->getTransform().setPosition(bodies[0]->position.x, bodies[0]->position.y, bodies[0]->position.z);
             ImGui::Text("Physics object 2: [%f][%f][%f] ", bodies[1]->position.x, bodies[1]->position.y, bodies[1]->position.z);
             mBoxes[1]->getTransform().setPosition(bodies[1]->position.x, bodies[1]->position.y, bodies[1]->position.z);
-            ImGui::Text("Ground box object posiiton: [%f][%f][%f] ", groundBox.position.x, groundBox.position.y, groundBox.position.z);
-            mBoxes[2]->getTransform().setPosition( groundBox.position.x, groundBox.position.y, groundBox.position.z);
+            ImGui::Text("Ground box object posiiton: [%f][%f][%f] ", groundBox->position.x, groundBox->position.y, groundBox->position.z);
+            mBoxes[2]->getTransform().setPosition(groundBox->position.x, groundBox->position.y, groundBox->position.z);
 
             ImGui::End();
 

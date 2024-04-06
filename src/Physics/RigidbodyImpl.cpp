@@ -2,6 +2,8 @@
 
 #include <cstdio>
 
+#include <cmath>
+
 bool AlmostEqualRelativeAndAbs(float A, float B, float maxDiff, float maxRelDiff)
 {
 	// Check if the numbers are really close -- needed when comparing numbers near zero.
@@ -116,12 +118,12 @@ void RigidbodyImpl::SynchCollisionVolumes()
 
 void RigidbodyImpl::Update(float dt)
 {
+
 	// Integrate velocity
 	const float damping = 0.98f;
 
-	// printf("InvMass \n");
 	glm::vec3 acceleration = forces * InvMass();
-	// printf("InvMass end \n");
+
 	velocity = velocity + acceleration * dt;
 	velocity = velocity * damping;
 
@@ -138,12 +140,11 @@ void RigidbodyImpl::Update(float dt)
 		velocity.z = 0.0f;
 	}
 
+
 #ifndef LINEAR_ONLY
 	if (type == EBox)
 	{
-		// printf("MultiplyVector \n");
 		glm::vec3 angAccel = MultiplyVector(torques, InvTensor());
-		// printf("MultiplyVector end \n");
 		angVel = angVel + angAccel * dt;
 		angVel = angVel * damping;
 
@@ -173,6 +174,7 @@ void RigidbodyImpl::Update(float dt)
 #endif
 
 	SynchCollisionVolumes();
+
 }
 
 CollisionResult FindCollisionFeatures(RigidbodyImpl &ra, RigidbodyImpl &rb)
@@ -180,7 +182,6 @@ CollisionResult FindCollisionFeatures(RigidbodyImpl &ra, RigidbodyImpl &rb)
 	CollisionResult result;
 	ResetCollisionResult(&result);
 
-	// printf("FindCollisionFeatures Impl 188  \n");
 	if (ra.type == ESphere)
 	{
 		if (rb.type == ESphere)
@@ -197,7 +198,6 @@ CollisionResult FindCollisionFeatures(RigidbodyImpl &ra, RigidbodyImpl &rb)
 	{
 		if (rb.type == EBox)
 		{
-			// printf("FindCollisionFeatures Impl 205 BOX BOX  \n");
 			result = FindCollisionFeatures(ra.box, rb.box);
 		}
 		else if (rb.type == ESphere)

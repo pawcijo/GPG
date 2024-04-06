@@ -10,8 +10,8 @@ enum RigidBodyType
 
     EBase = 0,
     EPoint,
-    EBox,
     ESphere,
+    EBox,
 };
 
 //TODO MOVE TO another file
@@ -37,6 +37,6 @@ public:
     inline bool HasVolume()
     {
         //TODO can be also sphere 
-        return type = RigidBodyType::EBox;
+        return type == RigidBodyType::EBox && type == RigidBodyType::ESphere ;
     }
 };

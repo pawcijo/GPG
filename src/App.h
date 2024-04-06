@@ -73,7 +73,7 @@ class App
     // Phsycis
     PhysicsManager physicsManager;
     std::vector<RigidbodyImpl*> bodies;
-    RigidbodyImpl groundBox;
+    RigidbodyImpl* groundBox;
 
 
     void ResetPhyscis();

@@ -18,7 +18,6 @@ PhysicsManager::PhysicsManager()
 void PhysicsManager::Update(float deltaTime)
 {
 
-	//printf("Update PhysicsManager 21  \n");
 	colliders1.clear();
 	colliders2.clear();
 	results.clear();
@@ -34,13 +33,11 @@ void PhysicsManager::Update(float deltaTime)
 				{
 					continue;
 				}
-				//printf("ResetCollisionResult 37  \n");
 				ResetCollisionResult(&result);
 				if (bodies[i]->HasVolume() && bodies[j]->HasVolume())
 				{
 					RigidbodyImpl *m1 = (RigidbodyImpl *)bodies[i];
 					RigidbodyImpl *m2 = (RigidbodyImpl *)bodies[j];
-					//printf("FindCollisionFeatures 43  \n");
 					result = FindCollisionFeatures(*m1, *m2);
 				}
 				if (result.colliding)
@@ -85,7 +82,6 @@ void PhysicsManager::Update(float deltaTime)
 		// Calculate foces acting on the object
 		for (int i = 0, size = bodies.size(); i < size; ++i)
 		{
-			//printf("ApplyForces 87  \n");
 			bodies[i]->ApplyForces();
 		}
 	}
@@ -111,12 +107,9 @@ void PhysicsManager::Update(float deltaTime)
 
 	// Integrate velocity and impulse of objects
 	{
-
 		for (int i = 0, size = bodies.size(); i < size; ++i)
 		{
-			//printf("Update body \n");
 			bodies[i]->Update(deltaTime);
-			//printf("Update body end \n");
 		}
 	}
 
@@ -152,15 +145,16 @@ void PhysicsManager::Update(float deltaTime)
 			}
 		}
 	}
-	//printf("End update\n");
-	// ready to render
+	//  ready to render
 }
 
-void PhysicsManager::AddRigidbody(Rigidbody* body) {
+void PhysicsManager::AddRigidbody(Rigidbody *body)
+{
 	bodies.push_back(body);
 }
 
-void PhysicsManager::AddConstraint(const OBB& obb) {
+void PhysicsManager::AddConstraint(const OBB &obb)
+{
 	constraints.push_back(obb);
 }
 
