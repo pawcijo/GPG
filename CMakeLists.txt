@@ -46,6 +46,7 @@ add_executable(OPGLPlayground
 	src/stb_image.cpp
 	src/Physics/Common.cpp
 	src/Physics/RigidbodyImpl.cpp
+	src/Physics/PhysicsManager.cpp
 	external/imgui/imgui.cpp
 	external/imgui/imgui_draw.cpp
 	external/imgui/imgui_tables.cpp

@@ -104,7 +104,7 @@ void App::ProcessMouse()
 
             // if (abs(xoffset_2) > 0.1 || abs(yoffset_2) > 0.1)
             {
-                // printf("Offset x: %f offset Y %f \n", xoffset, yoffset);
+                // //printf("Offset x: %f offset Y %f \n", xoffset, yoffset);
                 mCamera.ProcessMouseMovement(-1.0 * xoffset, -1.0 * yoffset);
             }
         }
@@ -166,6 +166,48 @@ App::App(AppWindow::AppWindow &appWindow) : mAppWindow(appWindow),
     glfwSetKeyCallback(window, ImGui_ImplGlfw_KeyCallback);
     glfwSetCharCallback(window, ImGui_ImplGlfw_CharCallback);
     glfwSetMonitorCallback(ImGui_ImplGlfw_MonitorCallback);
+
+    physicsManager.ImpulseIteration = 8;
+    physicsManager.DoLinearProjection = true;
+
+    ResetPhyscis();
+}
+
+void App::ResetPhyscis()
+{
+
+    physicsManager.ClearRigidbodys();
+    physicsManager.ClearConstraints();
+
+    bodies.clear();
+
+    bodies.push_back(new RigidbodyImpl(EBox));
+    bodies.push_back(new RigidbodyImpl(EBox));
+
+    bodies[0]->type = EBox;
+    bodies[0]->position = glm::vec3(0.5f, 6, 0);
+#ifndef LINEAR_ONLY
+    bodies[0]->orientation = glm::vec3(0.0f, 0.0f, 0.4f);
+#endif
+
+    bodies[1]->type = EBox;
+    bodies[1]->position = glm::vec3(0, 1, 0);
+    bodies[1]->mass = 5.0f;
+
+    groundBox = RigidbodyImpl(EBox);
+    groundBox.position = glm::vec3(0, -1, 0);
+    groundBox.box.size = glm::vec3(50, 1, 50);
+    groundBox.mass = 0.0f;
+    groundBox.SynchCollisionVolumes();
+
+    for (int i = 0; i < bodies.size(); ++i)
+    {
+
+        bodies[i]->SynchCollisionVolumes();
+        physicsManager.AddRigidbody(bodies[i]);
+    }
+
+    physicsManager.AddRigidbody(&groundBox);
 }
 
 void App::Run()
@@ -193,15 +235,17 @@ void App::Run()
     mBoxes[0]->getTransform().translate(glm::vec3(2.0, 0, 0.0));
     mBoxes[3]->getTransform().translate(glm::vec3(4.0, 0, 0.0));
 
-    mBoxes[2]->getTransform().translate(glm::vec3(0.0f, -0.55f, 0.0f));
-    mBoxes[2]->getTransform().setScale(10.0f, 10.0f, 10.0f);
+    mBoxes[2]->getTransform().setPosition(groundBox.position);
 
+    mBoxes[2]->getTransform().setScale(groundBox.box.size.x,groundBox.box.size.y,groundBox.box.size.z);
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     int counter = 0;
     bool prawda = true;
     while (!glfwWindowShouldClose(window))
     {
+
+        // printf("Render \n");
         processInput(window);
         ProcessKey();
         ProcessMouse();
@@ -252,6 +296,8 @@ void App::Run()
             box->Draw(box_shader.get(), this);
         }
 
+        physicsManager.Update(deltaTime);
+
 #pragma region Imgui
         {
             // New frame
@@ -277,6 +323,13 @@ void App::Run()
             }
             ImGui::Text("Selected object %i", selectedObject);
 
+            ImGui::Text("Physics object 1: [%f][%f][%f] ", bodies[0]->position.x, bodies[0]->position.y, bodies[0]->position.z);
+            mBoxes[0]->getTransform().setPosition(bodies[0]->position.x, bodies[0]->position.y, bodies[0]->position.z);
+            ImGui::Text("Physics object 2: [%f][%f][%f] ", bodies[1]->position.x, bodies[1]->position.y, bodies[1]->position.z);
+            mBoxes[1]->getTransform().setPosition(bodies[1]->position.x, bodies[1]->position.y, bodies[1]->position.z);
+            ImGui::Text("Ground box object posiiton: [%f][%f][%f] ", groundBox.position.x, groundBox.position.y, groundBox.position.z);
+            mBoxes[2]->getTransform().setPosition( groundBox.position.x, groundBox.position.y, groundBox.position.z);
+
             ImGui::End();
 
             ImGui::Render();
@@ -294,7 +347,7 @@ void App::Run()
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext(NULL);
 
-    printf("Close App.\n");
+    // printf("Close App.\n");
     glfwDestroyWindow(window);
     glfwTerminate();
 }
@@ -354,7 +407,6 @@ void MouseClickCallback(GLFWwindow *window, int button, int action, int mods)
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
     {
         Left_Mouse_click = true;
-
     }
 
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_RELEASE)
@@ -366,5 +418,5 @@ void MouseClickCallback(GLFWwindow *window, int button, int action, int mods)
 
 App::~App()
 {
-    printf("App destroyed \n");
+    // printf("App destroyed \n");
 }

@@ -12,8 +12,8 @@ struct Ray
     {
         NormalizeDirection();
     }
-    inline void NormalizeDirection()
+    inline glm::vec3 NormalizeDirection()
     {
-        glm::normalize(direction);
+        return glm::normalize(direction);
     }
 };

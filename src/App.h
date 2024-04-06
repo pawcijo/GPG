@@ -8,6 +8,9 @@
 #include <SimpleShape/Box.h>
 #include <Camera.h>
 
+#include <Physics/PhysicsManager.h>
+#include <Physics/RigidbodyImpl.h>
+
 #include <vector>
 #include <memory>
 
@@ -66,6 +69,14 @@ class App
     // TODO AppObject class
     std::vector<Box *> mBoxes;
     int selectedObject = -1;
+
+    // Phsycis
+    PhysicsManager physicsManager;
+    std::vector<RigidbodyImpl*> bodies;
+    RigidbodyImpl groundBox;
+
+
+    void ResetPhyscis();
 
     void SetViewAndPerspective(Camera &aCamera);
     void SwitchDrawMode();

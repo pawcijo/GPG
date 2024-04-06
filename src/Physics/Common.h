@@ -18,10 +18,6 @@ struct Interval
 };
 
 
-float RAD2DEG(float radians);
-float DEG2RAD(float degrees);
-float CorrectDegrees(float degrees);
-
 struct CollisionResult
 {
     bool colliding;

@@ -1,27 +1,11 @@
 #include "Common.h"
 #include "Plane.h"
 
+#include <cmath>
+
+#include <cstdio>
+
 #define CMP(x, y) (fabsf(x - y) <= FLT_EPSILON * fmaxf(1.0f, fmaxf(fabsf(x), fabsf(y))))
-
-float CorrectDegrees(float degrees)
-{
-    while (degrees > 360.0f)
-    {
-        degrees -= 360.0f;
-    }
-    while (degrees < -360.0f)
-    {
-        degrees += 360.0f;
-    }
-    return degrees;
-}
-
-float RAD2DEG(float radians)
-{
-    float degrees = radians * 57.295754f;
-    degrees = CorrectDegrees(degrees);
-    return degrees;
-}
 
 float Magnitude(const glm::vec2 &v)
 {
@@ -95,18 +79,25 @@ bool AABBAABB(const AABB &aabb1, const AABB &aabb2)
 glm::vec3 MultiplyVector(const glm::vec3 &vec, const glm::mat4 &mat)
 {
     glm::vec3 result;
-    result.x = vec.x * mat[1][1] + vec.y * mat[2][1] + vec.z * mat[3][1] + 0.0f * mat[4][1];
-    result.y = vec.x * mat[1][2] + vec.y * mat[2][2] + vec.z * mat[3][2] + 0.0f * mat[4][2];
-    result.z = vec.x * mat[1][3] + vec.y * mat[2][3] + vec.z * mat[3][3] + 0.0f * mat[4][3];
+
+    // TODO:: make sure if values are right
+    // printf("MultiplyVector mat4 \n");
+    result.x = vec.x * mat[0][0] + vec.y * mat[1][0] + vec.z * mat[2][0] + 0.0f * mat[3][0];
+    result.y = vec.x * mat[0][1] + vec.y * mat[1][2] + vec.z * mat[2][1] + 0.0f * mat[3][1];
+    result.z = vec.x * mat[0][2] + vec.y * mat[1][2] + vec.z * mat[2][2] + 0.0f * mat[3][2];
+    // printf("MultiplyVector mat4 end \n");
     return result;
 }
 
 glm::vec3 MultiplyVector(const glm::vec3 &vec, const glm::mat3 &mat)
 {
     glm::vec3 result;
-    result.x = glm::dot(vec, glm::vec3{mat[1][1], mat[2][1], mat[3][1]});
-    result.y = glm::dot(vec, glm::vec3{mat[1][2], mat[2][2], mat[3][2]});
-    result.z = glm::dot(vec, glm::vec3{mat[1][3], mat[2][3], mat[3][3]});
+    // TODO:: make sure if values are right
+    // printf("MultiplyVector mat3");
+    result.x = glm::dot(vec, glm::vec3{mat[0][0], mat[1][0], mat[2][0]});
+    result.y = glm::dot(vec, glm::vec3{mat[0][1], mat[1][1], mat[2][1]});
+    result.z = glm::dot(vec, glm::vec3{mat[0][2], mat[1][2], mat[2][2]});
+    // printf("MultiplyVector mat3 end");
     return result;
 }
 
@@ -160,7 +151,7 @@ CollisionResult FindCollisionFeatures(const Sphere &A, const Sphere &B)
     {
         return result;
     }
-    glm::normalize(d);
+    d = glm::normalize(d);
 
     result.colliding = true;
     result.normal = d;
@@ -231,6 +222,8 @@ CollisionResult FindCollisionFeatures(const OBB &A, const OBB &B)
     const float *o1 = &(A.orientation[0][0]);
     const float *o2 = &(B.orientation[0][0]);
 
+    // printf("FindCollisionFeatures test 226  \n");
+
     glm::vec3 test[15] = {
         glm::vec3(o1[0], o1[1], o1[2]),
         glm::vec3(o1[3], o1[4], o1[5]),
@@ -239,6 +232,7 @@ CollisionResult FindCollisionFeatures(const OBB &A, const OBB &B)
         glm::vec3(o2[3], o2[4], o2[5]),
         glm::vec3(o2[6], o2[7], o2[8])};
 
+    // printf("FindCollisionFeatures cross 237  \n");
     for (int i = 0; i < 3; ++i)
     { // Fill out rest of axis
         test[6 + i * 3 + 0] = glm::cross(test[i], test[0]);
@@ -262,6 +256,7 @@ CollisionResult FindCollisionFeatures(const OBB &A, const OBB &B)
             continue;
         }
 
+        // printf("PenetrationDepth 261 [%i] \n", i);
         float depth = PenetrationDepth(A, B, test[i], &shouldFlip);
         if (depth <= 0.0f)
         {
@@ -284,12 +279,14 @@ CollisionResult FindCollisionFeatures(const OBB &A, const OBB &B)
     }
     glm::vec3 axis = glm::normalize(*hitNormal);
 
+    // printf("ClipEdgesToOBB  284\n");
     std::vector<glm::vec3> c1 = ClipEdgesToOBB(GetEdges(B), A);
     std::vector<glm::vec3> c2 = ClipEdgesToOBB(GetEdges(A), B);
     result.contacts.reserve(c1.size() + c2.size());
     result.contacts.insert(result.contacts.end(), c1.begin(), c1.end());
     result.contacts.insert(result.contacts.end(), c2.begin(), c2.end());
 
+    // printf("GetInterval  end 312\n");
     Interval i = GetInterval(A, axis);
     float distance = (i.max - i.min) * 0.5f - result.depth * 0.5f;
     glm::vec3 pointOnPlane = A.position + axis * distance;
@@ -312,6 +309,8 @@ CollisionResult FindCollisionFeatures(const OBB &A, const OBB &B)
 
     result.colliding = true;
     result.normal = axis;
+
+    // printf("FindCollisionFeatures  end 312\n");
 
     return result;
 }
@@ -342,11 +341,15 @@ std::vector<Plane> GetPlanes(const OBB &obb)
 
 bool ClipToPlane(const Plane &plane, const Line &line, glm::vec3 *outPoint)
 {
+
+    // printf("ClipToPlane  346\n");
     glm::vec3 ab = line.end - line.start;
 
     float nA = glm::dot(plane.normal, line.start);
     float nAB = glm::dot(plane.normal, ab);
+    // printf("after dot  351\n");
 
+    // printf("CMP  353\n");
     if (CMP(nAB, 0))
     {
         return false;
@@ -387,35 +390,27 @@ bool PointInAABB(const glm::vec3 &point, const AABB &aabb)
 }
 bool PointInOBB(const glm::vec3 &point, const OBB &obb)
 {
-    glm::vec3 dir = point - obb.position;
+    //!!! Modified with chat gpt !!!
+    // Transform the point into the local coordinate system of the OBB
+    glm::vec3 localPoint = glm::inverse(obb.orientation) * (glm::vec3(point.x, point.y, point.z) - obb.position);
 
-    for (int i = 0; i < 3; ++i)
-    {
-
-        glm::vec3 orientation = obb.orientation[i * 3];
-        glm::vec3 axis(orientation[0], orientation[1], orientation[2]);
-
-        float distance = glm::dot(dir, axis);
-
-        if (distance > obb.size[i])
-        {
-            return false;
-        }
-        if (distance < -obb.size[i])
-        {
-            return false;
-        }
-    }
+    // Check if the transformed point lies within the OBB extents
+    return (abs(localPoint.x) <= obb.size.x &&
+            abs(localPoint.y) <= obb.size.y &&
+            abs(localPoint.z) <= obb.size.z);
 
     return true;
 }
 
 std::vector<glm::vec3> ClipEdgesToOBB(const std::vector<Line> &edges, const OBB &obb)
 {
+
+    // printf("ClipEdgesToOBB  416\n");
     std::vector<glm::vec3> result;
     result.reserve(edges.size() * 3);
     glm::vec3 intersection;
 
+    // printf("GetPlanes  421\n");
     const std::vector<Plane> &planes = GetPlanes(obb);
 
     for (int i = 0; i < planes.size(); ++i)
@@ -431,7 +426,7 @@ std::vector<glm::vec3> ClipEdgesToOBB(const std::vector<Line> &edges, const OBB 
             }
         }
     }
-
+    // printf("ClipEdgesToOBB  end\n");
     return result;
 }
 
@@ -525,6 +520,7 @@ Interval GetInterval(const OBB &obb, const glm::vec3 &axis)
 {
     glm::vec3 vertex[8];
 
+    // printf("GetInterval \n");
     glm::vec3 C = obb.position; // OBB Center
     glm::vec3 E = obb.size;     // OBB Extents
     const float *o = &obb.orientation[0][0];
@@ -585,16 +581,9 @@ Interval GetInterval(const AABB &aabb, const glm::vec3 &axis)
     return result;
 }
 
-float DEG2RAD(float degrees)
-{
-    degrees = CorrectDegrees(degrees);
-    float radians = degrees * 0.0174533f;
-    return radians;
-}
-
 glm::mat4 XRotation(float angle)
 {
-    angle = DEG2RAD(angle);
+    angle = glm::radians(angle);
     return glm::mat4(
         1.0f, 0.0f, 0.0f, 0.0f,
         0.0f, cosf(angle), sinf(angle), 0.0f,
@@ -604,7 +593,7 @@ glm::mat4 XRotation(float angle)
 
 glm::mat3 XRotation3x3(float angle)
 {
-    angle = DEG2RAD(angle);
+    angle = glm::radians(angle);
     return glm::mat3(
         1.0f, 0.0f, 0.0f,
         0.0f, cosf(angle), sinf(angle),
@@ -613,7 +602,7 @@ glm::mat3 XRotation3x3(float angle)
 
 glm::mat4 YRotation(float angle)
 {
-    angle = DEG2RAD(angle);
+    angle = glm::radians(angle);
     return glm::mat4(
         cosf(angle), 0.0f, -sinf(angle), 0.0f,
         0.0f, 1.0f, 0.0f, 0.0f,
@@ -623,7 +612,7 @@ glm::mat4 YRotation(float angle)
 
 glm::mat3 YRotation3x3(float angle)
 {
-    angle = DEG2RAD(angle);
+    angle = glm::radians(angle);
     return glm::mat3(
         cosf(angle), 0.0f, -sinf(angle),
         0.0f, 1.0f, 0.0f,
@@ -632,7 +621,7 @@ glm::mat3 YRotation3x3(float angle)
 
 glm::mat4 ZRotation(float angle)
 {
-    angle = DEG2RAD(angle);
+    angle = glm::radians(angle);
     return glm::mat4(
         cosf(angle), sinf(angle), 0.0f, 0.0f,
         -sinf(angle), cosf(angle), 0.0f, 0.0f,
@@ -642,7 +631,7 @@ glm::mat4 ZRotation(float angle)
 
 glm::mat3 ZRotation3x3(float angle)
 {
-    angle = DEG2RAD(angle);
+    angle = glm::radians(angle);
     return glm::mat3(
         cosf(angle), sinf(angle), 0.0f,
         -sinf(angle), cosf(angle), 0.0f,
@@ -651,6 +640,7 @@ glm::mat3 ZRotation3x3(float angle)
 
 glm::mat3 Rotation3x3(float pitch, float yaw, float roll)
 {
+    // printf("Rotation3x3 \n");
     return ZRotation3x3(roll) * XRotation3x3(pitch) * YRotation3x3(yaw);
 }
 
@@ -797,7 +787,7 @@ glm::vec3 ClosestPoint(const OBB &obb, const glm::vec3 &point)
 glm::vec3 ClosestPoint(const Sphere &sphere, const glm::vec3 &point)
 {
     glm::vec3 sphereToPoint = point - sphere.position;
-    glm::normalize(sphereToPoint);
+    sphereToPoint = glm::normalize(sphereToPoint);
     sphereToPoint = sphereToPoint * sphere.radius;
     return sphereToPoint + sphere.position;
 }

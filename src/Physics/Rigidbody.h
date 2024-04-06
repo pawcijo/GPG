@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "AABB.h"
+#include "OBB.h"
 
 enum RigidBodyType
 {
@@ -28,7 +29,9 @@ public:
     };
 
     virtual inline ~Rigidbody() {}
+    virtual inline void Update(float deltaTime) { }
     virtual inline void ApplyForces() {}
+    virtual inline void SolveConstraints(const std::vector<OBB>& constraints) { }
 
 
     inline bool HasVolume()

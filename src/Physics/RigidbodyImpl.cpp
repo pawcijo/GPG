@@ -1,9 +1,31 @@
 #include "RigidbodyImpl.h"
 
+#include <cstdio>
 
+bool AlmostEqualRelativeAndAbs(float A, float B, float maxDiff, float maxRelDiff)
+{
+	// Check if the numbers are really close -- needed when comparing numbers near zero.
+	float diff = fabs(A - B);
+	if (diff <= maxDiff)
+	{
+		return true;
+	}
+
+	A = fabs(A);
+	B = fabs(B);
+	float largest = (B > A) ? B : A;
+
+	if (diff <= largest * maxRelDiff)
+	{
+		return true;
+	}
+	return false;
+}
+
+#ifndef LINEAR_ONLY
 glm::mat4 RigidbodyImpl::InvTensor()
 {
-	if (mass == 0)
+	if (mass == 0.0f)
 	{
 		return glm::mat4(
 			0, 0, 0, 0,
@@ -47,12 +69,14 @@ glm::mat4 RigidbodyImpl::InvTensor()
 		0, 0, iz, 0,
 		0, 0, 0, iw));
 }
+#endif
 
 void RigidbodyImpl::ApplyForces()
 {
 	forces = GRAVITY_CONST * mass;
 }
 
+#ifndef LINEAR_ONLY
 void RigidbodyImpl::AddRotationalImpulse(const glm::vec3 &point, const glm::vec3 &impulse)
 {
 	glm::vec3 centerOfMass = position;
@@ -61,6 +85,7 @@ void RigidbodyImpl::AddRotationalImpulse(const glm::vec3 &point, const glm::vec3
 	glm::vec3 angAccel = MultiplyVector(torque, InvTensor());
 	angVel = angVel + angAccel;
 }
+#endif
 
 void RigidbodyImpl::AddLinearImpulse(const glm::vec3 &impulse)
 {
@@ -81,10 +106,12 @@ void RigidbodyImpl::SynchCollisionVolumes()
 	sphere.position = position;
 	box.position = position;
 
+#ifndef LINEAR_ONLY
 	box.orientation = Rotation3x3(
-		RAD2DEG(orientation.x),
-		RAD2DEG(orientation.y),
-		RAD2DEG(orientation.z));
+		glm::degrees(orientation.x),
+		glm::degrees(orientation.y),
+		glm::degrees(orientation.z));
+#endif
 }
 
 void RigidbodyImpl::Update(float dt)
@@ -92,7 +119,9 @@ void RigidbodyImpl::Update(float dt)
 	// Integrate velocity
 	const float damping = 0.98f;
 
+	// printf("InvMass \n");
 	glm::vec3 acceleration = forces * InvMass();
+	// printf("InvMass end \n");
 	velocity = velocity + acceleration * dt;
 	velocity = velocity * damping;
 
@@ -112,7 +141,9 @@ void RigidbodyImpl::Update(float dt)
 #ifndef LINEAR_ONLY
 	if (type == EBox)
 	{
+		// printf("MultiplyVector \n");
 		glm::vec3 angAccel = MultiplyVector(torques, InvTensor());
+		// printf("MultiplyVector end \n");
 		angVel = angVel + angAccel * dt;
 		angVel = angVel * damping;
 
@@ -149,6 +180,7 @@ CollisionResult FindCollisionFeatures(RigidbodyImpl &ra, RigidbodyImpl &rb)
 	CollisionResult result;
 	ResetCollisionResult(&result);
 
+	// printf("FindCollisionFeatures Impl 188  \n");
 	if (ra.type == ESphere)
 	{
 		if (rb.type == ESphere)
@@ -165,6 +197,7 @@ CollisionResult FindCollisionFeatures(RigidbodyImpl &ra, RigidbodyImpl &rb)
 	{
 		if (rb.type == EBox)
 		{
+			// printf("FindCollisionFeatures Impl 205 BOX BOX  \n");
 			result = FindCollisionFeatures(ra.box, rb.box);
 		}
 		else if (rb.type == ESphere)
@@ -204,7 +237,7 @@ void ApplyImpulse(RigidbodyImpl &A, RigidbodyImpl &B, const CollisionResult &M, 
 #endif
 	// Relative collision normal
 	glm::vec3 relativeNorm = M.normal;
-	glm::normalize(relativeNorm);
+	relativeNorm = glm::normalize(relativeNorm);
 
 	// Moving away from each other? Do nothing!
 	if (glm::dot(relativeVel, relativeNorm) > 0.0f)
@@ -241,11 +274,11 @@ void ApplyImpulse(RigidbodyImpl &A, RigidbodyImpl &B, const CollisionResult &M, 
 
 	// Friction
 	glm::vec3 t = relativeVel - (relativeNorm * glm::dot(relativeVel, relativeNorm));
-	if (CMP_ABS(MagnitudeSq(t), 0.0f))
+	if (AlmostEqualRelativeAndAbs(MagnitudeSq(t), 0.0f, 0.005, FLT_EPSILON))
 	{
 		return;
 	}
-	glm::normalize(t);
+	t = glm::normalize(t);
 
 	numerator = -glm::dot(relativeVel, t);
 	d1 = invMassSum;
@@ -263,7 +296,7 @@ void ApplyImpulse(RigidbodyImpl &A, RigidbodyImpl &B, const CollisionResult &M, 
 		jt /= (float)M.contacts.size();
 	}
 
-	if (CMP_ABS(jt, 0.0f))
+	if (AlmostEqualRelativeAndAbs(jt, 0.0f, 0.05, FLT_EPSILON))
 	{
 		return;
 	}

@@ -8,7 +8,6 @@
 #include <Shader.h>
 #include <AppWindow.h>
 
-
 namespace BoxSpace
 {
     static float vertices[] = {
