@@ -8,8 +8,12 @@
 #include <SimpleShape/Box.h>
 #include <Camera.h>
 
+/*
 #include <Physics/PhysicsManager.h>
 #include <Physics/RigidbodyImpl.h>
+*/
+
+#include <MyPhysics/PhysicsManager.h>
 
 #include <vector>
 #include <memory>
@@ -71,12 +75,18 @@ class App
     int selectedObject = -1;
 
     // Phsycis
+
+    /* Old Physics
     PhysicsManager physicsManager;
     std::vector<RigidbodyImpl*> bodies;
     RigidbodyImpl* groundBox;
-
-
     void ResetPhyscis();
+    */
+
+    // My Gpt try
+
+    PhysicsManager *pm = nullptr; // Gravity pointing down
+
 
     void SetViewAndPerspective(Camera &aCamera);
     void SwitchDrawMode();

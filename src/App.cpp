@@ -11,6 +11,8 @@
 
 #include "stb_image.h"
 
+#include <MyPhysics/Obb.h>
+
 void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -167,14 +169,19 @@ App::App(AppWindow::AppWindow &appWindow) : mAppWindow(appWindow),
     glfwSetCharCallback(window, ImGui_ImplGlfw_CharCallback);
     glfwSetMonitorCallback(ImGui_ImplGlfw_MonitorCallback);
 
-    physicsManager.ImpulseIteration = 8;
-    physicsManager.DoLinearProjection = true;
+    pm = new PhysicsManager(-1.0f, -9.81f, 0.0f);
 
-    ResetPhyscis();
+    /* OLD PHYSICS
+        physicsManager.ImpulseIteration = 8;
+        physicsManager.DoLinearProjection = true;
+
+        ResetPhyscis();
+    */
 }
-
+/* OLD PHYSICS
 void App::ResetPhyscis()
 {
+
 
     physicsManager.ClearRigidbodys();
     physicsManager.ClearConstraints();
@@ -211,6 +218,7 @@ void App::ResetPhyscis()
     }
 }
 
+*/
 void App::Run()
 {
     auto window = mAppWindow.GetWindow();
@@ -237,9 +245,23 @@ void App::Run()
 
     mBoxes[3]->getTransform().translate(glm::vec3(4.0, 0, 0.0));
 
-    mBoxes[2]->getTransform().setPosition(groundBox->position);
+    mBoxes[2]->getTransform().setPosition(glm::vec3(0, -1.0f, 0));
+    mBoxes[2]->getTransform().setScale(50, 1, 50);
 
-    mBoxes[2]->getTransform().setScale(groundBox->box.size.x, groundBox->box.size.y, groundBox->box.size.z);
+    Obb obb1(glm::vec3(0.0f, 20.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::mat3(1.0f), 2.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+    Obb obb2(glm::vec3(5.0f, 10.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::mat3(1.0f), 2.0f, glm::vec3(0.0f, -2.0f, 0.0f));
+
+    Obb obb3(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(50, 1, 50), glm::mat3(1.0f), 2.0f, glm::vec3(0.0f, -2.0f, 0.0f), true);
+
+    pm->addOBB(obb1);
+    pm->addOBB(obb2);
+    pm->addOBB(obb3);
+
+    /* OLD PHYSICS
+        mBoxes[2]->getTransform().setPosition(groundBox->position);
+        mBoxes[2]->getTransform().setPosition(groundBox->position);
+        mBoxes[2]->getTransform().setScale(groundBox->box.size.x, groundBox->box.size.y, groundBox->box.size.z);
+        */
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     int counter = 0;
@@ -298,7 +320,11 @@ void App::Run()
             box->Draw(box_shader.get(), this);
         }
 
-        physicsManager.Update(deltaTime);
+        /* Old Physics
+                physicsManager.Update(deltaTime);
+        */
+
+        pm->update(deltaTime);
 
 #pragma region Imgui
         {
@@ -325,17 +351,45 @@ void App::Run()
             }
             ImGui::Text("Selected object %i", selectedObject);
 
-            ImGui::Text("Physics object 1: [%f][%f][%f] ", bodies[0]->position.x, bodies[0]->position.y, bodies[0]->position.z);
-            mBoxes[0]->getTransform().setPosition(bodies[0]->position.x, bodies[0]->position.y, bodies[0]->position.z);
-            ImGui::Text("Physics object 2: [%f][%f][%f] ", bodies[1]->position.x, bodies[1]->position.y, bodies[1]->position.z);
-            mBoxes[1]->getTransform().setPosition(bodies[1]->position.x, bodies[1]->position.y, bodies[1]->position.z);
-            ImGui::Text("Ground box object posiiton: [%f][%f][%f] ", groundBox->position.x, groundBox->position.y, groundBox->position.z);
-            mBoxes[2]->getTransform().setPosition(groundBox->position.x, groundBox->position.y, groundBox->position.z);
+            /* Old Physics
+                        ImGui::Text("Physics object 1: [%f][%f][%f] ", bodies[0]->position.x, bodies[0]->position.y, bodies[0]->position.z);
+                        mBoxes[0]->getTransform().setPosition(bodies[0]->position.x, bodies[0]->position.y, bodies[0]->position.z);
+                        ImGui::Text("Physics object 2: [%f][%f][%f] ", bodies[1]->position.x, bodies[1]->position.y, bodies[1]->position.z);
+                        mBoxes[1]->getTransform().setPosition(bodies[1]->position.x, bodies[1]->position.y, bodies[1]->position.z);
+                        ImGui::Text("Ground box object posiiton: [%f][%f][%f] ", groundBox->position.x, groundBox->position.y, groundBox->position.z);
+                        mBoxes[2]->getTransform().setPosition(groundBox->position.x, groundBox->position.y, groundBox->position.z);
 
-            if (ImGui::Button("Reset Physics"))
-            {
-                ResetPhyscis();
-            }
+                        if (ImGui::Button("Reset Physics"))
+                        {
+
+                            ResetPhyscis();
+                        }
+
+            */
+
+            // New
+
+            ImGui::Text("Physics object 1: [%f][%f][%f] ",
+                        pm->obbs[0].center.x,
+                        pm->obbs[0].center.y,
+                        pm->obbs[0].center.z);
+            mBoxes[0]->getTransform().setPosition(pm->obbs[0].center.x,
+                                                  pm->obbs[0].center.y,
+                                                  pm->obbs[0].center.z);
+
+            ImGui::Text("Physics object 2: [%f][%f][%f] ",
+                        pm->obbs[1].center.x,
+                        pm->obbs[1].center.y,
+                        pm->obbs[1].center.z);
+
+            mBoxes[1]->getTransform().setPosition(pm->obbs[1].center.x,
+                                                  pm->obbs[1].center.y,
+                                                  pm->obbs[1].center.z);
+
+            ImGui::Text("Ground box object posiiton: [%f][%f][%f] ",
+                        pm->obbs[2].center.x,
+                        pm->obbs[2].center.y,
+                        pm->obbs[2].center.z);
 
             ImGui::End();
 

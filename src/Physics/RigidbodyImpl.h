@@ -8,6 +8,8 @@
 
 #include <glm/glm.hpp>
 
+
+
 bool AlmostEqualRelativeAndAbs(float A, float B, float maxDiff, float maxRelDiff = FLT_EPSILON);
 
 class RigidbodyImpl : public Rigidbody

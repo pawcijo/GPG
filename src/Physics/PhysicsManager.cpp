@@ -45,7 +45,7 @@ void PhysicsManager::Update(float deltaTime)
 				if (result.colliding)
 				{
 					
-#if 0 
+#if 1 
 					bool isDuplicate = false;
 					for (int k = 0, kSize = colliders1.size(); k < kSize; ++k) {
 						if (colliders1[k] == bodies[i] || colliders1[k] == bodies[j]) {
