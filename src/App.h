@@ -73,6 +73,7 @@ class App
     // TODO AppObject class
     std::vector<Box *> mBoxes;
     int selectedObject = -1;
+    Obb * selecteObb = nullptr;
 
     // Phsycis
 
@@ -91,6 +92,10 @@ class App
     void SetViewAndPerspective(Camera &aCamera);
     void SwitchDrawMode();
     void SwitchCameraMode();
+
+    void ColorPicking();
+
+    void ImGuiStuff();
 
     void ProcessKey();
     void ProcessMouse();

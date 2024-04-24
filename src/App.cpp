@@ -75,6 +75,35 @@ void App::ProcessKey()
     {
         mCamera.Position -= speed * mCamera.Up;
     }
+
+    if (selecteObb)
+    {
+        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+        {
+            if (selecteObb)
+            {
+                selecteObb->center += speed * glm::vec3(0.0f, 1.0f, 0.0f);
+            }
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+        {
+            if (selecteObb)
+            {
+                selecteObb->center -= speed * glm::vec3(0.0f, 1.0f, 0.0f);
+            }
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        {
+            selecteObb->center -= speed * glm::vec3(1.0f, 0.0f, 0.0f);
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        {
+            selecteObb->center += speed * glm::vec3(1.0f, 0.0f, 0.0f);
+        }
+    }
 }
 
 void App::ProcessMouse()
@@ -169,59 +198,7 @@ App::App(AppWindow::AppWindow &appWindow) : mAppWindow(appWindow),
     glfwSetCharCallback(window, ImGui_ImplGlfw_CharCallback);
     glfwSetMonitorCallback(ImGui_ImplGlfw_MonitorCallback);
 
-    pm = new PhysicsManager(-1.0f, -9.81f, 0.0f);
-
-    /* OLD PHYSICS
-        physicsManager.ImpulseIteration = 8;
-        physicsManager.DoLinearProjection = true;
-
-        ResetPhyscis();
-    */
-}
-/* OLD PHYSICS
-void App::ResetPhyscis()
-{
-
-
-    physicsManager.ClearRigidbodys();
-    physicsManager.ClearConstraints();
-
-    bodies.clear();
-
-    bodies.push_back(new RigidbodyImpl(EBox));
-    bodies.push_back(new RigidbodyImpl(EBox));
-
-    bodies[0]->type = EBox;
-    bodies[0]->position = glm::vec3(0.5f, 6, 0);
-#ifndef LINEAR_ONLY
-    bodies[0]->orientation = glm::vec3(0.0f, 0.0f, 0.4f);
-#endif
-
-    bodies[1]->type = EBox;
-    bodies[1]->position = glm::vec3(0, 1, 0);
-    bodies[1]->mass = 5.0f;
-
-    bodies.push_back(new RigidbodyImpl(EBox));
-
-    groundBox = bodies[2];
-
-    groundBox->position = glm::vec3(0, -0.5f, 0) * glm::vec3(1, 0.5f, 1);
-    groundBox->box.size = glm::vec3(50, 1, 50) * 0.25f;
-    groundBox->mass = 0.0f;
-    groundBox->SynchCollisionVolumes();
-
-    for (int i = 0; i < bodies.size(); ++i)
-    {
-
-        bodies[i]->SynchCollisionVolumes();
-        physicsManager.AddRigidbody(bodies[i]);
-    }
-}
-
-*/
-void App::Run()
-{
-    auto window = mAppWindow.GetWindow();
+    pm = new PhysicsManager(0.0f, 0.0f, 0.0f);
 
     mBoxes.push_back(new Box("resources/textures/clown.png",
                              DrawMode::EDefault,
@@ -236,33 +213,28 @@ void App::Run()
                              box_shader.get(),
                              color_pick_shader.get(), 2));
 
-    mBoxes.push_back(new Box("resources/textures/juanP.jpg",
-                             DrawMode::EDefault,
-                             box_shader.get(),
-                             color_pick_shader.get(), 3));
-
     mBoxes[0]->getTransform().translate(glm::vec3(2.0, 0, 0.0));
-
-    mBoxes[3]->getTransform().translate(glm::vec3(4.0, 0, 0.0));
 
     mBoxes[2]->getTransform().setPosition(glm::vec3(0, -1.0f, 0));
     mBoxes[2]->getTransform().setScale(50, 1, 50);
 
-    Obb obb1(glm::vec3(0.0f, 20.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::mat3(1.0f), 2.0f, glm::vec3(0.0f, 0.0f, 0.0f));
-    Obb obb2(glm::vec3(5.0f, 10.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::mat3(1.0f), 2.0f, glm::vec3(0.0f, -2.0f, 0.0f));
+    pm->addOBB(new Obb(glm::vec3(0.0f, 4.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::mat3(1.0f), 2.0f, glm::vec3(0.0f, 0.0f, 0.0f)));
+    pm->addOBB(new Obb(glm::vec3(5.0f, 2.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::mat3(1.0f), 2.0f, glm::vec3(0.0f, 0.0f, 0.0f)));
+    pm->addOBB(new Obb(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(50, 1, 50), glm::mat3(1.0f), 2.0f, glm::vec3(0.0f, 0.0f, 0.0f), true));
 
-    Obb obb3(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(50, 1, 50), glm::mat3(1.0f), 2.0f, glm::vec3(0.0f, -2.0f, 0.0f), true);
+    for (int i = 0; i < mBoxes.size(); i++)
+    {
+        pm->obbs[i]->object = mBoxes[i];
+    }
 
-    pm->addOBB(obb1);
-    pm->addOBB(obb2);
-    pm->addOBB(obb3);
+    mBoxes[0]->SetObb(pm->obbs[0]);
+    mBoxes[1]->SetObb(pm->obbs[1]);
+    mBoxes[2]->SetObb(pm->obbs[2]);
+}
 
-    /* OLD PHYSICS
-        mBoxes[2]->getTransform().setPosition(groundBox->position);
-        mBoxes[2]->getTransform().setPosition(groundBox->position);
-        mBoxes[2]->getTransform().setScale(groundBox->box.size.x, groundBox->box.size.y, groundBox->box.size.z);
-        */
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+void App::Run()
+{
+    auto window = mAppWindow.GetWindow();
 
     int counter = 0;
     bool prawda = true;
@@ -274,41 +246,16 @@ void App::Run()
         ProcessKey();
         ProcessMouse();
 
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         // TODO make deltaTime work more robust
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        pm->update(deltaTime);
+
         SetViewAndPerspective(mCamera);
 
-        for (int i = 0; i < mBoxes.size(); i++)
-        {
-
-            mBoxes[i]->Draw_Color(color_pick_shader.get(), mAppWindow);
-        }
-
-        glFlush();
-        glFinish();
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-        if (Left_Mouse_click && mCanPick)
-        {
-            unsigned char data[4];
-
-            // Assuming screen starts from left and window is somewhere up the ground
-            glReadPixels(mousePosX, mAppWindow.Getheight() - mousePosY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-            int pickedID =
-                data[0] +
-                data[1] * 256 +
-                data[2] * 256 * 256;
-
-            selectedObject = pickedID;
-            mCanPick = false;
-        }
+        ColorPicking();
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -320,85 +267,9 @@ void App::Run()
             box->Draw(box_shader.get(), this);
         }
 
-        /* Old Physics
-                physicsManager.Update(deltaTime);
-        */
+        ImGuiStuff();
 
-        pm->update(deltaTime);
-
-#pragma region Imgui
-        {
-            // New frame
-            ImGui_ImplOpenGL3_NewFrame();
-            ImGui_ImplGlfw_NewFrame();
-            ImGui::NewFrame();
-
-            ImGui::Begin("Camera Settings");
-            if (ImGui::CollapsingHeader("Orthograpic"))
-            {
-                ImGui::SliderFloat("Left", &mCamera.orthographicSettings.left, -100.0f, 100.0f);
-                ImGui::SliderFloat("Right", &mCamera.orthographicSettings.right, -100.0f, 100.0f);
-                ImGui::SliderFloat("Bottom", &mCamera.orthographicSettings.bottom, -100.0f, 100.0f);
-                ImGui::SliderFloat("Top", &mCamera.orthographicSettings.top, -100.0f, 100.0f);
-                ImGui::SliderFloat("Near", &mCamera.orthographicSettings.zNear, -100.0f, 100.0f);
-                ImGui::SliderFloat("Far", &mCamera.orthographicSettings.zFar, -100.0f, 200.0f);
-            }
-
-            if (ImGui::CollapsingHeader("Perspective"))
-            {
-
-                ImGui::SliderFloat("Fov", &mCamera.Zoom, 0.0f, 90.0f);
-            }
-            ImGui::Text("Selected object %i", selectedObject);
-
-            /* Old Physics
-                        ImGui::Text("Physics object 1: [%f][%f][%f] ", bodies[0]->position.x, bodies[0]->position.y, bodies[0]->position.z);
-                        mBoxes[0]->getTransform().setPosition(bodies[0]->position.x, bodies[0]->position.y, bodies[0]->position.z);
-                        ImGui::Text("Physics object 2: [%f][%f][%f] ", bodies[1]->position.x, bodies[1]->position.y, bodies[1]->position.z);
-                        mBoxes[1]->getTransform().setPosition(bodies[1]->position.x, bodies[1]->position.y, bodies[1]->position.z);
-                        ImGui::Text("Ground box object posiiton: [%f][%f][%f] ", groundBox->position.x, groundBox->position.y, groundBox->position.z);
-                        mBoxes[2]->getTransform().setPosition(groundBox->position.x, groundBox->position.y, groundBox->position.z);
-
-                        if (ImGui::Button("Reset Physics"))
-                        {
-
-                            ResetPhyscis();
-                        }
-
-            */
-
-            // New
-
-            ImGui::Text("Physics object 1: [%f][%f][%f] ",
-                        pm->obbs[0].center.x,
-                        pm->obbs[0].center.y,
-                        pm->obbs[0].center.z);
-            mBoxes[0]->getTransform().setPosition(pm->obbs[0].center.x,
-                                                  pm->obbs[0].center.y,
-                                                  pm->obbs[0].center.z);
-
-            ImGui::Text("Physics object 2: [%f][%f][%f] ",
-                        pm->obbs[1].center.x,
-                        pm->obbs[1].center.y,
-                        pm->obbs[1].center.z);
-
-            mBoxes[1]->getTransform().setPosition(pm->obbs[1].center.x,
-                                                  pm->obbs[1].center.y,
-                                                  pm->obbs[1].center.z);
-
-            ImGui::Text("Ground box object posiiton: [%f][%f][%f] ",
-                        pm->obbs[2].center.x,
-                        pm->obbs[2].center.y,
-                        pm->obbs[2].center.z);
-
-            ImGui::End();
-
-            ImGui::Render();
-
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        }
-
-#pragma endregion Imgui
+        pm->ClearCollisonMap();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -411,6 +282,116 @@ void App::Run()
     // printf("Close App.\n");
     glfwDestroyWindow(window);
     glfwTerminate();
+}
+
+void App::ImGuiStuff()
+{
+
+    // New frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Begin("Koks okienko");
+    if (ImGui::CollapsingHeader("Orthograpic"))
+    {
+        ImGui::SliderFloat("Left", &mCamera.orthographicSettings.left, -100.0f, 100.0f);
+        ImGui::SliderFloat("Right", &mCamera.orthographicSettings.right, -100.0f, 100.0f);
+        ImGui::SliderFloat("Bottom", &mCamera.orthographicSettings.bottom, -100.0f, 100.0f);
+        ImGui::SliderFloat("Top", &mCamera.orthographicSettings.top, -100.0f, 100.0f);
+        ImGui::SliderFloat("Near", &mCamera.orthographicSettings.zNear, -100.0f, 100.0f);
+        ImGui::SliderFloat("Far", &mCamera.orthographicSettings.zFar, -100.0f, 200.0f);
+    }
+
+    if (ImGui::CollapsingHeader("Perspective"))
+    {
+
+        ImGui::SliderFloat("Fov", &mCamera.Zoom, 0.0f, 90.0f);
+    }
+    ImGui::Text("Selected object %i", selectedObject);
+
+    // New
+    for (int i = 0; i < mBoxes.size(); i++)
+    {
+        if (nullptr != mBoxes[i]->GetObb())
+            mBoxes[i]->getTransform().setPosition(pm->obbs[i]->center.x,
+                                                  pm->obbs[i]->center.y,
+                                                  pm->obbs[i]->center.z);
+    }
+
+    ImGui::Text("Physics object 1: [%f][%f][%f] ",
+                pm->obbs[0]->center.x,
+                pm->obbs[0]->center.y,
+                pm->obbs[0]->center.z);
+
+    ImGui::Text("Physics object 2: [%f][%f][%f] ",
+                pm->obbs[1]->center.x,
+                pm->obbs[1]->center.y,
+                pm->obbs[1]->center.z);
+
+    ImGui::Text("Ground box object posiiton: [%f][%f][%f] ",
+                pm->obbs[2]->center.x,
+                pm->obbs[2]->center.y,
+                pm->obbs[2]->center.z);
+
+    if (!pm->collisionMap.empty())
+    {
+        //printf("Jebanie cipa chuj \n");
+    }
+
+    if (ImGui::CollapsingHeader("Collision"))
+    {
+        for (auto collisionPair : pm->collisionMap)
+        {
+            ImGui::Text("%i %i", collisionPair.first->object->ObjectId(), collisionPair.second->object->ObjectId());
+        }
+    }
+
+    ImGui::End();
+
+    ImGui::Render();
+
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void App::ColorPicking()
+{
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    for (int i = 0; i < mBoxes.size(); i++)
+    {
+
+        mBoxes[i]->Draw_Color(color_pick_shader.get(), mAppWindow);
+    }
+
+    glFlush();
+    glFinish();
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    if (Left_Mouse_click && mCanPick)
+    {
+        unsigned char data[4];
+
+        // Assuming screen starts from left and window is somewhere up the ground
+        glReadPixels(mousePosX, mAppWindow.Getheight() - mousePosY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+        int pickedID =
+            data[0] +
+            data[1] * 256 +
+            data[2] * 256 * 256;
+
+        selectedObject = pickedID;
+        if (pickedID < pm->obbs.size())
+        {
+            selecteObb = pm->obbs[selectedObject];
+        }
+        else
+        {
+            selecteObb = nullptr;
+        }
+        mCanPick = false;
+    }
 }
 
 void App::SetViewAndPerspective(Camera &aCamera)

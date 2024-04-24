@@ -14,7 +14,7 @@
 
 #include <App.h>
 
-Box::Box(std::filesystem::path texturePath, DrawMode aDrawmode, Shader *nomralShader, Shader *pickingShader,unsigned int uniqueId)
+Box::Box(std::filesystem::path texturePath, DrawMode aDrawmode, Shader *nomralShader, Shader *pickingShader, unsigned int uniqueId)
 {
     mDrawmode = aDrawmode;
     objectId = uniqueId;
@@ -83,17 +83,33 @@ void Box::SetDrawMode(DrawMode drawMode)
     mDrawmode = drawMode;
 }
 
-void Box::Draw(Shader *shader,App *app)
+void Box::SetObb(Obb *aObb)
+{
+    this->obb = aObb;
+}
+
+void Box::Draw(Shader *shader, App *app)
 {
     glUseProgram(shader->shaderProgramID);
 
-    if(objectId == app->selectedObject)
+    if (objectId == app->selectedObject)
     {
-        shader->setBool("isSelected",true);
-
+        shader->setBool("isSelected", true);
     }
-    else{
-         shader->setBool("isSelected",false);
+    else
+    {
+        shader->setBool("isSelected", false);
+    }
+
+    if (obb && obb->intersect)
+    {
+        //printf("isColliding \n");
+        shader->setBool("isColliding", true);
+    }
+    else
+    {
+        //printf("is not Colliding \n");
+        shader->setBool("isColliding", false);
     }
 
     if (mDrawmode == DrawMode::EWireFrame)
@@ -142,6 +158,11 @@ void Box::Draw_Color(Shader *shader, AppWindow::AppWindow &window)
     glBindVertexArray(color_pick_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
+}
+
+Obb *Box::GetObb()
+{
+    return obb;
 }
 
 Transform &Box::getTransform()

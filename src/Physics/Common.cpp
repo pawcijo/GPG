@@ -521,7 +521,6 @@ Interval GetInterval(const OBB &obb, const glm::vec3 &axis)
 {
     glm::vec3 vertex[8];
 
-    // printf("GetInterval \n");
     glm::vec3 C = obb.position; // OBB Center
     glm::vec3 E = obb.size;     // OBB Extents
     const float *o = &obb.orientation[0][0];
@@ -641,7 +640,6 @@ glm::mat3 ZRotation3x3(float angle)
 
 glm::mat3 Rotation3x3(float pitch, float yaw, float roll)
 {
-    // printf("Rotation3x3 \n");
     return ZRotation3x3(roll) * XRotation3x3(pitch) * YRotation3x3(yaw);
 }
 
