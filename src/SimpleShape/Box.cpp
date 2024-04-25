@@ -101,6 +101,8 @@ void Box::Draw(Shader *shader, App *app)
         shader->setBool("isSelected", false);
     }
 
+
+/*
     if (obb && obb->intersect)
     {
         //printf("isColliding \n");
@@ -111,6 +113,7 @@ void Box::Draw(Shader *shader, App *app)
         //printf("is not Colliding \n");
         shader->setBool("isColliding", false);
     }
+    */
 
     if (mDrawmode == DrawMode::EWireFrame)
     {

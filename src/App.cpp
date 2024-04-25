@@ -11,6 +11,8 @@
 
 #include "stb_image.h"
 
+#include <glm/gtc/quaternion.hpp>
+
 #include <MyPhysics/Obb.h>
 
 void processInput(GLFWwindow *window)
@@ -80,28 +82,23 @@ void App::ProcessKey()
     {
         if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
         {
-            if (selecteObb)
-            {
-                selecteObb->center += speed * glm::vec3(0.0f, 1.0f, 0.0f);
-            }
+
+            selecteObb->Translate(speed * glm::vec3(0.0f, 1.0f, 0.0f));
         }
 
         if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
         {
-            if (selecteObb)
-            {
-                selecteObb->center -= speed * glm::vec3(0.0f, 1.0f, 0.0f);
-            }
+            selecteObb->Translate((-1.0f * speed) * glm::vec3(0.0f, 1.0f, 0.0f));
         }
 
         if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
         {
-            selecteObb->center -= speed * glm::vec3(1.0f, 0.0f, 0.0f);
+            selecteObb->Translate((-1.0f * speed) * glm::vec3(1.0f, 0.0f, 0.0f));
         }
 
         if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
         {
-            selecteObb->center += speed * glm::vec3(1.0f, 0.0f, 0.0f);
+            selecteObb->Translate(speed * glm::vec3(1.0f, 0.0f, 0.0f));
         }
     }
 }
@@ -198,7 +195,8 @@ App::App(AppWindow::AppWindow &appWindow) : mAppWindow(appWindow),
     glfwSetCharCallback(window, ImGui_ImplGlfw_CharCallback);
     glfwSetMonitorCallback(ImGui_ImplGlfw_MonitorCallback);
 
-    pm = new PhysicsManager(0.0f, 0.0f, 0.0f);
+    pm = new PhysicsManager(0.0f, -9.8f, 0.0f);
+    pm->SetApp(this);
 
     mBoxes.push_back(new Box("resources/textures/clown.png",
                              DrawMode::EDefault,
@@ -218,9 +216,9 @@ App::App(AppWindow::AppWindow &appWindow) : mAppWindow(appWindow),
     mBoxes[2]->getTransform().setPosition(glm::vec3(0, -1.0f, 0));
     mBoxes[2]->getTransform().setScale(50, 1, 50);
 
-    pm->addOBB(new Obb(glm::vec3(0.0f, 4.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::mat3(1.0f), 2.0f, glm::vec3(0.0f, 0.0f, 0.0f)));
-    pm->addOBB(new Obb(glm::vec3(5.0f, 2.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::mat3(1.0f), 2.0f, glm::vec3(0.0f, 0.0f, 0.0f)));
-    pm->addOBB(new Obb(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(50, 1, 50), glm::mat3(1.0f), 2.0f, glm::vec3(0.0f, 0.0f, 0.0f), true));
+    pm->AddOBB(new Obb(mBoxes[0]->getTransform(), 2.0f, glm::vec3(0.0f, 0.0f, 0.0f)));
+    pm->AddOBB(new Obb(mBoxes[1]->getTransform(), 2.0f, glm::vec3(0.0f, 0.0f, 0.0f)));
+    pm->AddOBB(new Obb(mBoxes[2]->getTransform(), 2.0f, glm::vec3(0.0f, 0.0f, 0.0f), true));
 
     for (int i = 0; i < mBoxes.size(); i++)
     {
@@ -238,6 +236,7 @@ void App::Run()
 
     int counter = 0;
     bool prawda = true;
+    ImGuiIO &io = ImGui::GetIO();
     while (!glfwWindowShouldClose(window))
     {
 
@@ -251,11 +250,19 @@ void App::Run()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        pm->update(deltaTime);
+        if (!pause)
+        {
+            pm->Update(deltaTime);
+        }
+
+        pm->SynchroniseWithRender();
 
         SetViewAndPerspective(mCamera);
 
-        ColorPicking();
+        if (!io.WantCaptureMouse)
+        {
+            ColorPicking();
+        }
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -305,45 +312,82 @@ void App::ImGuiStuff()
 
     if (ImGui::CollapsingHeader("Perspective"))
     {
-
         ImGui::SliderFloat("Fov", &mCamera.Zoom, 0.0f, 90.0f);
-    }
-    ImGui::Text("Selected object %i", selectedObject);
-
-    // New
-    for (int i = 0; i < mBoxes.size(); i++)
-    {
-        if (nullptr != mBoxes[i]->GetObb())
-            mBoxes[i]->getTransform().setPosition(pm->obbs[i]->center.x,
-                                                  pm->obbs[i]->center.y,
-                                                  pm->obbs[i]->center.z);
     }
 
     ImGui::Text("Physics object 1: [%f][%f][%f] ",
-                pm->obbs[0]->center.x,
-                pm->obbs[0]->center.y,
-                pm->obbs[0]->center.z);
+                pm->obbs[0]->GetCenter().x,
+                pm->obbs[0]->GetCenter().y,
+                pm->obbs[0]->GetCenter().z);
 
     ImGui::Text("Physics object 2: [%f][%f][%f] ",
-                pm->obbs[1]->center.x,
-                pm->obbs[1]->center.y,
-                pm->obbs[1]->center.z);
+                pm->obbs[1]->GetCenter().x,
+                pm->obbs[1]->GetCenter().y,
+                pm->obbs[1]->GetCenter().z);
 
     ImGui::Text("Ground box object posiiton: [%f][%f][%f] ",
-                pm->obbs[2]->center.x,
-                pm->obbs[2]->center.y,
-                pm->obbs[2]->center.z);
+                pm->obbs[2]->GetCenter().x,
+                pm->obbs[2]->GetCenter().y,
+                pm->obbs[2]->GetCenter().z);
 
-    if (!pm->collisionMap.empty())
+    if (ImGui::CollapsingHeader("Collision", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        //printf("Jebanie cipa chuj \n");
-    }
 
-    if (ImGui::CollapsingHeader("Collision"))
-    {
-        for (auto collisionPair : pm->collisionMap)
+        if (ImGui::Button("Pause/Resume"))
+        {
+            pause = !pause;
+        }
+
+        if (ImGui::Button("Resolve all collison"))
+        {
+            pm->ResolveAllCollision();
+        }
+
+        for (auto collisionPair : pm->collisionSet)
         {
             ImGui::Text("%i %i", collisionPair.first->object->ObjectId(), collisionPair.second->object->ObjectId());
+        }
+    }
+
+    if (ImGui::CollapsingHeader("Selected Object", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        ImGui::Text("Selected object %i", selectedObject);
+        if (nullptr != selecteObb)
+        {
+            glm::vec3 rotation = selecteObb->GetRotation();
+            ImGui::Text("Rotation  X:%f Y:%f Z:%f ", rotation.x, rotation.y, rotation.z);
+        }
+
+        if (ImGui::Button("Rotate X +"))
+        {
+
+            if (nullptr != selecteObb)
+                selecteObb->Rotate(15.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+        }
+        if (ImGui::Button("Rotate X -"))
+        {
+            if (nullptr != selecteObb)
+                selecteObb->Rotate(-15.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+        }
+        if (ImGui::Button("Rotate Y +"))
+        {
+            if (nullptr != selecteObb)
+                selecteObb->Rotate(15.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        }
+        if (ImGui::Button("Rotate Y -"))
+        {
+            if (nullptr != selecteObb)
+                selecteObb->Rotate(-15.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        }
+        if (ImGui::Button("Rotate Z +"))
+        {
+            if (nullptr != selecteObb)
+                selecteObb->Rotate(15.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+        }
+        if (ImGui::Button("Rotate z -"))
+        {
+            if (nullptr != selecteObb)
+                selecteObb->Rotate(-15.0f, glm::vec3(0.0f, 0.0f, 1.0f));
         }
     }
 

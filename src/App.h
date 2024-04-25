@@ -8,10 +8,6 @@
 #include <SimpleShape/Box.h>
 #include <Camera.h>
 
-/*
-#include <Physics/PhysicsManager.h>
-#include <Physics/RigidbodyImpl.h>
-*/
 
 #include <MyPhysics/PhysicsManager.h>
 
@@ -95,6 +91,8 @@ class App
 
     void ColorPicking();
 
+
+    bool pause = true;
     void ImGuiStuff();
 
     void ProcessKey();
@@ -105,5 +103,6 @@ public:
     ~App();
     void Run();
 
+    friend class PhysicsManager;
     friend class Box;
 };

@@ -9,25 +9,34 @@
 
 #include <SimpleShape/Box.h>
 
-
+class App;
 
 class PhysicsManager
 {
 private:
     glm::vec3 gravity;
 
+    App *app;
+
 public:
     std::vector<Obb *> obbs;
-    std::unordered_set<std::pair<Obb *, Obb *>, PairObbHash> collisionMap;
+    std::unordered_set<std::pair<Obb *, Obb *>, PairObbHash> collisionSet;
     PhysicsManager(float gravityX, float gravityY, float gravityZ);
 
-    void addOBB(Obb *obb);
-    void update(float deltaTime);
+    void SetApp(App *aApp) { app = aApp; }
 
-    void ClearCollisonMap() { collisionMap.clear(); }
+    void AddOBB(Obb *obb);
+    void Update(float deltaTime);
 
-    bool intersects(Obb *one, Obb *other);
-    void resolveCollision(Obb *one, Obb *other);
+    void ClearCollisonMap() { collisionSet.clear(); }
 
-    void applyPositionCorrection(Obb *obb);
+    bool Intersects(Obb *one, Obb *other);
+    void ResolveCollision(Obb *one, Obb *other);
+    void ResolveAllCollision();
+
+    void ApplyPositionCorrection(Obb *obb);
+
+    void SynchroniseWithRender();
+
+    friend class App;
 };
