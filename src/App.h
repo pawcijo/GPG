@@ -8,8 +8,7 @@
 #include <SimpleShape/Box.h>
 #include <Camera.h>
 
-#include <Physics/PhysicsManager.h>
-#include <Physics/RigidbodyImpl.h>
+#include "MyPhysics/Physics.hpp"
 
 #include <vector>
 #include <memory>
@@ -36,6 +35,8 @@ static float globalCameraPitch;
 
 void CursorPositonCallback(GLFWwindow *window, double xpos, double ypos);
 void MouseClickCallback(GLFWwindow *window, int button, int action, int mods);
+
+const  float dt = 1.0f / 60.0f;
 
 class App
 {
@@ -71,16 +72,18 @@ class App
     int selectedObject = -1;
 
     // Phsycis
-    PhysicsManager physicsManager;
-    std::vector<RigidbodyImpl*> bodies;
-    RigidbodyImpl* groundBox;
-
-
-    void ResetPhyscis();
+    PhysicsScene* scene;
+    PhysicsClock g_clock;
 
     void SetViewAndPerspective(Camera &aCamera);
     void SwitchDrawMode();
     void SwitchCameraMode();
+
+    void ColorPicking();
+
+
+    bool pause = false;
+    void ImGuiStuff();
 
     void ProcessKey();
     void ProcessMouse();
@@ -89,6 +92,8 @@ public:
     App(AppWindow::AppWindow &window);
     ~App();
     void Run();
+    void PhysicsUpdate(float time);
 
+    friend class PhysicsManager;
     friend class Box;
 };

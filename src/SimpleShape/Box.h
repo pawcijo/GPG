@@ -8,6 +8,7 @@
 #include <Shader.h>
 #include <AppWindow.h>
 
+
 namespace BoxSpace
 {
     static float vertices[] = {
@@ -78,6 +79,7 @@ class Box
     Shader *normalShader;
     Shader *pickingShader;
 
+
 public:
     Box(std::filesystem::path texturePath,
         DrawMode drawmode,
@@ -85,6 +87,8 @@ public:
         Shader *pickingShader,
         unsigned int uniqueId);
     ~Box();
+
+    unsigned int ObjectId(){return objectId;}
     void Draw(Shader *shaderProgram, App *app);
     void Draw_Color(Shader *shaderProgram, AppWindow::AppWindow &window);
     Transform &getTransform();
