@@ -43,20 +43,19 @@ Some text bla bla bla .
 - ✅ Color picking to grab object (Boxes for now)
 - ✅ AABB
 
+**14.05.24**
+
 TODO:
 - [ ] Texture class
 - [ ] Save configuration
 - [ ] Model class
 - [ ] Scene Hierarchy with classes (weak, shared ptrs ?)
-- [ ] Collison on CPU: (Collider Class,
-                        AABB collider (✅),
-                        OBB Collider (HARD),
-                        Sphere collider,
-                        Point collider (✅))
+
+- [✅] Collison on CPU: (Based on qu3e)
 - [ ] Move collison to cpu
 - [ ] Load fonts to display at screen
 - [ ] FPS counter + Text display 
-- [ ] More robust time (deltaTime)
+- [ ] More robust time (use realtime not const time per update)
 
 
 Maybe: ?
