@@ -8,7 +8,6 @@
 #include <Shader.h>
 #include <AppWindow.h>
 
-#include <MyPhysics/Obb.h>
 
 namespace BoxSpace
 {
@@ -80,8 +79,6 @@ class Box
     Shader *normalShader;
     Shader *pickingShader;
 
-    Obb * obb = nullptr;
-
 
 public:
     Box(std::filesystem::path texturePath,
@@ -93,8 +90,6 @@ public:
 
     unsigned int ObjectId(){return objectId;}
     void Draw(Shader *shaderProgram, App *app);
-    void SetObb(Obb* obb);
-    Obb * GetObb();
     void Draw_Color(Shader *shaderProgram, AppWindow::AppWindow &window);
     Transform &getTransform();
     void SetDrawMode(DrawMode drawMode);

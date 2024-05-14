@@ -12,7 +12,7 @@ enum Camera_Movement
 };
 
 const glm::vec3 CAMERA_DEFAULT_POSTITION(0.0f, 3.5f, 7.0f);
-const glm::vec3 CAMERA_DEFAULT_WORLD_UP(0.0f, 1.0f, 0.0f);
+const glm::vec3 CAMERA_DEFAULT_WORLD_UP(0.0f,1.0f, 0.0f);
 const glm::vec3 CAMERA_DAFAULT_FRONT(0.0f, 0.0f, 1.0f);
 const float CAMERA_DEFAULT_YAW(24.0f);
 const float CAMERA_DEFAULT_PITCH(14.0f);

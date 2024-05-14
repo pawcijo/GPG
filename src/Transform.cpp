@@ -3,11 +3,19 @@
 
 Transform::Transform()
 {
-    transform = glm::mat4(1.0f);
+    
     position = glm::vec3(0.0f);
     scale = glm::vec3(1.0f);
     rotation = glm::vec3(0.0f, 0.0f, 0.0f);
     quaterion = glm::quat(rotation);
+
+
+    glm::mat4 positionMatrix = glm::mat4(1.0f);
+    positionMatrix = glm::scale(positionMatrix, scale);
+    positionMatrix = glm::translate(positionMatrix,
+                              glm::vec3(position.x, position.y, position.z));
+
+    transform = glm::mat4(1.0f);
 }
 
 Transform Transform::origin() { return Transform(); }
@@ -98,6 +106,7 @@ void Transform::rotate(float value, glm::vec3 axis)
 
     transform = glm::rotate(transform, glm::radians(value), axis);
     quaterion = glm::toQuat(transform);
+    rotationMatrix = glm::mat4_cast(quaterion);
 }
 
 void Transform::setRotation(float x, float y, float z)
@@ -114,9 +123,27 @@ void Transform::setRotation(float x, float y, float z)
 
     transform = positionMatrix;
     quaterion = glm::toQuat(transform);
+    rotationMatrix = glm::mat4_cast(quaterion);
 }
 
+ void Transform::setRotation(glm::mat3 rotation)
+ {
+    glm::mat4 positionMatrix = glm::mat4(1.0f);
+    float pie = glm::pi<float>();  
 
+    glm::mat4 rotationMatrix = glm::mat4(rotation);
+
+    positionMatrix = glm::scale(positionMatrix, scale);
+    positionMatrix = glm::translate(positionMatrix, glm::vec3(position.x, position.y, position.z));
+    
+    positionMatrix = positionMatrix * rotationMatrix;
+
+    transform = positionMatrix;
+    quaterion = glm::toQuat(transform);
+    rotationMatrix = glm::mat4_cast(quaterion);
+
+
+ }
 
 void Transform::setRotation(glm::vec3 rotation)
 {
@@ -128,15 +155,19 @@ void Transform::setRotation(glm::vec3 rotation)
 
     positionMatrix = glm::scale(positionMatrix, scale);
     positionMatrix = glm::translate(positionMatrix, glm::vec3(position.x, position.y, position.z));
-    positionMatrix = positionMatrix * glm::eulerAngleXYZ((rotation.x / 180.0f) * pie, (rotation.y / 180.0f) * pie, (rotation.z / 180.0f) * pie);
+    
+    positionMatrix = positionMatrix * (glm::eulerAngleXYZ((rotation.x * 180.0f) / pie, (rotation.y * 180.0f) / pie, (rotation.z * 180.0f) / pie));
 
     transform = positionMatrix;
     quaterion = glm::toQuat(transform);
+    rotationMatrix = glm::mat4_cast(quaterion);
 }
 
 void Transform::setTransform(glm::mat4 aTransform) { transform = aTransform; }
 
 glm::vec3 &Transform::getPositionRef() { return position; }
+
+const glm::mat4 Transform::getRotationMatrix() const { return rotationMatrix; }
 
 const glm::vec3 Transform::getPosition() const { return position; }
 const glm::vec3 Transform::getRotation() const { return rotation; }

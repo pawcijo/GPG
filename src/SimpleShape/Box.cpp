@@ -83,11 +83,6 @@ void Box::SetDrawMode(DrawMode drawMode)
     mDrawmode = drawMode;
 }
 
-void Box::SetObb(Obb *aObb)
-{
-    this->obb = aObb;
-}
-
 void Box::Draw(Shader *shader, App *app)
 {
     glUseProgram(shader->shaderProgramID);
@@ -101,19 +96,6 @@ void Box::Draw(Shader *shader, App *app)
         shader->setBool("isSelected", false);
     }
 
-
-/*
-    if (obb && obb->intersect)
-    {
-        //printf("isColliding \n");
-        shader->setBool("isColliding", true);
-    }
-    else
-    {
-        //printf("is not Colliding \n");
-        shader->setBool("isColliding", false);
-    }
-    */
 
     if (mDrawmode == DrawMode::EWireFrame)
     {
@@ -163,10 +145,7 @@ void Box::Draw_Color(Shader *shader, AppWindow::AppWindow &window)
     glBindVertexArray(0);
 }
 
-Obb *Box::GetObb()
-{
-    return obb;
-}
+
 
 Transform &Box::getTransform()
 {

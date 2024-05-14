@@ -7,6 +7,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
  
+
+set(CMAKE_DEBUG_POSTFIX d)
+
 # Compile external dependencies 
 add_subdirectory (external)
 
@@ -44,11 +47,19 @@ add_executable(OPGLPlayground
 	src/SimpleShape/Square.cpp
 	src/SimpleShape/Box.cpp
 	src/stb_image.cpp
-	src/Physics/Common.cpp
-	#src/Physics/RigidbodyImpl.cpp
-	#src/Physics/PhysicsManager.cpp
-	src/MyPhysics/Obb.cpp
-	src/MyPhysics/PhysicsManager.cpp
+	src/MyPhysics/PhysicsScene.cpp
+	src/MyPhysics/PhysicsMemory.cpp
+	src/MyPhysics/PhysicsContactManager.cpp
+	src/MyPhysics/PhysicsIsland.cpp
+	src/MyPhysics/PhysicsBody.cpp
+	src/MyPhysics/PhysicsBox.cpp
+	src/MyPhysics/PhysicsContactSolver
+	src/MyPhysics/PhysicsBroadPhase
+	src/MyPhysics/PhysicsDynamicAABBTree.cpp
+	src/MyPhysics/PhysicsContact.cpp
+	src/MyPhysics/PhysicsCollide.cpp
+	src/MyPhysics/PhysicsClock.cpp
+	src/MyPhysics/Common.cpp
 	external/imgui/imgui.cpp
 	external/imgui/imgui_draw.cpp
 	external/imgui/imgui_tables.cpp

@@ -18,10 +18,11 @@ class Transform
 {
 
     glm::mat4 transform;
-    
+
     glm::vec3 position;
     glm::vec3 scale;
     glm::vec3 rotation;
+
     glm::mat4 rotationMatrix;
     glm::quat quaterion;
 
@@ -31,6 +32,8 @@ public:
     void scaleTransform(GLfloat x, GLfloat y, GLfloat z);
     void setTransform(glm::mat4 transform);
     
+
+    void setRotation(glm::mat3 rotation);
     void setRotation(glm::vec3 rotation);
     void setRotation(float x, float y, float z);
     
@@ -50,6 +53,7 @@ public:
 
     const glm::vec3 getPosition() const;
     glm::vec3 &getPositionRef();
+    const glm::mat4 getRotationMatrix() const;
     const glm::vec3 getRotation() const;
     const glm::vec3 getScale() const;
 };
