@@ -10,6 +10,8 @@
 
 #include "MyPhysics/Physics.hpp"
 
+#include <GameObject/GameObjectManager.h>
+
 #include <vector>
 #include <memory>
 
@@ -67,9 +69,9 @@ class App
     double lastX;
 
     // App objects
-    // TODO AppObject class
-    std::vector<Box *> mBoxes;
     int selectedObject = -1;
+    GameObjectManager manager;
+
 
     // Phsycis
     PhysicsScene* scene;
@@ -94,6 +96,7 @@ public:
     void Run();
     void PhysicsUpdate(float time);
 
+    friend class Mesh;
     friend class PhysicsManager;
     friend class Box;
 };

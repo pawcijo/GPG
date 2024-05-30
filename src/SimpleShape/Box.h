@@ -90,7 +90,7 @@ public:
 
     unsigned int ObjectId(){return objectId;}
     void Draw(Shader *shaderProgram, App *app);
-    void Draw_Color(Shader *shaderProgram, AppWindow::AppWindow &window);
+    void Draw_Color(Shader *shaderProgram);
     Transform &getTransform();
     void SetDrawMode(DrawMode drawMode);
 };

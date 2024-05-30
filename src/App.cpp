@@ -14,6 +14,12 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
+#include <GameObject/GameObjectBuilder.h>
+#include <GameObject/GameObject.h>
+
+#include <Mesh/Mesh.h>
+#include <Mesh/ExampleMesh.h>
+
 void processInput(GLFWwindow *window)
 {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -158,17 +164,17 @@ void App::SwitchDrawMode()
   if (mDrawMode == DrawMode::EDefault)
   {
     mDrawMode = DrawMode::EWireFrame;
-    for (auto &box : mBoxes)
+    for (auto &object : manager.objectList)
     {
-      box->SetDrawMode(DrawMode::EWireFrame);
+      object->GetMesh()->SetDrawMode(DrawMode::EWireFrame);
     }
   }
   else
   {
     mDrawMode = DrawMode::EDefault;
-    for (auto &box : mBoxes)
+    for (auto &object : manager.objectList)
     {
-      box->SetDrawMode(DrawMode::EDefault);
+      object->GetMesh()->SetDrawMode(DrawMode::EDefault);
     }
   }
 }
@@ -202,21 +208,6 @@ App::App(AppWindow::AppWindow &appWindow)
   glfwSetCharCallback(window, ImGui_ImplGlfw_CharCallback);
   glfwSetMonitorCallback(ImGui_ImplGlfw_MonitorCallback);
 
-  mBoxes.push_back(new Box("resources/textures/clown.png", DrawMode::EDefault,
-                           box_shader.get(), color_pick_shader.get(), 0));
-  mBoxes.push_back(new Box("resources/textures/clown_2.png", DrawMode::EDefault,
-                           box_shader.get(), color_pick_shader.get(), 1));
-  mBoxes.push_back(new Box("resources/textures/box.jpg", DrawMode::EDefault,
-                           box_shader.get(), color_pick_shader.get(), 2));
-
-  mBoxes.push_back(new Box("resources/textures/clown.png", DrawMode::EDefault,
-                           box_shader.get(), color_pick_shader.get(), 3));
-
-  mBoxes[0]->getTransform().setPosition(glm::vec3(2.0, 0, 0.0));
-
-  mBoxes[3]->getTransform().setPosition(glm::vec3(2.0, 2.0, 0.0));
-  mBoxes[3]->getTransform().setRotation(glm::vec3(30.0, 0.0, 0.0));
-
   scene->SetAllowSleep(true);
   scene->SetEnableFriction(true);
   scene->SetIterations(5);
@@ -235,26 +226,39 @@ App::App(AppWindow::AppWindow &appWindow)
   boxDef.Set(tx, glm::vec3(50.0f, 1.0f, 50.0f));
   body->AddBox(boxDef);
 
-  mBoxes[2]->getTransform().setScale(boxDef.GetExtension());
-
   bodyDef.bodyType = eDynamicBody;
   boxDef.Set(tx, glm::vec3(1.0f, 1.0f, 1.0f));
 
   for (int i = 0; i < 2; i++)
   {
-    bodyDef.position = glm::vec3(0.0f, (2.0f * i) + 4, 0.0f);
+    bodyDef.position = glm::vec3(0.0f + i * 0.5f, (2.0f * i) + 4, 0.0f);
 
     body = scene->CreateBody(bodyDef);
     body->AddBox(boxDef);
   }
 
+  Mesh *mesh = new Mesh(textureBoxVertexVector, "resources/textures/box.jpg", color_pick_shader.get());
 
+  GameObjectBuilder builder;
   int couterbefore = 0;
   for (PhysicsBody *body = scene->BodyList(); body; body = body->Next())
   {
+    manager.AddObject(builder.setBody(body).setMesh(mesh).build());
+
     std::cout << "Body Position: \n"
               << "X: " << body->GetTransform().position.x << " Y: " << body->GetTransform().position.y << " Z: " << body->GetTransform().position.z << "\n";
   }
+
+
+    Mesh *clownMesh = new Mesh(textureBoxVertexVector, "resources/textures/clown.png", color_pick_shader.get());
+
+    Transform * clownTransform = new Transform();
+    clownTransform->setPosition(glm::vec3(2.0, 2.0, 0.0));
+    clownTransform->setRotation(glm::vec3(30.0, 0.0, 0.0));
+
+   manager.AddObject(builder.setTransform(clownTransform).setMesh(clownMesh).build());
+   
+
 }
 
 void App::PhysicsUpdate(float time)
@@ -298,39 +302,6 @@ void App::Run()
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
 
-    counter = 0;
-    for (PhysicsBody *body = scene->BodyList(); body; body = body->Next())
-    {
-      glm::vec3 position = body->GetTransform().position;
-      glm::mat3 rotation = body->GetTransform().rotation;
-
-      // std::cout << "Body Position: " << counter << "\n"
-      //           << "X: " << body->GetTransform().position.x << " Y: " << body->GetTransform().position.y << " Z: " << body->GetTransform().position.z << "\n";
-
-      if (counter == 0)
-      {
-
-        if (position.y < 1)
-        {
-          int dupa = 2137;
-        }
-
-        mBoxes[0]->getTransform().setPosition(position);
-        mBoxes[0]->getTransform().setRotation(rotation);
-      }
-
-      if (counter == 1)
-      {
-        mBoxes[1]->getTransform().setPosition(position);
-        mBoxes[1]->getTransform().setRotation(rotation);
-      }
-      if (counter == 2)
-      {
-        mBoxes[2]->getTransform().setPosition(position);
-        mBoxes[2]->getTransform().setRotation(rotation);
-      }
-      counter++;
-    }
 
     if (!pause)
     {
@@ -348,10 +319,10 @@ void App::Run()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     auto shaderPtr = box_shader.get();
-    for (Box *box : mBoxes)
-    {
 
-      box->Draw(box_shader.get(), this);
+    for (auto gameobject : manager.objectList)
+    {
+      gameobject->Draw(*box_shader.get(), false,*this);
     }
 
     ImGuiStuff();
@@ -432,10 +403,15 @@ void App::ColorPicking()
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  for (int i = 0; i < mBoxes.size(); i++)
+  /*for (int i = 0; i < mBoxes.size(); i++)
   {
 
-    mBoxes[i]->Draw_Color(color_pick_shader.get(), mAppWindow);
+    mBoxes[i]->Draw_Color(color_pick_shader.get());
+  }
+  */
+  for (auto gameobject : manager.objectList)
+  {
+    gameobject->Draw(*box_shader.get(), true, *this);
   }
 
   glFlush();

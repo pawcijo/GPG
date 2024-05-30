@@ -4,6 +4,7 @@
 #include "glm/gtc/quaternion.hpp"
 #include "glm/gtx/rotate_vector.hpp"
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/euler_angles.hpp>
 
 #include "PhysicsScene.h"
 #include "PhysicsContact.h"
@@ -366,6 +367,22 @@ bool PhysicsBody::CanCollide(const PhysicsBody *other) const
 const PhysicsTransform PhysicsBody::GetTransform() const
 {
 	return m_tx;
+}
+
+const glm::mat4 PhysicsBody::GetTransformMat4() const
+{
+	// set right position,scale and rotaiton
+
+	glm::mat4 aTransform{1};
+
+	aTransform = glm::scale(aTransform, m_boxes[0].e);
+	aTransform = glm::translate(aTransform,
+								glm::vec3(m_tx.position.x, m_tx.position.y, m_tx.position.z));
+
+	glm::mat4 rotationMatrix = glm::mat4(m_tx.rotation);
+
+	aTransform = aTransform * rotationMatrix;
+	return aTransform;
 }
 
 //--------------------------------------------------------------------------------------------------

@@ -122,7 +122,7 @@ void Box::Draw(Shader *shader, App *app)
     glActiveTexture(GL_TEXTURE0);
 }
 
-void Box::Draw_Color(Shader *shader, AppWindow::AppWindow &window)
+void Box::Draw_Color(Shader *shader)
 {
     glUseProgram(shader->shaderProgramID);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

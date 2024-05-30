@@ -85,6 +85,7 @@ public:
     void SetAngularVelocity(const glm::vec3 v);
     bool CanCollide(const PhysicsBody *other) const;
     const PhysicsTransform GetTransform() const;
+    const glm::mat4 GetTransformMat4() const;
     int GetFlags() const;
     void SetLayers(int layers);
     int GetLayers() const;

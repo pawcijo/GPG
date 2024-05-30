@@ -60,6 +60,9 @@ add_executable(OPGLPlayground
 	src/MyPhysics/PhysicsCollide.cpp
 	src/MyPhysics/PhysicsClock.cpp
 	src/MyPhysics/Common.cpp
+	src/GameObject/GameObject.cpp
+	src/GameObject/GameObjectManager.cpp
+	src/Mesh/Mesh.cpp
 	external/imgui/imgui.cpp
 	external/imgui/imgui_draw.cpp
 	external/imgui/imgui_tables.cpp
