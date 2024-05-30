@@ -7,32 +7,36 @@
 class GameObjectBuilder
 {
 private:
-    Mesh* mesh = nullptr;
-    PhysicsBody* body = nullptr;
-    Transform* transform = nullptr;
+    Mesh *mesh = nullptr;
+    PhysicsBody *body = nullptr;
+    Transform *transform = nullptr;
 
 public:
-    GameObjectBuilder& setMesh( Mesh* aMesh)
+    GameObjectBuilder &setMesh(Mesh *aMesh)
     {
         this->mesh = aMesh;
         return *this;
     }
 
-        GameObjectBuilder& setBody( PhysicsBody* aBody)
+    GameObjectBuilder &setBody(PhysicsBody *aBody)
     {
         this->body = aBody;
         return *this;
     }
 
-        GameObjectBuilder& setTransform( Transform* aTransform)
+    GameObjectBuilder &setTransform(Transform *aTransform)
     {
         this->transform = aTransform;
         return *this;
     }
 
-
-    GameObject * build()
+    GameObject *build()
     {
-        return new GameObject(mesh,body,transform);
+        GameObject *obj = new GameObject(mesh, body, transform);
+
+        mesh = nullptr;
+        body = nullptr;
+        transform = nullptr;
+        return obj;
     }
 };

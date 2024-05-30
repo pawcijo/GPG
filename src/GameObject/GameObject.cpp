@@ -46,6 +46,23 @@ void GameObject::Draw(Shader &shaderProgram, bool drawColorPick, App &app)
     }
 }
 
+glm::vec3 GameObject::Position()
+{
+    if (nullptr != body)
+    {
+        return body->GetTransform().position;
+    }
+    else
+    {
+        if (nullptr != transform)
+        {
+
+            return transform->getPosition();
+        }
+    }
+    return glm::vec3(0, 0, 0);
+}
+
 unsigned int GameObject::ObjectId()
 {
     return objectId;

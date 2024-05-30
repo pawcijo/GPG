@@ -287,13 +287,13 @@ const glm::vec3 PhysicsBody::GetLocalVector(const glm::vec3 &v) const
 //--------------------------------------------------------------------------------------------------
 const glm::vec3 PhysicsBody::GetWorldPoint(const glm::vec3 &p) const
 {
-	return TransformMulTranspose(m_tx, p);
+	return TransformMul(m_tx, p);
 }
 
 //--------------------------------------------------------------------------------------------------
 const glm::vec3 PhysicsBody::GetWorldVector(const glm::vec3 &v) const
 {
-	return TransformMulTranspose(m_tx.rotation, v);
+	return TransformMul(m_tx.rotation, v);
 }
 
 //--------------------------------------------------------------------------------------------------

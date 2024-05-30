@@ -249,16 +249,13 @@ App::App(AppWindow::AppWindow &appWindow)
               << "X: " << body->GetTransform().position.x << " Y: " << body->GetTransform().position.y << " Z: " << body->GetTransform().position.z << "\n";
   }
 
+  Mesh *clownMesh = new Mesh(textureBoxVertexVector, "resources/textures/clown.png", color_pick_shader.get());
 
-    Mesh *clownMesh = new Mesh(textureBoxVertexVector, "resources/textures/clown.png", color_pick_shader.get());
+  Transform *clownTransform = new Transform();
+  clownTransform->setPosition(glm::vec3(2.0, 2.0, 0.0));
+  clownTransform->setRotation(glm::vec3(30.0, 0.0, 0.0));
 
-    Transform * clownTransform = new Transform();
-    clownTransform->setPosition(glm::vec3(2.0, 2.0, 0.0));
-    clownTransform->setRotation(glm::vec3(30.0, 0.0, 0.0));
-
-   manager.AddObject(builder.setTransform(clownTransform).setMesh(clownMesh).build());
-   
-
+  manager.AddObject(builder.setTransform(clownTransform).setMesh(clownMesh).build());
 }
 
 void App::PhysicsUpdate(float time)
@@ -302,7 +299,6 @@ void App::Run()
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
 
-
     if (!pause)
     {
       PhysicsUpdate(time);
@@ -322,7 +318,7 @@ void App::Run()
 
     for (auto gameobject : manager.objectList)
     {
-      gameobject->Draw(*box_shader.get(), false,*this);
+      gameobject->Draw(*box_shader.get(), false, *this);
     }
 
     ImGuiStuff();
@@ -389,6 +385,17 @@ void App::ImGuiStuff()
   if (ImGui::CollapsingHeader("Selected Object",
                               ImGuiTreeNodeFlags_DefaultOpen))
   {
+    if(-1 != selectedObject)
+    {
+    GameObject *object = manager.GetSelectedObjectPtr(selectedObject);
+    ImGui::Text("Position:");
+    if(selectedObject == 4)
+    {
+      int dupa = 12;
+    }
+    auto position = object->Position();
+    ImGui::Text("X: %f Y: %f Z: %f", position.x, position.y, position.z);
+    }
   }
 
   ImGui::End();
@@ -403,12 +410,6 @@ void App::ColorPicking()
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  /*for (int i = 0; i < mBoxes.size(); i++)
-  {
-
-    mBoxes[i]->Draw_Color(color_pick_shader.get());
-  }
-  */
   for (auto gameobject : manager.objectList)
   {
     gameobject->Draw(*box_shader.get(), true, *this);

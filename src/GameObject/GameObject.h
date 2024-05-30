@@ -33,6 +33,9 @@ public:
     bool IsStatic();
     void Draw(Shader &shaderProgram, bool colorPick, App &app);
     unsigned int ObjectId();
+
+    glm::vec3 Position();
+
     GameObject() = delete;
     ~GameObject();
 };

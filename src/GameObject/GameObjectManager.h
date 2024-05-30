@@ -11,4 +11,5 @@ public:
 
     void AddObject(GameObject * obj);
     void RemoveOjbect(unsigned int Id);
+    GameObject * GetSelectedObjectPtr(unsigned int selectedId);
 };
