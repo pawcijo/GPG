@@ -69,7 +69,7 @@ public:
 
 	// Run the simulation forward in time by dt (fixed timestep). Variable
 	// timestep is not supported.
-	void Step();
+	void Step( float deltaTime);
 
 	// Construct a new rigid body. The BodyDef can be reused at the user's
 	// discretion, as no reference to the BodyDef is kept.

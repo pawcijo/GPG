@@ -41,7 +41,7 @@ namespace AppWindow
             return -1;
         }
         glfwMakeContextCurrent(mWindow);
-        glfwSwapInterval(1);
+        glfwSwapInterval(0);
 
 #pragma region IMGUI
         // IMGUI

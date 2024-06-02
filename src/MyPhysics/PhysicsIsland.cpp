@@ -42,7 +42,7 @@
 //--------------------------------------------------------------------------------------------------
 // PhysicsIsland
 //--------------------------------------------------------------------------------------------------
-void PhysicsIsland::Solve( )
+void PhysicsIsland::Solve( float deltaTime)
 {
 	// Apply gravity
 	// Integrate velocities and create state buffers, calculate world inertia
@@ -60,8 +60,8 @@ void PhysicsIsland::Solve( )
 			body->m_invInertiaWorld = r * body->m_invInertiaModel * glm::transpose( r );
 
 			// Integrate velocity
-			body->m_linearVelocity += (body->m_force * body->m_invMass) * m_dt;
-			body->m_angularVelocity += (body->m_invInertiaWorld * body->m_torque) * m_dt;
+			body->m_linearVelocity += (body->m_force * body->m_invMass) * deltaTime;
+			body->m_angularVelocity += (body->m_invInertiaWorld * body->m_torque) * deltaTime;
 
 			// From Box2D!
 			// Apply damping.
@@ -71,8 +71,8 @@ void PhysicsIsland::Solve( )
 			// v2 = exp(-c * dt) * v1
 			// Pade approximation:
 			// v2 = v1 * 1 / (1 + c * dt)
-			body->m_linearVelocity *= float( 1.0 ) / (float( 1.0 ) + m_dt * body->m_linearDamping);
-			body->m_angularVelocity *= float( 1.0 ) / (float( 1.0 ) + m_dt * body->m_angularDamping);
+			body->m_linearVelocity *= float( 1.0 ) / (float( 1.0 ) + deltaTime * body->m_linearDamping);
+			body->m_angularVelocity *= float( 1.0 ) / (float( 1.0 ) + deltaTime * body->m_angularDamping);
 		}
 
 		v->v = body->m_linearVelocity;
@@ -83,7 +83,7 @@ void PhysicsIsland::Solve( )
 	// Initialize velocity constraint for normal + friction and warm start
 	PhysicsContactSolver contactSolver;
 	contactSolver.Initialize( this );
-	contactSolver.PreSolve( m_dt );
+	contactSolver.PreSolve( deltaTime );
 
 	// Solve contacts
 	for ( int i = 0; i < m_iterations; ++i )
@@ -105,8 +105,8 @@ void PhysicsIsland::Solve( )
 		body->m_angularVelocity = v->w;
 
 		// Integrate position
-		body->m_worldCenter += body->m_linearVelocity * m_dt;
-		Integrate(body->m_q,body->m_angularVelocity, m_dt);
+		body->m_worldCenter += body->m_linearVelocity * deltaTime;
+		Integrate(body->m_q,body->m_angularVelocity, deltaTime);
 		body->m_q = glm::normalize( body->m_q );
 		body->m_tx.rotation = glm::mat3{body->m_q};
 	}
@@ -135,7 +135,7 @@ void PhysicsIsland::Solve( )
 
 			else
 			{
-				body->m_sleepTime += m_dt;
+				body->m_sleepTime += deltaTime;
 				minSleepTime = glm::min( minSleepTime, body->m_sleepTime );
 			}
 		}

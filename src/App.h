@@ -76,6 +76,8 @@ class App
     // Phsycis
     PhysicsScene* scene;
     PhysicsClock g_clock;
+    void  ResetSimulation();
+
 
     void SetViewAndPerspective(Camera &aCamera);
     void SwitchDrawMode();

@@ -140,7 +140,7 @@ void App::ProcessMouse()
       // if (abs(xoffset_2) > 0.1 || abs(yoffset_2) > 0.1)
       {
         // //printf("Offset x: %f offset Y %f \n", xoffset, yoffset);
-        mCamera.ProcessMouseMovement(-1.0 * xoffset, -1.0 * yoffset);
+        mCamera.ProcessMouseMovement(-1.0 * deltaTime * xoffset, -1.0 * deltaTime * yoffset);
       }
     }
   }
@@ -269,7 +269,7 @@ void App::PhysicsUpdate(float time)
   accumulator = Clamp01(accumulator);
   while (accumulator >= dt)
   {
-    scene->Step();
+    scene->Step( time);
     accumulator -= dt;
   }
 }
@@ -338,6 +338,20 @@ void App::Run()
   glfwTerminate();
 }
 
+
+//TODO fix 
+//broken behaviour
+void App::ResetSimulation()
+{
+
+  for (int i = 0; i < 2; i++)
+  {
+    manager.objectList[i]->GetBody()->SetTransform(glm::vec3(0.0f + i * 0.5f, (2.0f * i) + 4, 0.0f));
+
+  }
+
+}
+
 void App::ImGuiStuff()
 {
 
@@ -376,9 +390,14 @@ void App::ImGuiStuff()
       pause = !pause;
     }
 
+    if (ImGui::Button("Reset"))
+    {
+      ResetSimulation();
+    }
+
     if (ImGui::Button("PhysicsStep"))
     {
-      scene->Step();
+      scene->Step( 1/60);
     }
   }
 

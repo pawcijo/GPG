@@ -44,7 +44,7 @@ struct PhysicsVelocityState
 class PhysicsIsland
 {
     public:
-	void Solve( );
+	void Solve( float deltaTime);
 	void Add( PhysicsBody *body );
 	void Add( PhysicsContactConstraint *contact );
 	void Initialize( );

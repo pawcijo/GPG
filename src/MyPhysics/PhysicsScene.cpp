@@ -61,7 +61,7 @@ PhysicsScene::~PhysicsScene( )
 }
 
 //--------------------------------------------------------------------------------------------------
-void PhysicsScene::Step( )
+void PhysicsScene::Step( float deltaTime)
 {
 	if ( m_newBox )
 	{
@@ -179,7 +179,7 @@ void PhysicsScene::Step( )
 		assert( island.m_bodyCount != 0 );
 
 		island.Initialize( );
-		island.Solve( );
+		island.Solve( deltaTime);
 
 		// Reset all static island flags
 		// This allows static bodies to participate in other island formations

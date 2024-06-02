@@ -29,6 +29,7 @@ private:
 
 public:
     Mesh *GetMesh() { return mesh; };
+    PhysicsBody *GetBody() { return body; }
     void SetStatic(bool isStatic);
     bool IsStatic();
     void Draw(Shader &shaderProgram, bool colorPick, App &app);
