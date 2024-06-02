@@ -48,6 +48,9 @@ class App
     std::unique_ptr<Shader> box_shader;
     std::unique_ptr<Shader> color_pick_shader;
 
+    //Mesh vector
+    std::vector<std::unique_ptr<Mesh>> meshes;
+
     // Render options
     DrawMode mDrawMode = DrawMode::EDefault;
 
@@ -77,6 +80,10 @@ class App
     PhysicsScene* scene;
     PhysicsClock g_clock;
     void  ResetSimulation();
+
+    void LoadMeshesAndStuff();
+
+    void CreateGameObjects();
 
 
     void SetViewAndPerspective(Camera &aCamera);

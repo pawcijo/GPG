@@ -4,6 +4,7 @@
 
 #include "AppWindow.h"
 
+#include "stb_image.h"
 #include <iostream>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -51,6 +52,8 @@ namespace AppWindow
         ImGuiIO &io = ImGui::GetIO();
         (void)io;
 
+        stbi_set_flip_vertically_on_load(true);
+
         ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
         ImGui_ImplOpenGL3_Init(glsl_version);
 
@@ -63,6 +66,7 @@ namespace AppWindow
         {
             fprintf(stderr, "Failed to initialize GLEW\n");
             glfwTerminate();
+            abort();
         }
 
         glViewport(0, 0, width, height);

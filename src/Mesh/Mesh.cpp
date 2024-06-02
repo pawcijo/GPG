@@ -9,6 +9,8 @@
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::filesystem::path texturePath, Shader *colorPickingShader)
 {
+
+    mesh_name = texturePath.filename();
     vertices_size = vertices.size();
 
     SetPickingShader(colorPickingShader);

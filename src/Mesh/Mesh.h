@@ -15,6 +15,9 @@ class App;
 class Mesh
 {
 private:
+
+    std::string mesh_name;
+
     unsigned int vertices_size;
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -37,10 +40,13 @@ private:
     unsigned int funnyTexture;
 
 public:
+
+    std::string Name(){ return mesh_name;}
+
     void SetShader(Shader *shader);
     void SetPickingShader(Shader *shader);
     void LoadTexture(std::filesystem::path texturePath);
-     void SetDrawMode(DrawMode drawMode);
+    void SetDrawMode(DrawMode drawMode);
 
     unsigned int VAO;
     Mesh(std::vector<Vertex> vertices, std::filesystem::path texturePath, Shader *colorPickingShader);

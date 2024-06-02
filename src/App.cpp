@@ -9,8 +9,6 @@
 
 #include <filesystem>
 
-#include "stb_image.h"
-
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
@@ -80,34 +78,6 @@ void App::ProcessKey()
   {
     mCamera.Position -= speed * mCamera.Up;
   }
-
-  /*
-      if (selecteObb)
-      {
-          if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-          {
-
-              selecteObb->Translate(speed * glm::vec3(0.0f, 1.0f, 0.0f));
-          }
-
-          if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-          {
-              selecteObb->Translate((-1.0f * speed) * glm::vec3(0.0f, 1.0f,
-     0.0f));
-          }
-
-          if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-          {
-              selecteObb->Translate((-1.0f * speed) * glm::vec3(1.0f, 0.0f,
-     0.0f));
-          }
-
-          if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-          {
-              selecteObb->Translate(speed * glm::vec3(1.0f, 0.0f, 0.0f));
-          }
-      }
-      */
 }
 
 void App::ProcessMouse()
@@ -195,11 +165,10 @@ App::App(AppWindow::AppWindow &appWindow)
   auto window = appWindow.GetWindow();
   ImGui_ImplGlfw_RestoreCallbacks(window);
 
-  stbi_set_flip_vertically_on_load(true);
-
   glfwSetCursorPosCallback(window, CursorPositonCallback);
   glfwSetMouseButtonCallback(window, MouseClickCallback);
 
+  ImGui::GetIO().FontGlobalScale = 3.0;
   // Imgui Callbacks
   glfwSetWindowFocusCallback(window, ImGui_ImplGlfw_WindowFocusCallback);
   glfwSetCursorEnterCallback(window, ImGui_ImplGlfw_CursorEnterCallback);
@@ -211,6 +180,10 @@ App::App(AppWindow::AppWindow &appWindow)
   scene->SetAllowSleep(true);
   scene->SetEnableFriction(true);
   scene->SetIterations(5);
+}
+
+void App::CreateGameObjects()
+{
 
   // Create the floor
   PhysicsBodyDef bodyDef;
@@ -237,46 +210,55 @@ App::App(AppWindow::AppWindow &appWindow)
     body->AddBox(boxDef);
   }
 
-  Mesh *mesh = new Mesh(textureBoxVertexVector, "resources/textures/box.jpg", color_pick_shader.get());
-
   GameObjectBuilder builder;
   int couterbefore = 0;
   for (PhysicsBody *body = scene->BodyList(); body; body = body->Next())
   {
-    manager.AddObject(builder.setBody(body).setMesh(mesh).build());
+    manager.AddObject(builder.setBody(body).setMesh(meshes[0].get()).build());
 
     std::cout << "Body Position: \n"
               << "X: " << body->GetTransform().position.x << " Y: " << body->GetTransform().position.y << " Z: " << body->GetTransform().position.z << "\n";
   }
 
-  Mesh *clownMesh = new Mesh(textureBoxVertexVector, "resources/textures/clown.png", color_pick_shader.get());
-
   Transform *clownTransform = new Transform();
   clownTransform->setPosition(glm::vec3(2.0, 2.0, 0.0));
   clownTransform->setRotation(glm::vec3(30.0, 0.0, 0.0));
 
-  manager.AddObject(builder.setTransform(clownTransform).setMesh(clownMesh).build());
+  manager.AddObject(builder.setTransform(clownTransform).setMesh(meshes[1].get()).build());
+}
+
+void App::LoadMeshesAndStuff()
+{
+  meshes.push_back(std::make_unique<Mesh>(textureBoxVertexVector, "resources/textures/box.jpg", color_pick_shader.get()));
+  meshes.push_back(std::make_unique<Mesh>(textureBoxVertexVector, "resources/textures/clown.png", color_pick_shader.get()));
 }
 
 void App::PhysicsUpdate(float time)
 {
+
+  // ! This is wrong, and not needed if time is working correctly
+  // ! for now this is commented.
   // The time accumulator is used to allow the application to render at
   // a frequency different from the constant frequency the physics sim-
   // ulation is running at (default 60Hz).
-  static float accumulator = 0;
-  accumulator += time;
+  
+  
+  //static float accumulator = 0;
+  // accumulator += time;
 
-  accumulator = Clamp01(accumulator);
-  while (accumulator >= dt)
-  {
-    scene->Step( time);
-    accumulator -= dt;
-  }
+  // accumulator = Clamp01(accumulator);
+  // while (accumulator >= dt)
+  //{
+  scene->Step(time);
+  //  accumulator -= dt;
+  //}
 }
 
 void App::Run()
 {
 
+  LoadMeshesAndStuff();
+  CreateGameObjects();
   auto window = mAppWindow.GetWindow();
   PhysicsBody *bodyTest = scene->BodyList();
 
@@ -295,6 +277,11 @@ void App::Run()
     ProcessMouse();
 
     // TODO make deltaTime work more robust
+    // ? use http://gameprogrammingpatterns.com/game-loop.html ? 
+    // ? or even https://github.com/FrictionalGames/HPL1Engine ? 
+    // ? https://github.com/FrictionalGames/HPL1Engine/blob/master/sources/game/Game.cpp ?
+    // * HPL implementation looks robust <3 for Penumbra 
+
     float currentFrame = static_cast<float>(glfwGetTime());
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
@@ -338,18 +325,15 @@ void App::Run()
   glfwTerminate();
 }
 
-
-//TODO fix 
-//broken behaviour
+// TODO fix
+// broken behaviour
 void App::ResetSimulation()
 {
 
   for (int i = 0; i < 2; i++)
   {
     manager.objectList[i]->GetBody()->SetTransform(glm::vec3(0.0f + i * 0.5f, (2.0f * i) + 4, 0.0f));
-
   }
-
 }
 
 void App::ImGuiStuff()
@@ -397,23 +381,23 @@ void App::ImGuiStuff()
 
     if (ImGui::Button("PhysicsStep"))
     {
-      scene->Step( 1/60);
+      scene->Step(1 / 60);
     }
   }
 
   if (ImGui::CollapsingHeader("Selected Object",
                               ImGuiTreeNodeFlags_DefaultOpen))
   {
-    if(-1 != selectedObject)
+    if (-1 != selectedObject)
     {
-    GameObject *object = manager.GetSelectedObjectPtr(selectedObject);
-    ImGui::Text("Position:");
-    if(selectedObject == 4)
-    {
-      int dupa = 12;
-    }
-    auto position = object->Position();
-    ImGui::Text("X: %f Y: %f Z: %f", position.x, position.y, position.z);
+      GameObject *object = manager.GetSelectedObjectPtr(selectedObject);
+      ImGui::Text("Position:");
+      if (selectedObject == 4)
+      {
+        int dupa = 12;
+      }
+      auto position = object->Position();
+      ImGui::Text("X: %f Y: %f Z: %f", position.x, position.y, position.z);
     }
   }
 

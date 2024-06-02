@@ -5,7 +5,9 @@ Some text bla bla bla .
 
 ## Requirements for Ubuntu :
 
-**sudo apt-get install build-essential libxmu-dev libxi-dev libgl-dev**
+**sudo apt-get install build-essential libxmu-dev libxi-dev libgl-dev libwayland-dev libxkbcommon-dev**
+
+Run with x11 as wayland is bugged as hell. (at least with intel iGpu)
 
 (might need more TODO check on clean system)
 

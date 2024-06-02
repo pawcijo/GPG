@@ -26,4 +26,5 @@ GameObject *GameObjectManager::GetSelectedObjectPtr(unsigned int selectedId)
             return objectList[i];
         }
     }
+    return nullptr;
 }

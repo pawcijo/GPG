@@ -6,7 +6,7 @@
 int main()
 {
 
-    AppWindow::AppWindow appWindow(1600, 900);
+    AppWindow::AppWindow appWindow(1920, 1080);
     App app(appWindow);
 
     app.Run();
