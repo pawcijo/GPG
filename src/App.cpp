@@ -18,6 +18,8 @@
 #include <Mesh/Mesh.h>
 #include <Mesh/ExampleMesh.h>
 
+#include "SDL.h"
+
 void processInput(GLFWwindow *window)
 {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -180,11 +182,13 @@ App::App(AppWindow::AppWindow &appWindow)
   scene->SetAllowSleep(true);
   scene->SetEnableFriction(true);
   scene->SetIterations(5);
+
+  mFrametimestart =((float)GetApplicationTime()) / 1000.0f;
+
 }
 
 void App::CreateGameObjects()
 {
-
   // Create the floor
   PhysicsBodyDef bodyDef;
   // bodyDef.axis.Set( q3RandomFloat( -1.0f, 1.0f ), q3RandomFloat( -1.0f, 1.0f
@@ -241,10 +245,9 @@ void App::PhysicsUpdate(float time)
   // The time accumulator is used to allow the application to render at
   // a frequency different from the constant frequency the physics sim-
   // ulation is running at (default 60Hz).
-  
-  
-  //static float accumulator = 0;
-  // accumulator += time;
+
+  // static float accumulator = 0;
+  //  accumulator += time;
 
   // accumulator = Clamp01(accumulator);
   // while (accumulator >= dt)
@@ -277,10 +280,10 @@ void App::Run()
     ProcessMouse();
 
     // TODO make deltaTime work more robust
-    // ? use http://gameprogrammingpatterns.com/game-loop.html ? 
-    // ? or even https://github.com/FrictionalGames/HPL1Engine ? 
+    // ? use http://gameprogrammingpatterns.com/game-loop.html ?
+    // ? or even https://github.com/FrictionalGames/HPL1Engine ?
     // ? https://github.com/FrictionalGames/HPL1Engine/blob/master/sources/game/Game.cpp ?
-    // * HPL implementation looks robust <3 for Penumbra 
+    // * HPL implementation looks robust <3 for Penumbra
 
     float currentFrame = static_cast<float>(glfwGetTime());
     deltaTime = currentFrame - lastFrame;
@@ -325,6 +328,11 @@ void App::Run()
   glfwTerminate();
 }
 
+unsigned long App::GetApplicationTime()
+{
+  return SDL_GetTicks();
+}
+
 // TODO fix
 // broken behaviour
 void App::ResetSimulation()
@@ -333,6 +341,7 @@ void App::ResetSimulation()
   for (int i = 0; i < 2; i++)
   {
     manager.objectList[i]->GetBody()->SetTransform(glm::vec3(0.0f + i * 0.5f, (2.0f * i) + 4, 0.0f));
+    manager.objectList[i]->GetBody()->SetToAwake();
   }
 }
 
@@ -391,13 +400,12 @@ void App::ImGuiStuff()
     if (-1 != selectedObject)
     {
       GameObject *object = manager.GetSelectedObjectPtr(selectedObject);
-      ImGui::Text("Position:");
-      if (selectedObject == 4)
+      if (nullptr != object)
       {
-        int dupa = 12;
+        ImGui::Text("Position:");
+        auto position = object->Position();
+        ImGui::Text("X: %f Y: %f Z: %f", position.x, position.y, position.z);
       }
-      auto position = object->Position();
-      ImGui::Text("X: %f Y: %f Z: %f", position.x, position.y, position.z);
     }
   }
 

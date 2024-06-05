@@ -38,7 +38,7 @@ static float globalCameraPitch;
 void CursorPositonCallback(GLFWwindow *window, double xpos, double ypos);
 void MouseClickCallback(GLFWwindow *window, int button, int action, int mods);
 
-const  float dt = 1.0f / 60.0f;
+const float dt = 1.0f / 60.0f;
 
 class App
 {
@@ -48,7 +48,7 @@ class App
     std::unique_ptr<Shader> box_shader;
     std::unique_ptr<Shader> color_pick_shader;
 
-    //Mesh vector
+    // Mesh vector
     std::vector<std::unique_ptr<Mesh>> meshes;
 
     // Render options
@@ -75,16 +75,16 @@ class App
     int selectedObject = -1;
     GameObjectManager manager;
 
+    unsigned long GetApplicationTime();
 
     // Phsycis
-    PhysicsScene* scene;
+    PhysicsScene *scene;
     PhysicsClock g_clock;
-    void  ResetSimulation();
+    void ResetSimulation();
 
     void LoadMeshesAndStuff();
 
     void CreateGameObjects();
-
 
     void SetViewAndPerspective(Camera &aCamera);
     void SwitchDrawMode();
@@ -92,12 +92,13 @@ class App
 
     void ColorPicking();
 
-
     bool pause = false;
     void ImGuiStuff();
 
     void ProcessKey();
     void ProcessMouse();
+
+    float mFrametimestart; 
 
 public:
     App(AppWindow::AppWindow &window);

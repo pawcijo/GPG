@@ -7,6 +7,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <print>
+
 Square::Square(DrawMode aDrawmode)
 {
     mDrawmode = aDrawmode;
@@ -76,5 +78,6 @@ Square::~Square()
 {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    printf("Square removed");
+    std::println("Square removed");
+
 }

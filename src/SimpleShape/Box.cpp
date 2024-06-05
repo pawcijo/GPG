@@ -9,6 +9,7 @@
 
 #include <stb_image.h>
 #include <filesystem>
+#include <print>
 
 #include <ctime> // For time()
 
@@ -73,7 +74,7 @@ Box::Box(std::filesystem::path texturePath, DrawMode aDrawmode, Shader *nomralSh
     }
     else
     {
-        std::cout << "Texture failed to load at path: " << texturePath.c_str() << std::endl;
+        std::println("Texture failed to load at path: {}", texturePath.c_str());
         stbi_image_free(data);
     }
 }
@@ -95,7 +96,6 @@ void Box::Draw(Shader *shader, App *app)
     {
         shader->setBool("isSelected", false);
     }
-
 
     if (mDrawmode == DrawMode::EWireFrame)
     {
@@ -145,8 +145,6 @@ void Box::Draw_Color(Shader *shader)
     glBindVertexArray(0);
 }
 
-
-
 Transform &Box::getTransform()
 {
     return transform;
@@ -156,5 +154,5 @@ Box::~Box()
 {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    printf("Box removed.\n");
+    std::println("Box removed.");
 }

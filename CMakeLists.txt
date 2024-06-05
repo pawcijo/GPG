@@ -2,10 +2,11 @@
 cmake_minimum_required (VERSION 3.9.3)
 project (OPGLPlayground)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
+find_package(SDL2 REQUIRED)
  
 
 set(CMAKE_DEBUG_POSTFIX d)
@@ -20,6 +21,7 @@ include_directories(
 	external/glfw/include/
 	external/glm/
 	external/glew/include/
+	${SDL2_INCLUDE_DIRS}
 	.
 )
 
@@ -27,6 +29,7 @@ set(ALL_LIBS
 	${OPENGL_LIBRARY}
 	glfw
 	GLEW
+	${SDL2_LIBRARIES}
 )
 
 add_definitions(

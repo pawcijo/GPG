@@ -9,6 +9,8 @@
 #include <iostream>
 #include <glm/glm.hpp>
 
+#include <filesystem>
+
 
 #define INVALID_UNIFORM_LOCATION 0xffffffff
 
@@ -21,7 +23,7 @@ public:
     unsigned GetUniformLocation(const char *pUniformName);
 
     // constructor reads and builds the shader
-    Shader(std::string vertexPath, std::string fragmentPath, std::string computePath ="");
+    Shader(std::filesystem::path vertexPath, std::filesystem::path fragmentPath, std::filesystem::path computePath ="");
     ~Shader();
     // use/activate the shader
     void use();
