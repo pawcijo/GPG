@@ -7,8 +7,12 @@ set(CMAKE_CXX_STANDARD 23)
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 find_package(SDL2 REQUIRED)
- 
 
+
+set(CMAKE_LIBRARY_PATH ${CMAKE_INSTALL_PREFIX}/lib)
+
+find_library(NEWTON_LIB ndNewton REQUIRED)
+ 
 set(CMAKE_DEBUG_POSTFIX d)
 
 # Compile external dependencies 
@@ -21,7 +25,11 @@ include_directories(
 	external/glfw/include/
 	external/glm/
 	external/glew/include/
+	external/newton-4.00/sdk/dCore/
+	external/newton-4.00/sdk/dNewton/
+	external/newton-4.00/sdk/dCollision/
 	${SDL2_INCLUDE_DIRS}
+	${CMAKE_INSTALL_PREFIX}/include/ndNewton
 	.
 )
 
@@ -30,6 +38,8 @@ set(ALL_LIBS
 	glfw
 	GLEW
 	${SDL2_LIBRARIES}
+	${NEWTON_LIB} 
+	pthread
 )
 
 add_definitions(
@@ -62,6 +72,7 @@ add_executable(OPGLPlayground
 	src/MyPhysics/PhysicsContact.cpp
 	src/MyPhysics/PhysicsCollide.cpp
 	src/MyPhysics/PhysicsClock.cpp
+	src/MyPhysics/PhysicsTimer.cpp
 	src/MyPhysics/Common.cpp
 	src/GameObject/GameObject.cpp
 	src/GameObject/GameObjectManager.cpp

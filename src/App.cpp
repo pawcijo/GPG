@@ -20,6 +20,11 @@
 
 #include "SDL.h"
 
+std::unique_ptr<PhysicsTimer> CreatePhysicsTimer(unsigned int alUpdatesPerSec)
+{
+    return std::make_unique<PhysicsTimer>(alUpdatesPerSec);
+}
+
 void processInput(GLFWwindow *window)
 {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -179,16 +184,20 @@ App::App(AppWindow::AppWindow &appWindow)
   glfwSetCharCallback(window, ImGui_ImplGlfw_CharCallback);
   glfwSetMonitorCallback(ImGui_ImplGlfw_MonitorCallback);
 
+  // 60 updates per second for physics
+  mPhysicsTimerPtr = CreatePhysicsTimer(60);
+
   scene->SetAllowSleep(true);
   scene->SetEnableFriction(true);
   scene->SetIterations(5);
 
-  mFrametimestart =((float)GetApplicationTime()) / 1000.0f;
-
+  mFrametimestart = ((float)GetApplicationTime()) / 1000.0f;
 }
 
 void App::CreateGameObjects()
 {
+
+  mGameTime = 0;
   // Create the floor
   PhysicsBodyDef bodyDef;
   // bodyDef.axis.Set( q3RandomFloat( -1.0f, 1.0f ), q3RandomFloat( -1.0f, 1.0f
@@ -259,9 +268,17 @@ void App::PhysicsUpdate(float time)
 
 void App::Run()
 {
+  bool bDone = false;
+  double fNumOfTimes = 0;
+  double fMediumTime = 0;
 
   LoadMeshesAndStuff();
   CreateGameObjects();
+
+  mPhysicsTimerPtr->Reset();
+
+  unsigned long lTempTime = GetApplicationTime();
+
   auto window = mAppWindow.GetWindow();
   PhysicsBody *bodyTest = scene->BodyList();
 
@@ -269,7 +286,8 @@ void App::Run()
   bool prawda = true;
   ImGuiIO &io = ImGui::GetIO();
 
-  float time = g_clock.Start();
+  mFrameTime = 0;
+  unsigned long lTempFrameTime = GetApplicationTime();
 
   while (!glfwWindowShouldClose(window))
   {
@@ -285,14 +303,24 @@ void App::Run()
     // ? https://github.com/FrictionalGames/HPL1Engine/blob/master/sources/game/Game.cpp ?
     // * HPL implementation looks robust <3 for Penumbra
 
+    // TODO change input timer to physicsTimer
     float currentFrame = static_cast<float>(glfwGetTime());
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
 
-    if (!pause)
+    while (mPhysicsTimerPtr->WantUpdate() && !pause)
     {
-      PhysicsUpdate(time);
+      unsigned int lUpdateTime = GetApplicationTime();
+
+      PhysicsUpdate(mPhysicsTimerPtr->GetStepSize());
+
+      unsigned int lDeltaTime = GetApplicationTime() - lUpdateTime;
+      mUpdateTime = (float)(lDeltaTime) / 1000.0f;
+
+      mIsUpdated = true;
+      mGameTime += mPhysicsTimerPtr->GetStepSize();
     }
+    mPhysicsTimerPtr->EndUpdateLoop();
 
     SetViewAndPerspective(mCamera);
 
@@ -341,6 +369,8 @@ void App::ResetSimulation()
   for (int i = 0; i < 2; i++)
   {
     manager.objectList[i]->GetBody()->SetTransform(glm::vec3(0.0f + i * 0.5f, (2.0f * i) + 4, 0.0f));
+    manager.objectList[i]->GetBody()->SetAngularVelocity(glm::vec3(0,0,0));
+    manager.objectList[i]->GetBody()->SetLinearVelocity(glm::vec3(0,0,0));
     manager.objectList[i]->GetBody()->SetToAwake();
   }
 }

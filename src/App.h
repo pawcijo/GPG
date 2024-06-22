@@ -9,6 +9,7 @@
 #include <Camera.h>
 
 #include "MyPhysics/Physics.hpp"
+#include "MyPhysics/PhysicsTimer.h"
 
 #include <GameObject/GameObjectManager.h>
 
@@ -39,6 +40,8 @@ void CursorPositonCallback(GLFWwindow *window, double xpos, double ypos);
 void MouseClickCallback(GLFWwindow *window, int button, int action, int mods);
 
 const float dt = 1.0f / 60.0f;
+
+
 
 class App
 {
@@ -77,6 +80,11 @@ class App
 
     unsigned long GetApplicationTime();
 
+    std::unique_ptr<PhysicsTimer> mPhysicsTimerPtr;
+    float mFrameTime;
+    bool mIsUpdated;
+    float mUpdateTime;
+    double mGameTime;
     // Phsycis
     PhysicsScene *scene;
     PhysicsClock g_clock;
@@ -98,7 +106,7 @@ class App
     void ProcessKey();
     void ProcessMouse();
 
-    float mFrametimestart; 
+    float mFrametimestart;
 
 public:
     App(AppWindow::AppWindow &window);
