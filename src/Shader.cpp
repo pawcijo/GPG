@@ -1,7 +1,6 @@
 #include "Shader.h"
 #include <vector>
 
-#include <print>
 
 // constructor reads and builds the shader
 Shader::Shader(std::filesystem::path vertex_file_path, std::filesystem::path fragment_file_path, std::filesystem::path compute_file_path)
@@ -63,7 +62,7 @@ Shader::Shader(std::filesystem::path vertex_file_path, std::filesystem::path fra
 	{
 		// Compile Vertex Shader
 
-		std::println("Compiling shader : {}.", vertex_file_path.c_str());
+		std::printf("Compiling shader : %s.\n", vertex_file_path.c_str());
 		char const *VertexSourcePointer = VertexShaderCode.c_str();
 
 		glShaderSource(VertexShaderID, 1, &VertexSourcePointer, NULL);
@@ -83,7 +82,7 @@ Shader::Shader(std::filesystem::path vertex_file_path, std::filesystem::path fra
 	if (!fragment_file_path.empty())
 	{
 		// Compile Fragment Shader
-		std::println("Compiling shader : {}.", fragment_file_path.c_str());
+		std::printf("Compiling shader : %s.\n", fragment_file_path.c_str());
 		char const *FragmentSourcePointer = FragmentShaderCode.c_str();
 		glShaderSource(FragmentShaderID, 1, &FragmentSourcePointer, NULL);
 		glCompileShader(FragmentShaderID);
@@ -102,7 +101,7 @@ Shader::Shader(std::filesystem::path vertex_file_path, std::filesystem::path fra
 	if (!compute_file_path.empty())
 	{
 		// Compile Compute Shader
-		std::println("Compiling shader : {}.", compute_file_path.c_str());
+		std::printf("Compiling shader : %s.\n", compute_file_path.c_str());
 		char const *ComputeSourcePointer = ComputeShaderCode.c_str();
 		glShaderSource(ComputeShaderID, 1, &ComputeSourcePointer, NULL);
 		glCompileShader(ComputeShaderID);
@@ -114,12 +113,12 @@ Shader::Shader(std::filesystem::path vertex_file_path, std::filesystem::path fra
 		{
 			std::vector<char> ComputeShaderErrorMessage(InfoLogLength + 1);
 			glGetShaderInfoLog(ComputeShaderID, InfoLogLength, NULL, &ComputeShaderErrorMessage[0]);
-			std::println("Error Message : {}.", &ComputeShaderErrorMessage[0]);
+			std::printf("Error Message : %s.\n", &ComputeShaderErrorMessage[0]);
 		}
 	}
 
 	// Link the program
-	std::println("Linking program ");
+	std::printf("Linking program.\n");
 
 	GLuint ProgramID = glCreateProgram();
 	if (!vertex_file_path.empty())
@@ -143,7 +142,7 @@ Shader::Shader(std::filesystem::path vertex_file_path, std::filesystem::path fra
 	{
 		std::vector<char> ProgramErrorMessage(InfoLogLength + 1);
 		glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
-		std::println("Error Message : {}.", &ProgramErrorMessage[0]);
+		std::printf("Error Message : %s.\n", &ProgramErrorMessage[0]);
 	}
 
 	if (!vertex_file_path.empty())
@@ -167,7 +166,7 @@ Shader::Shader(std::filesystem::path vertex_file_path, std::filesystem::path fra
 
 Shader::~Shader()
 {
-	std::println("Shader program removed.");
+	std::printf("Shader program removed.\n");
 	glDeleteProgram(shaderProgramID);
 }
 

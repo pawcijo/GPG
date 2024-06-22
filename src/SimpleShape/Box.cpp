@@ -9,7 +9,6 @@
 
 #include <stb_image.h>
 #include <filesystem>
-#include <print>
 
 #include <ctime> // For time()
 
@@ -74,7 +73,7 @@ Box::Box(std::filesystem::path texturePath, DrawMode aDrawmode, Shader *nomralSh
     }
     else
     {
-        std::println("Texture failed to load at path: {}", texturePath.c_str());
+        std::printf("Texture failed to load at path: %s.\n", texturePath.c_str());
         stbi_image_free(data);
     }
 }
@@ -154,5 +153,5 @@ Box::~Box()
 {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    std::println("Box removed.");
+    std::printf("Box removed.\n");
 }
