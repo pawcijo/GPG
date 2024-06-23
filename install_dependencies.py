@@ -27,7 +27,7 @@ if cmake_result == 0:
     print("CMake configuration successful")
     
     # Run the make command in the build directory
-    make_result = run_command(["make"], cwd=build_dir)
+    make_result = run_command(["make","-j","4"], cwd=build_dir)
     
     # Check the make result
     if make_result == 0:

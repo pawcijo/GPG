@@ -1,0 +1,77 @@
+diff --git a/newton-4.00/CMakeLists.txt b/newton-4.00/CMakeLists.txt
+index b9c7467e1..b58c511d8 100644
+--- a/newton-4.00/CMakeLists.txt
++++ b/newton-4.00/CMakeLists.txt
+@@ -38,7 +38,7 @@ project(NewtonSDK)
+ include(CheckTypeSize)
+ CHECK_TYPE_SIZE("void*" PTR_SIZE BUILTIN_TYPES_ONLY)
+ 
+-set(CMAKE_CXX_STANDARD 11)
++set(CMAKE_CXX_STANDARD 23)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ # Don't use e.g. GNU extension (like -std=gnu++11) for portability
+ set(CMAKE_CXX_EXTENSIONS OFF)
+diff --git a/newton-4.00/sdk/dCore/ndSaveLoadSytem.h b/newton-4.00/sdk/dCore/ndSaveLoadSytem.h
+index c4a662834..174c2cce5 100644
+--- a/newton-4.00/sdk/dCore/ndSaveLoadSytem.h
++++ b/newton-4.00/sdk/dCore/ndSaveLoadSytem.h
+@@ -153,7 +153,7 @@ template<class T>
+ class ndLoadSaveClass: public ndLoadSaveBase
+ {
+ 	public:
+-	ndLoadSaveClass<T>(const char* const className)
++	ndLoadSaveClass(const char* const className)
+ 	{
+ 		RegisterLoaderClass(className, this);
+ 	}
+diff --git a/newton-4.00/sdk/dCore/ndTypes.h b/newton-4.00/sdk/dCore/ndTypes.h
+index 2497eaffd..45bf43c39 100644
+--- a/newton-4.00/sdk/dCore/ndTypes.h
++++ b/newton-4.00/sdk/dCore/ndTypes.h
+@@ -380,17 +380,17 @@ inline void operator delete[](void* ptr)	\
+ 	class ndAtomic : public std::atomic<T>
+ 	{
+ 		public:
+-		ndAtomic<T>()
++		ndAtomic()
+ 			: std::atomic<T>(T(0))
+ 		{
+ 		}
+ 
+-		ndAtomic<T>(T val)
++		ndAtomic(T val)
+ 			: std::atomic<T>(val)
+ 		{
+ 		}
+ 
+-		ndAtomic<T>(const ndAtomic<T>& copy)
++		ndAtomic(const ndAtomic<T>& copy)
+ 			: std::atomic<T>(copy.load())
+ 		{
+ 		}
+diff --git a/newton-4.00/thirdParty/hacd/src/VHACD_Lib/inc/vhacdICHull.h b/newton-4.00/thirdParty/hacd/src/VHACD_Lib/inc/vhacdICHull.h
+index 2959cf89c..556b22da2 100644
+--- a/newton-4.00/thirdParty/hacd/src/VHACD_Lib/inc/vhacdICHull.h
++++ b/newton-4.00/thirdParty/hacd/src/VHACD_Lib/inc/vhacdICHull.h
+@@ -18,6 +18,8 @@
+ #include "vhacdManifoldMesh.h"
+ #include "vhacdVector.h"
+ 
++#include <cstdint>
++
+ namespace nd_
+ {
+ 	namespace VHACD 
+diff --git a/newton-4.00/thirdParty/hacd/src/VHACD_Lib/inc/vhacdVolume.h b/newton-4.00/thirdParty/hacd/src/VHACD_Lib/inc/vhacdVolume.h
+index 6ddabff59..a4be9275b 100644
+--- a/newton-4.00/thirdParty/hacd/src/VHACD_Lib/inc/vhacdVolume.h
++++ b/newton-4.00/thirdParty/hacd/src/VHACD_Lib/inc/vhacdVolume.h
+@@ -20,6 +20,8 @@
+ #include <vector>
+ #include <assert.h>
+ 
++#include <cstdint>
++
+ 
+ namespace nd_
+ {

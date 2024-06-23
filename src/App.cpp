@@ -1,5 +1,3 @@
-
-
 #include <App.h>
 
 #include <Shader.h>
@@ -18,11 +16,13 @@
 #include <Mesh/Mesh.h>
 #include <Mesh/ExampleMesh.h>
 
+
+#include <ndNewton.h>
 #include "SDL.h"
 
 std::unique_ptr<PhysicsTimer> CreatePhysicsTimer(unsigned int alUpdatesPerSec)
 {
-    return std::make_unique<PhysicsTimer>(alUpdatesPerSec);
+  return std::make_unique<PhysicsTimer>(alUpdatesPerSec);
 }
 
 void processInput(GLFWwindow *window)
@@ -56,7 +56,7 @@ void App::ProcessKey()
     F2_Pressed = false;
   }
 
-  float speed = deltaTime * mCamera.MovementSpeed;
+  float speed = mPhysicsTimerPtr->GetStepSize() * mCamera.MovementSpeed;
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
   {
     mCamera.Position += speed * mCamera.Front;
@@ -117,7 +117,7 @@ void App::ProcessMouse()
       // if (abs(xoffset_2) > 0.1 || abs(yoffset_2) > 0.1)
       {
         // //printf("Offset x: %f offset Y %f \n", xoffset, yoffset);
-        mCamera.ProcessMouseMovement(-1.0 * deltaTime * xoffset, -1.0 * deltaTime * yoffset);
+        mCamera.ProcessMouseMovement(-1.0 * mPhysicsTimerPtr->GetStepSize() * xoffset, -1.0 * mPhysicsTimerPtr->GetStepSize() * yoffset);
       }
     }
   }
@@ -248,22 +248,7 @@ void App::LoadMeshesAndStuff()
 
 void App::PhysicsUpdate(float time)
 {
-
-  // ! This is wrong, and not needed if time is working correctly
-  // ! for now this is commented.
-  // The time accumulator is used to allow the application to render at
-  // a frequency different from the constant frequency the physics sim-
-  // ulation is running at (default 60Hz).
-
-  // static float accumulator = 0;
-  //  accumulator += time;
-
-  // accumulator = Clamp01(accumulator);
-  // while (accumulator >= dt)
-  //{
   scene->Step(time);
-  //  accumulator -= dt;
-  //}
 }
 
 void App::Run()
@@ -289,6 +274,10 @@ void App::Run()
   mFrameTime = 0;
   unsigned long lTempFrameTime = GetApplicationTime();
 
+  //Newton Physics
+   ndWorld world;
+
+
   while (!glfwWindowShouldClose(window))
   {
 
@@ -297,16 +286,10 @@ void App::Run()
     ProcessKey();
     ProcessMouse();
 
-    // TODO make deltaTime work more robust
-    // ? use http://gameprogrammingpatterns.com/game-loop.html ?
-    // ? or even https://github.com/FrictionalGames/HPL1Engine ?
-    // ? https://github.com/FrictionalGames/HPL1Engine/blob/master/sources/game/Game.cpp ?
-    // * HPL implementation looks robust <3 for Penumbra
-
-    // TODO change input timer to physicsTimer
-    float currentFrame = static_cast<float>(glfwGetTime());
-    deltaTime = currentFrame - lastFrame;
-    lastFrame = currentFrame;
+    // TODO change input timer to SDL timer
+    ////float currentFrame = static_cast<float>(glfwGetTime());
+    ////deltaTime = currentFrame - lastFrame;
+    ////lastFrame = currentFrame;
 
     while (mPhysicsTimerPtr->WantUpdate() && !pause)
     {
@@ -351,9 +334,10 @@ void App::Run()
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext(NULL);
 
-  // printf("Close App.\n");
   glfwDestroyWindow(window);
   glfwTerminate();
+
+  printf("Close App.\n");
 }
 
 unsigned long App::GetApplicationTime()
@@ -361,16 +345,16 @@ unsigned long App::GetApplicationTime()
   return SDL_GetTicks();
 }
 
-// TODO fix
-// broken behaviour
 void App::ResetSimulation()
 {
 
   for (int i = 0; i < 2; i++)
   {
-    manager.objectList[i]->GetBody()->SetTransform(glm::vec3(0.0f + i * 0.5f, (2.0f * i) + 4, 0.0f));
-    manager.objectList[i]->GetBody()->SetAngularVelocity(glm::vec3(0,0,0));
-    manager.objectList[i]->GetBody()->SetLinearVelocity(glm::vec3(0,0,0));
+    manager.objectList[i]->GetBody()->SetTransform(
+        glm::vec3(0.0f + i * 0.5f, (2.0f * i) + 4, 0.0f),
+        glm::vec3(1.0f, 1.0f, 1.0f), 0);
+    manager.objectList[i]->GetBody()->SetAngularVelocity(glm::vec3(0, 0, 0));
+    manager.objectList[i]->GetBody()->SetLinearVelocity(glm::vec3(0, 0, 0));
     manager.objectList[i]->GetBody()->SetToAwake();
   }
 }
@@ -440,9 +424,7 @@ void App::ImGuiStuff()
   }
 
   ImGui::End();
-
   ImGui::Render();
-
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 

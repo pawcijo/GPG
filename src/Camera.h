@@ -17,8 +17,8 @@ const glm::vec3 CAMERA_DAFAULT_FRONT(0.0f, 0.0f, 1.0f);
 const float CAMERA_DEFAULT_YAW(24.0f);
 const float CAMERA_DEFAULT_PITCH(14.0f);
 
-const float CAMERA_DEFAULT_SPEED(3.0f);
-const float CAMERA_DEFAULT_MOUSE_SENSIVITY(0.5f);
+const float CAMERA_DEFAULT_SPEED(1.0f);
+const float CAMERA_DEFAULT_MOUSE_SENSIVITY(0.1f);
 const float CAMERA_DEFAULT_ZOOM(45.0f);
 
 
