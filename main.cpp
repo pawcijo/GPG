@@ -1,13 +1,25 @@
-#include <AppWindow.h>
-#include <App.h>
+#include <AppWindowVulkan.h>
+#include <AppVulkan.hpp>
 
-//#define DYNAMIC_FRICTION true
+#include <stdexcept>
+#include <print>
 
 int main()
 {
-    AppWindow::AppWindow appWindow(1920, 1080);
-    App app(appWindow);
+    AppWindowVulkan::AppWindowVulkan appWindow(1920, 1080);
+    AppVulkan app(appWindow);
 
-    app.Run();
+    try
+    {
+        app.Run();
+    }
+    catch (const std::exception &e)
+    {
+        std::println("Exception {}", e.what());
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+
     return 0;
 }

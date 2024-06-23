@@ -5,6 +5,8 @@ project (OPGLPlayground)
 set(CMAKE_CXX_STANDARD 23)
 
 set(OpenGL_GL_PREFERENCE GLVND)
+
+find_package(Vulkan REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(SDL2 REQUIRED)
 
@@ -30,11 +32,13 @@ include_directories(
 	external/newton-4.00/sdk/dCollision/
 	${SDL2_INCLUDE_DIRS}
 	${CMAKE_INSTALL_PREFIX}/include/ndNewton
+	${Vulkan_INCLUDE_DIRS}
 	.
 )
 
 set(ALL_LIBS
 	${OPENGL_LIBRARY}
+	Vulkan::Vulkan
 	glfw
 	GLEW
 	${SDL2_LIBRARIES}
@@ -52,38 +56,42 @@ add_definitions(
 
 add_executable(OPGLPlayground 
 	main.cpp
-	src/AppWindow.cpp
-	src/App.cpp
-	src/Shader.cpp
-	src/Camera.cpp
-	src/Transform.cpp
-	src/SimpleShape/Square.cpp
-	src/SimpleShape/Box.cpp
-	src/stb_image.cpp
-	src/MyPhysics/PhysicsScene.cpp
-	src/MyPhysics/PhysicsMemory.cpp
-	src/MyPhysics/PhysicsContactManager.cpp
-	src/MyPhysics/PhysicsIsland.cpp
-	src/MyPhysics/PhysicsBody.cpp
-	src/MyPhysics/PhysicsBox.cpp
-	src/MyPhysics/PhysicsContactSolver
-	src/MyPhysics/PhysicsBroadPhase
-	src/MyPhysics/PhysicsDynamicAABBTree.cpp
-	src/MyPhysics/PhysicsContact.cpp
-	src/MyPhysics/PhysicsCollide.cpp
-	src/MyPhysics/PhysicsClock.cpp
-	src/MyPhysics/PhysicsTimer.cpp
-	src/MyPhysics/Common.cpp
-	src/GameObject/GameObject.cpp
-	src/GameObject/GameObjectManager.cpp
-	src/Mesh/Mesh.cpp
-	external/imgui/imgui.cpp
-	external/imgui/imgui_draw.cpp
-	external/imgui/imgui_tables.cpp
-	external/imgui/imgui_widgets.cpp
-	external/imgui/imgui_demo.cpp
-	external/imgui/backends/imgui_impl_glfw.cpp 
-	external/imgui/backends/imgui_impl_opengl3.cpp
+	src/AppWindowVulkan.cpp
+	src/AppVulkan.cpp
+	src/VulkanValidation.hpp
+	#src/AppWindow.cpp
+	#src/App.cpp
+	#src/Shader.cpp
+	#src/Camera.cpp
+	#src/Transform.cpp
+	#src/SimpleShape/Square.cpp
+	#src/SimpleShape/Box.cpp
+	#src/stb_image.cpp
+
+	#src/MyPhysics/PhysicsScene.cpp
+	#src/MyPhysics/PhysicsMemory.cpp
+	#src/MyPhysics/PhysicsContactManager.cpp
+	#src/MyPhysics/PhysicsIsland.cpp
+	#src/MyPhysics/PhysicsBody.cpp
+	#src/MyPhysics/PhysicsBox.cpp
+	#src/MyPhysics/PhysicsContactSolver
+	#src/MyPhysics/PhysicsBroadPhase
+	#src/MyPhysics/PhysicsDynamicAABBTree.cpp
+	#src/MyPhysics/PhysicsContact.cpp
+	#src/MyPhysics/PhysicsCollide.cpp
+	#src/MyPhysics/PhysicsClock.cpp
+	#src/MyPhysics/PhysicsTimer.cpp
+	#src/MyPhysics/Common.cpp
+	#src/GameObject/GameObject.cpp
+	#src/GameObject/GameObjectManager.cpp
+	#src/Mesh/Mesh.cpp
+	#external/imgui/imgui.cpp
+	#external/imgui/imgui_draw.cpp
+	#external/imgui/imgui_tables.cpp
+	#external/imgui/imgui_widgets.cpp
+	#external/imgui/imgui_demo.cpp
+	#external/imgui/backends/imgui_impl_glfw.cpp 
+	#external/imgui/backends/imgui_impl_opengl3.cpp
 	
 )
 
