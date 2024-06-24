@@ -62,19 +62,27 @@ namespace AppWindowVulkan
         std::vector<VkSemaphore> mRenderFinishedSemaphores;
         std::vector<VkFence> mInFlightFences;
 
+        VkBuffer mVertexBuffer;
+        VkDeviceMemory mVertexBufferMemory;
+
+        VkBuffer mIndexBuffer;
+        VkDeviceMemory mIndexBufferMemory;
+
         unsigned int mWidth;
         unsigned int mHeight;
-        void InitWindow(int width, int height);
-        void InitVulkan();
+        void initWindow(int width, int height);
+        void initVulkan();
 
         uint32_t mCurrentFrame = 0;
 
         QueueFamilyIndices findQueueFamilies(VkPhysicalDevice aDevice);
         bool isDeviceSuitable(VkPhysicalDevice aDevice);
-
         VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
-
         SwapChainSupportDetails querySwapChainSupport();
+        void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &bufferMemory);
+        void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+
+        uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
         void createInstance();
         void setupDebugMessenger();
@@ -87,10 +95,15 @@ namespace AppWindowVulkan
         void createGraphicsPipeline();
         void createFramebuffers();
         void createCommandPool();
+        void createVertexBuffer();
+        void createIndexBuffer();
         void createCommandBuffers();
         void createSyncObjects();
 
         void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+        void cleanupSwapChain();
+
+        void recreateSwapChain();
 
     public:
         AppWindowVulkan(unsigned int width, unsigned int height);
@@ -100,6 +113,7 @@ namespace AppWindowVulkan
         unsigned int Getheight() { return mHeight; }
 
         VkDevice GetDevice() { return mDevice; }
+        bool mFramebufferResized = false;
 
         void DrawFrame();
 

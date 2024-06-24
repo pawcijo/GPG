@@ -19,7 +19,6 @@ void AppVulkan::Run()
 void AppVulkan::CleanUp()
 {
     mAppWindow.CleanUp();
-
     glfwTerminate();
 }
 

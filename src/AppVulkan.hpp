@@ -8,6 +8,7 @@
 #include <vector>
 #include <memory>
 
+#include <Vulkan/VulkanUtis.hpp>
 
 class AppVulkan
 {

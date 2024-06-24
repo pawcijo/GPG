@@ -12,6 +12,12 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 namespace AppWindowVulkan
 {
 
+    static void framebufferResizeCallback(GLFWwindow *window, int width, int height)
+    {
+        auto app = reinterpret_cast<AppWindowVulkan *>(glfwGetWindowUserPointer(window));
+        app->mFramebufferResized = true;
+    }
+
     static std::vector<char> readFile(const std::string &filename)
     {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
@@ -48,6 +54,22 @@ namespace AppWindowVulkan
         return availableFormats[0];
     }
 
+    uint32_t AppWindowVulkan::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+    {
+        VkPhysicalDeviceMemoryProperties memProperties;
+        vkGetPhysicalDeviceMemoryProperties(mPhysicalDevice, &memProperties);
+
+        for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+        {
+            if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+            {
+                return i;
+            }
+        }
+
+        throw std::runtime_error("failed to find suitable memory type!");
+    }
+
     VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes)
     {
         for (const auto &availablePresentMode : availablePresentModes)
@@ -59,6 +81,69 @@ namespace AppWindowVulkan
         }
 
         return VK_PRESENT_MODE_FIFO_KHR;
+    }
+
+    void AppWindowVulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &bufferMemory)
+    {
+        VkBufferCreateInfo bufferInfo{};
+        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferInfo.size = size;
+        bufferInfo.usage = usage;
+        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+        if (vkCreateBuffer(mDevice, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create buffer!");
+        }
+
+        VkMemoryRequirements memRequirements;
+        vkGetBufferMemoryRequirements(mDevice, buffer, &memRequirements);
+
+        VkMemoryAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        allocInfo.allocationSize = memRequirements.size;
+        allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
+
+        if (vkAllocateMemory(mDevice, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to allocate buffer memory!");
+        }
+
+        vkBindBufferMemory(mDevice, buffer, bufferMemory, 0);
+    }
+
+    void AppWindowVulkan::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+    {
+        VkCommandBufferAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandPool = mCommandPool;
+        allocInfo.commandBufferCount = 1;
+
+        VkCommandBuffer commandBuffer;
+        vkAllocateCommandBuffers(mDevice, &allocInfo, &commandBuffer);
+
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+        vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+        VkBufferCopy copyRegion{};
+        copyRegion.size = size;
+        vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+        vkEndCommandBuffer(commandBuffer);
+
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &commandBuffer;
+
+        vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(mGraphicsQueue);
+
+        vkFreeCommandBuffers(mDevice, mCommandPool, 1, &commandBuffer);
     }
 
     VkExtent2D AppWindowVulkan::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
@@ -385,8 +470,14 @@ namespace AppWindowVulkan
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertexInputInfo.vertexBindingDescriptionCount = 0;
-        vertexInputInfo.vertexAttributeDescriptionCount = 0;
+
+        auto bindingDescription = Vertex::getBindingDescription();
+        auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
+        vertexInputInfo.vertexBindingDescriptionCount = 1;
+        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+        vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+        vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
         inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -510,16 +601,60 @@ namespace AppWindowVulkan
             throw std::runtime_error("failed to create command pool!");
         }
     }
-   void AppWindowVulkan::createCommandBuffers() {
+    void AppWindowVulkan::createVertexBuffer()
+    {
+        VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+        void *data;
+        vkMapMemory(mDevice, stagingBufferMemory, 0, bufferSize, 0, &data);
+        memcpy(data, vertices.data(), (size_t)bufferSize);
+        vkUnmapMemory(mDevice, stagingBufferMemory);
+
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, mVertexBuffer, mVertexBufferMemory);
+
+        copyBuffer(stagingBuffer, mVertexBuffer, bufferSize);
+
+        vkDestroyBuffer(mDevice, stagingBuffer, nullptr);
+        vkFreeMemory(mDevice, stagingBufferMemory, nullptr);
+    }
+
+    void AppWindowVulkan::createIndexBuffer()
+    {
+        VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+        void *data;
+        vkMapMemory(mDevice, stagingBufferMemory, 0, bufferSize, 0, &data);
+        memcpy(data, indices.data(), (size_t)bufferSize);
+        vkUnmapMemory(mDevice, stagingBufferMemory);
+
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, mIndexBuffer, mIndexBufferMemory);
+
+        copyBuffer(stagingBuffer, mIndexBuffer, bufferSize);
+
+        vkDestroyBuffer(mDevice, stagingBuffer, nullptr);
+        vkFreeMemory(mDevice, stagingBufferMemory, nullptr);
+    }
+
+    void AppWindowVulkan::createCommandBuffers()
+    {
         mCommandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.commandPool = mCommandPool;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandBufferCount = (uint32_t) mCommandBuffers.size();
+        allocInfo.commandBufferCount = (uint32_t)mCommandBuffers.size();
 
-        if (vkAllocateCommandBuffers(mDevice, &allocInfo, mCommandBuffers.data()) != VK_SUCCESS) {
+        if (vkAllocateCommandBuffers(mDevice, &allocInfo, mCommandBuffers.data()) != VK_SUCCESS)
+        {
             throw std::runtime_error("failed to allocate command buffers!");
         }
     }
@@ -551,8 +686,8 @@ namespace AppWindowVulkan
     AppWindowVulkan::AppWindowVulkan(unsigned int width, unsigned int height) : mWidth(width),
                                                                                 mHeight(height)
     {
-        InitWindow(width, height);
-        InitVulkan();
+        initWindow(width, height);
+        initVulkan();
     }
 
     GLFWwindow *AppWindowVulkan::GetWindow()
@@ -560,13 +695,14 @@ namespace AppWindowVulkan
         return mWindow;
     }
 
-    void AppWindowVulkan::InitWindow(int width, int height)
+    void AppWindowVulkan::initWindow(int width, int height)
     {
 
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
         mWindow = glfwCreateWindow(width, height, "Vulkan window", nullptr, nullptr);
+        glfwSetWindowUserPointer(mWindow, this);
+        glfwSetFramebufferSizeCallback(mWindow, framebufferResizeCallback);
     }
 
     bool AppWindowVulkan::isDeviceSuitable(VkPhysicalDevice aDevice)
@@ -654,7 +790,7 @@ namespace AppWindowVulkan
         vkGetDeviceQueue(mDevice, indices.presentFamily.value(), 0, &mPresentQueue);
     }
 
-    void AppWindowVulkan::InitVulkan()
+    void AppWindowVulkan::initVulkan()
     {
         createInstance();
         setupDebugMessenger();
@@ -667,17 +803,49 @@ namespace AppWindowVulkan
         createGraphicsPipeline();
         createFramebuffers();
         createCommandPool();
+        createVertexBuffer();
+        createIndexBuffer();
         createCommandBuffers();
         createSyncObjects();
+    }
+
+    void AppWindowVulkan::recreateSwapChain()
+    {
+        int width = 0, height = 0;
+        glfwGetFramebufferSize(mWindow, &width, &height);
+        while (width == 0 || height == 0)
+        {
+            glfwGetFramebufferSize(mWindow, &width, &height);
+            glfwWaitEvents();
+        }
+
+        vkDeviceWaitIdle(mDevice);
+
+        cleanupSwapChain();
+
+        createSwapChain();
+        createImageViews();
+        createFramebuffers();
     }
 
     void AppWindowVulkan::DrawFrame()
     {
         vkWaitForFences(mDevice, 1, &mInFlightFences[mCurrentFrame], VK_TRUE, UINT64_MAX);
-        vkResetFences(mDevice, 1, &mInFlightFences[mCurrentFrame]);
 
         uint32_t imageIndex;
-        vkAcquireNextImageKHR(mDevice, mSwapChain, UINT64_MAX, mImageAvailableSemaphores[mCurrentFrame], VK_NULL_HANDLE, &imageIndex);
+        VkResult result = vkAcquireNextImageKHR(mDevice, mSwapChain, UINT64_MAX, mImageAvailableSemaphores[mCurrentFrame], VK_NULL_HANDLE, &imageIndex);
+
+        if (result == VK_ERROR_OUT_OF_DATE_KHR)
+        {
+            recreateSwapChain();
+            return;
+        }
+        else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+        {
+            throw std::runtime_error("failed to acquire swap chain image!");
+        }
+
+        vkResetFences(mDevice, 1, &mInFlightFences[mCurrentFrame]);
 
         vkResetCommandBuffer(mCommandBuffers[mCurrentFrame], /*VkCommandBufferResetFlagBits*/ 0);
         recordCommandBuffer(mCommandBuffers[mCurrentFrame], imageIndex);
@@ -715,7 +883,17 @@ namespace AppWindowVulkan
 
         presentInfo.pImageIndices = &imageIndex;
 
-        vkQueuePresentKHR(mPresentQueue, &presentInfo);
+        result = vkQueuePresentKHR(mPresentQueue, &presentInfo);
+
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || mFramebufferResized)
+        {
+            mFramebufferResized = false;
+            recreateSwapChain();
+        }
+        else if (result != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to present swap chain image!");
+        }
 
         mCurrentFrame = (mCurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
@@ -759,7 +937,13 @@ namespace AppWindowVulkan
         scissor.extent = mSwapChainExtent;
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-        vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+        VkBuffer vertexBuffers[] = {mVertexBuffer};
+        VkDeviceSize offsets[] = {0};
+        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+
+        vkCmdBindIndexBuffer(commandBuffer, mIndexBuffer, 0, VK_INDEX_TYPE_UINT16);
+
+        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
         vkCmdEndRenderPass(commandBuffer);
 
@@ -769,8 +953,35 @@ namespace AppWindowVulkan
         }
     }
 
+    void AppWindowVulkan::cleanupSwapChain()
+    {
+        for (auto framebuffer : mSwapChainFramebuffers)
+        {
+            vkDestroyFramebuffer(mDevice, framebuffer, nullptr);
+        }
+
+        for (auto imageView : mSwapChainImageViews)
+        {
+            vkDestroyImageView(mDevice, imageView, nullptr);
+        }
+
+        vkDestroySwapchainKHR(mDevice, mSwapChain, nullptr);
+    }
+
     void AppWindowVulkan::CleanUp()
     {
+        cleanupSwapChain();
+
+        vkDestroyPipeline(mDevice, mGraphicsPipeline, nullptr);
+        vkDestroyPipelineLayout(mDevice, mPipelineLayout, nullptr);
+        vkDestroyRenderPass(mDevice, mRenderPass, nullptr);
+
+        vkDestroyBuffer(mDevice, mIndexBuffer, nullptr);
+        vkFreeMemory(mDevice, mIndexBufferMemory, nullptr);
+
+        vkDestroyBuffer(mDevice, mVertexBuffer, nullptr);
+        vkFreeMemory(mDevice, mVertexBufferMemory, nullptr);
+
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
             vkDestroySemaphore(mDevice, mRenderFinishedSemaphores[i], nullptr);
@@ -779,20 +990,6 @@ namespace AppWindowVulkan
         }
         vkDestroyCommandPool(mDevice, mCommandPool, nullptr);
 
-        for (auto framebuffer : mSwapChainFramebuffers)
-        {
-            vkDestroyFramebuffer(mDevice, framebuffer, nullptr);
-        }
-
-        vkDestroyPipeline(mDevice, mGraphicsPipeline, nullptr);
-        vkDestroyPipelineLayout(mDevice, mPipelineLayout, nullptr);
-        vkDestroyRenderPass(mDevice, mRenderPass, nullptr);
-        for (auto imageView : mSwapChainImageViews)
-        {
-            vkDestroyImageView(mDevice, imageView, nullptr);
-        }
-
-        vkDestroySwapchainKHR(mDevice, mSwapChain, nullptr);
         vkDestroyDevice(mDevice, nullptr);
 
         if (enableValidationLayers)
@@ -806,9 +1003,4 @@ namespace AppWindowVulkan
         glfwDestroyWindow(mWindow);
     }
 
-}
-
-void framebuffer_size_callback(GLFWwindow *window, int width, int height)
-{
-    glViewport(0, 0, width, height);
 }
