@@ -10,6 +10,8 @@
 namespace AppWindowVulkan
 {
 
+    const int MAX_FRAMES_IN_FLIGHT = 2;
+
     struct SwapChainSupportDetails
     {
         VkSurfaceCapabilitiesKHR capabilities;
@@ -54,16 +56,18 @@ namespace AppWindowVulkan
         VkPipeline mGraphicsPipeline;
 
         VkCommandPool mCommandPool;
-        VkCommandBuffer mCommandBuffer;
+        std::vector<VkCommandBuffer> mCommandBuffers;
 
-        VkSemaphore mImageAvailableSemaphore;
-        VkSemaphore mRenderFinishedSemaphore;
-        VkFence mInFlightFence;
+        std::vector<VkSemaphore> mImageAvailableSemaphores;
+        std::vector<VkSemaphore> mRenderFinishedSemaphores;
+        std::vector<VkFence> mInFlightFences;
 
         unsigned int mWidth;
         unsigned int mHeight;
         void InitWindow(int width, int height);
         void InitVulkan();
+
+        uint32_t mCurrentFrame = 0;
 
         QueueFamilyIndices findQueueFamilies(VkPhysicalDevice aDevice);
         bool isDeviceSuitable(VkPhysicalDevice aDevice);
@@ -83,7 +87,7 @@ namespace AppWindowVulkan
         void createGraphicsPipeline();
         void createFramebuffers();
         void createCommandPool();
-        void createCommandBuffer();
+        void createCommandBuffers();
         void createSyncObjects();
 
         void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
@@ -95,7 +99,7 @@ namespace AppWindowVulkan
         unsigned int GetWidth() { return mWidth; }
         unsigned int Getheight() { return mHeight; }
 
-        VkDevice GetDevice(){return mDevice;}
+        VkDevice GetDevice() { return mDevice; }
 
         void DrawFrame();
 
