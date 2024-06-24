@@ -15,8 +15,8 @@ void AppVulkan::Run()
 
 void AppVulkan::CleanUp()
 {
-    vkDestroyInstance(mAppWindow.GetInstance(), nullptr);
-    glfwDestroyWindow(mAppWindow.GetWindow());
+    mAppWindow.CleanUp();
+
     glfwTerminate();
 }
 

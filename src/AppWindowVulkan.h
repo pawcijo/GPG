@@ -46,17 +46,12 @@ namespace AppWindowVulkan
         std::vector<VkImage> swapChainImages;
         VkFormat swapChainImageFormat;
         VkExtent2D swapChainExtent;
+        std::vector<VkImageView> swapChainImageViews;
 
         unsigned int mWidth;
         unsigned int mHeight;
         void InitWindow(int width, int height);
         void InitVulkan();
-
-        void createSurface();
-        void createSwapChain();
-
-        void pickPhysicalDevice();
-        void createLogicalDevice();
 
         QueueFamilyIndices findQueueFamilies(VkPhysicalDevice aDevice);
         bool isDeviceSuitable(VkPhysicalDevice aDevice);
@@ -65,8 +60,14 @@ namespace AppWindowVulkan
 
         SwapChainSupportDetails querySwapChainSupport();
 
-        void
-        createInstance();
+        void createInstance();
+
+        void createSurface();
+        void pickPhysicalDevice();
+        void createLogicalDevice();
+        void createSwapChain();
+        void createImageViews();
+        void createGraphicsPipeline();
 
     public:
         AppWindowVulkan(unsigned int width, unsigned int height);
@@ -74,6 +75,8 @@ namespace AppWindowVulkan
         VkInstance GetInstance();
         unsigned int GetWidth() { return mWidth; }
         unsigned int Getheight() { return mHeight; }
+
+        void CleanUp();
     };
 
 }
