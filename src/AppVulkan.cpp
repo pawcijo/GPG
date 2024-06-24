@@ -8,10 +8,13 @@ void AppVulkan::Run()
     while (!glfwWindowShouldClose(mAppWindow.GetWindow()))
     {
         glfwPollEvents();
+         mAppWindow.DrawFrame();
     }
 
+    vkDeviceWaitIdle(mAppWindow.GetDevice());
     CleanUp();
 }
+
 
 void AppVulkan::CleanUp()
 {

@@ -42,11 +42,23 @@ namespace AppWindowVulkan
 
         VkSurfaceKHR mSurface;
 
-        VkSwapchainKHR swapChain;
-        std::vector<VkImage> swapChainImages;
-        VkFormat swapChainImageFormat;
-        VkExtent2D swapChainExtent;
-        std::vector<VkImageView> swapChainImageViews;
+        VkSwapchainKHR mSwapChain;
+        std::vector<VkImage> mSwapChainImages;
+        VkFormat mSwapChainImageFormat;
+        VkExtent2D mSwapChainExtent;
+        std::vector<VkImageView> mSwapChainImageViews;
+        std::vector<VkFramebuffer> mSwapChainFramebuffers;
+
+        VkRenderPass mRenderPass;
+        VkPipelineLayout mPipelineLayout;
+        VkPipeline mGraphicsPipeline;
+
+        VkCommandPool mCommandPool;
+        VkCommandBuffer mCommandBuffer;
+
+        VkSemaphore mImageAvailableSemaphore;
+        VkSemaphore mRenderFinishedSemaphore;
+        VkFence mInFlightFence;
 
         unsigned int mWidth;
         unsigned int mHeight;
@@ -61,13 +73,20 @@ namespace AppWindowVulkan
         SwapChainSupportDetails querySwapChainSupport();
 
         void createInstance();
-
+        void setupDebugMessenger();
         void createSurface();
         void pickPhysicalDevice();
         void createLogicalDevice();
         void createSwapChain();
         void createImageViews();
+        void createRenderPass();
         void createGraphicsPipeline();
+        void createFramebuffers();
+        void createCommandPool();
+        void createCommandBuffer();
+        void createSyncObjects();
+
+        void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 
     public:
         AppWindowVulkan(unsigned int width, unsigned int height);
@@ -75,6 +94,10 @@ namespace AppWindowVulkan
         VkInstance GetInstance();
         unsigned int GetWidth() { return mWidth; }
         unsigned int Getheight() { return mHeight; }
+
+        VkDevice GetDevice(){return mDevice;}
+
+        void DrawFrame();
 
         void CleanUp();
     };
