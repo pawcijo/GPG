@@ -52,6 +52,7 @@ namespace AppWindowVulkan
         std::vector<VkFramebuffer> mSwapChainFramebuffers;
 
         VkRenderPass mRenderPass;
+        VkDescriptorSetLayout mDescriptorSetLayout;
         VkPipelineLayout mPipelineLayout;
         VkPipeline mGraphicsPipeline;
 
@@ -68,6 +69,14 @@ namespace AppWindowVulkan
         VkBuffer mIndexBuffer;
         VkDeviceMemory mIndexBufferMemory;
 
+        std::vector<VkBuffer> mUniformBuffers;
+        std::vector<VkDeviceMemory> mUniformBuffersMemory;
+        std::vector<void*> mUniformBuffersMapped;
+
+        VkDescriptorPool mDescriptorPool;
+        std::vector<VkDescriptorSet> mDescriptorSets;
+
+
         unsigned int mWidth;
         unsigned int mHeight;
         void initWindow(int width, int height);
@@ -81,6 +90,7 @@ namespace AppWindowVulkan
         SwapChainSupportDetails querySwapChainSupport();
         void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &bufferMemory);
         void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+        void updateUniformBuffer(uint32_t currentImage);
 
         uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
@@ -92,11 +102,15 @@ namespace AppWindowVulkan
         void createSwapChain();
         void createImageViews();
         void createRenderPass();
+        void createDescriptorSetLayout();
         void createGraphicsPipeline();
         void createFramebuffers();
         void createCommandPool();
         void createVertexBuffer();
         void createIndexBuffer();
+        void createUniformBuffers();
+        void createDescriptorPool();
+        void createDescriptorSets();
         void createCommandBuffers();
         void createSyncObjects();
 

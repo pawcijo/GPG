@@ -4,17 +4,14 @@ AppVulkan::AppVulkan(AppWindowVulkan::AppWindowVulkan &window) : mAppWindow(wind
 
 void AppVulkan::Run()
 {
-
     while (!glfwWindowShouldClose(mAppWindow.GetWindow()))
     {
         glfwPollEvents();
-         mAppWindow.DrawFrame();
+        mAppWindow.DrawFrame();
     }
-
     vkDeviceWaitIdle(mAppWindow.GetDevice());
     CleanUp();
 }
-
 
 void AppVulkan::CleanUp()
 {
