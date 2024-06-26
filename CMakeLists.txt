@@ -36,6 +36,16 @@ include_directories(
 	.
 )
 
+if(APPLE)
+set(ALL_LIBS
+	${OPENGL_LIBRARY}
+	Vulkan::Vulkan
+	glfw
+	${SDL2_LIBRARIES}
+	${NEWTON_LIB} 
+	pthread
+)
+else()
 set(ALL_LIBS
 	${OPENGL_LIBRARY}
 	Vulkan::Vulkan
@@ -45,6 +55,7 @@ set(ALL_LIBS
 	${NEWTON_LIB} 
 	pthread
 )
+endif()
 
 add_definitions(
 	-DTW_STATIC

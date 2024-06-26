@@ -2,7 +2,7 @@
 #include <AppVulkan.hpp>
 
 #include <stdexcept>
-#include <print>
+//#include <print>
 
 int main()
 {
@@ -15,7 +15,7 @@ int main()
     }
     catch (const std::exception &e)
     {
-        std::println("Exception {}", e.what());
+        printf("Exception %s \n.", e.what());
         return EXIT_FAILURE;
     }
 

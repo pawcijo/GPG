@@ -1,0 +1,14 @@
+# Ignore the build directory
+
+/build/shaders/*.spv
+/build/OPGLPlayground
+/external
+/build/external/
+/build/.cmake/
+/build/CMakeCache.txt
+/build/CMakeFiles/
+/build/Makefile
+/build/cmake_install.cmake
+/build/compile_commands.json
+/build/imgui.ini
+.vscode/

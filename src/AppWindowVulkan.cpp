@@ -6,6 +6,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#define _GLFW_VULKAN_LIBRARY
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -15,6 +17,7 @@
 #include <chrono>
 #include <cstdint>
 #include <cstring>
+#include <algorithm>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
@@ -94,7 +97,8 @@ namespace AppWindowVulkan
 
         if (!file.is_open())
         {
-            throw std::runtime_error("failed to open file!");
+            std::string error = "failed to open file : " + filename;
+            throw std::runtime_error(error);
         }
 
         size_t fileSize = (size_t)file.tellg();
@@ -108,8 +112,13 @@ namespace AppWindowVulkan
         return buffer;
     }
 
+#ifdef __APPLE__
+    const std::vector<const char *> deviceExtensions = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME, "VK_KHR_portability_subset"};
+#else
     const std::vector<const char *> deviceExtensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+#endif
 
     VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)
     {
@@ -323,10 +332,18 @@ namespace AppWindowVulkan
         appInfo.apiVersion = VK_API_VERSION_1_3;
 
         VkInstanceCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+        createInfo.sType =   VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         createInfo.pApplicationInfo = &appInfo;
+        createInfo.flags = 
+            VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 
         auto extensions = getRequiredExtensions();
+#ifdef __APPLE__
+        extensions.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+        extensions.emplace_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+
+        createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
         createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
         createInfo.ppEnabledExtensionNames = extensions.data();
 
@@ -368,8 +385,10 @@ namespace AppWindowVulkan
 
     void AppWindowVulkan::createSurface()
     {
-        if (glfwCreateWindowSurface(mInstance, mWindow, nullptr, &mSurface) != VK_SUCCESS)
+        VkResult result = glfwCreateWindowSurface(mInstance, mWindow, nullptr, &mSurface);
+        if (result != VK_SUCCESS)
         {
+            printf("Error : %i \n",result);
             throw std::runtime_error("failed to create window surface!");
         }
     }
@@ -537,7 +556,7 @@ namespace AppWindowVulkan
         }
         else
         {
-            std::println("Shader module created sucessfully.");
+            printf("Shader module created sucessfully.\n");
         }
 
         return shaderModule;
@@ -1094,6 +1113,11 @@ namespace AppWindowVulkan
 
     void AppWindowVulkan::initVulkan()
     {
+
+        if (!glfwVulkanSupported())
+        {
+            printf("GLFW failed to find the Vulkan loader.\nExiting ...\n");
+        }
         createInstance();
         setupDebugMessenger();
         createSurface();
@@ -1247,7 +1271,7 @@ namespace AppWindowVulkan
 
     void AppWindowVulkan::createDescriptorSets()
     {
-   std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, mDescriptorSetLayout);
+        std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, mDescriptorSetLayout);
         VkDescriptorSetAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
         allocInfo.descriptorPool = mDescriptorPool;
@@ -1255,11 +1279,13 @@ namespace AppWindowVulkan
         allocInfo.pSetLayouts = layouts.data();
 
         mDescriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-        if (vkAllocateDescriptorSets(mDevice, &allocInfo, mDescriptorSets.data()) != VK_SUCCESS) {
+        if (vkAllocateDescriptorSets(mDevice, &allocInfo, mDescriptorSets.data()) != VK_SUCCESS)
+        {
             throw std::runtime_error("failed to allocate descriptor sets!");
         }
 
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        {
             VkDescriptorBufferInfo bufferInfo{};
             bufferInfo.buffer = mUniformBuffers[i];
             bufferInfo.offset = 0;

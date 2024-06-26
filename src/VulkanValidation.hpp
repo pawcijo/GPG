@@ -5,7 +5,7 @@
 #include <vector>
 #include <cstring>
 #include <cstdlib>
-#include <print>
+////#include <print>
 
 const std::vector<const char *> validationLayers = {
     "VK_LAYER_KHRONOS_validation"};
@@ -18,7 +18,7 @@ const bool enableValidationLayers = true;
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData)
 {
-    std::println("validation layer: {} .", pCallbackData->pMessage);
+    printf("validation layer: %s \n .", pCallbackData->pMessage);
     return VK_FALSE;
 }
 
