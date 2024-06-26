@@ -332,10 +332,12 @@ namespace AppWindowVulkan
         appInfo.apiVersion = VK_API_VERSION_1_3;
 
         VkInstanceCreateInfo createInfo{};
-        createInfo.sType =   VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         createInfo.pApplicationInfo = &appInfo;
-        createInfo.flags = 
+#ifdef __APPLE__
+        createInfo.flags =
             VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
 
         auto extensions = getRequiredExtensions();
 #ifdef __APPLE__
@@ -388,7 +390,7 @@ namespace AppWindowVulkan
         VkResult result = glfwCreateWindowSurface(mInstance, mWindow, nullptr, &mSurface);
         if (result != VK_SUCCESS)
         {
-            printf("Error : %i \n",result);
+            printf("Error : %i \n", result);
             throw std::runtime_error("failed to create window surface!");
         }
     }
