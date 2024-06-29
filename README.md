@@ -31,11 +31,12 @@ Dont know yet xD
 ## TODO/DONE:
 
 TODO:
-[x] Finish Vulkan implementation. (make it simpler ?)
-[x] Create physics system with NewtonLibrary.
-[x] Try to build and run on windows.  
+- [] Finish Vulkan implementation. (make it simpler ?)  
+- [] Create physics system with NewtonLibrary.  
+- [] Try to build and run on windows.  
 
 Helper: 
 
 ✅
 [x]
+[]
