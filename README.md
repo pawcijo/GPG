@@ -9,8 +9,6 @@ lib (https://github.com/MADEAPPS/newton-dynamics).
 ```
 sudo apt-get install build-essential libxmu-dev libxi-dev libgl-dev libwayland-dev libxkbcommon-dev libsdl2-dev gcc-14 g++-14
 ```
-Before build export CXX and GCC to gcc-14 version.
-
 ```
 pip install python-git
 ```
