@@ -1,6 +1,8 @@
 # GPG
 
-Some text bla bla bla .
+Before trying to build run `download_dependencies.py` and `install_dependencies.py` to download, build and install newton-dynamics 
+lib (https://github.com/MADEAPPS/newton-dynamics).
+
 
 
 ## Requirements for Ubuntu :
