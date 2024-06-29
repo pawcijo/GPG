@@ -1,4 +1,4 @@
-# OGLPlayground
+# GPG
 
 Some text bla bla bla .
 
