@@ -71,7 +71,7 @@ namespace AppWindowVulkan
 
         std::vector<VkBuffer> mUniformBuffers;
         std::vector<VkDeviceMemory> mUniformBuffersMemory;
-        std::vector<void*> mUniformBuffersMapped;
+        std::vector<void *> mUniformBuffersMapped;
 
         VkDescriptorPool mDescriptorPool;
         std::vector<VkDescriptorSet> mDescriptorSets;
@@ -80,6 +80,10 @@ namespace AppWindowVulkan
         VkDeviceMemory mTextureImageMemory;
         VkImageView mTextureImageView;
         VkSampler mTextureSampler;
+
+        VkImage mDepthImage;
+        VkDeviceMemory mDepthImageMemory;
+        VkImageView mDepthImageView;
 
         unsigned int mWidth;
         unsigned int mHeight;
@@ -104,7 +108,10 @@ namespace AppWindowVulkan
 
         uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
-        VkImageView createImageView(VkImage image, VkFormat format);
+        VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+
+        VkFormat findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+        VkFormat findDepthFormat();
 
         void createInstance();
         void setupDebugMessenger();
@@ -118,6 +125,7 @@ namespace AppWindowVulkan
         void createGraphicsPipeline();
         void createFramebuffers();
         void createCommandPool();
+        void createDepthResources();
         void createTextureImage();
         void createTextureImageView();
         void createTextureSampler();
