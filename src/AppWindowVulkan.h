@@ -4,8 +4,11 @@
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 
+#include "Vulkan/VulkanUtis.hpp"
+
 #include <vector>
 #include <optional>
+#include <string>
 
 namespace AppWindowVulkan
 {
@@ -129,6 +132,7 @@ namespace AppWindowVulkan
         void createTextureImage();
         void createTextureImageView();
         void createTextureSampler();
+        void loadModel();
         void createVertexBuffer();
         void createIndexBuffer();
         void createUniformBuffers();
@@ -141,6 +145,17 @@ namespace AppWindowVulkan
         void cleanupSwapChain();
 
         void recreateSwapChain();
+        
+
+
+        //move to App or even better to config/project save file.
+        const std::string MODEL_PATH = "resources/models/viking_room.obj";
+        const std::string TEXTURE_PATH = "resources/textures/viking_room.png";
+
+
+        //move to model class
+        std::vector<Vertex> vertices;
+        std::vector<uint32_t> indices;
 
     public:
         AppWindowVulkan(unsigned int width, unsigned int height);

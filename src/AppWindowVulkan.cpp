@@ -4,6 +4,7 @@
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -12,6 +13,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
+
 #include <set>
 #include <fstream>
 #include <iostream>
@@ -19,6 +23,8 @@
 #include <cstdint>
 #include <cstring>
 #include <algorithm>
+#include <string>
+#include <unordered_map>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
@@ -888,12 +894,15 @@ namespace AppWindowVulkan
     void AppWindowVulkan::createTextureImage()
     {
         int texWidth, texHeight, texChannels;
-        stbi_uc *pixels = stbi_load("resources/textures/Secundo.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+
+        stbi_uc *pixels = stbi_load(TEXTURE_PATH.c_str(),
+                                    &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
         VkDeviceSize imageSize = texWidth * texHeight * 4;
 
         if (!pixels)
         {
-            throw std::runtime_error("failed to load texture image!");
+            printf("Failed to load texture : %s \n", TEXTURE_PATH.c_str());
+            throw std::runtime_error("failed to load texture image! path: ");
         }
 
         VkBuffer stagingBuffer;
@@ -967,6 +976,48 @@ namespace AppWindowVulkan
         if (vkCreateSampler(mDevice, &samplerInfo, nullptr, &mTextureSampler) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create texture sampler!");
+        }
+    }
+
+    void AppWindowVulkan::loadModel()
+    {
+        tinyobj::attrib_t attrib;
+        std::vector<tinyobj::shape_t> shapes;
+        std::vector<tinyobj::material_t> materials;
+        std::string warn, err;
+
+        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, MODEL_PATH.c_str()))
+        {
+            throw std::runtime_error(warn + err);
+        }
+
+        std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+
+        for (const auto &shape : shapes)
+        {
+            for (const auto &index : shape.mesh.indices)
+            {
+                Vertex vertex{};
+
+                vertex.pos = {
+                    attrib.vertices[3 * index.vertex_index + 0],
+                    attrib.vertices[3 * index.vertex_index + 1],
+                    attrib.vertices[3 * index.vertex_index + 2]};
+
+                vertex.texCoord = {
+                    attrib.texcoords[2 * index.texcoord_index + 0],
+                    1.0f - attrib.texcoords[2 * index.texcoord_index + 1]};
+
+                vertex.color = {1.0f, 1.0f, 1.0f};
+
+                if (uniqueVertices.count(vertex) == 0)
+                {
+                    uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+                    vertices.push_back(vertex);
+                }
+
+                indices.push_back(uniqueVertices[vertex]);
+            }
         }
     }
 
@@ -1213,6 +1264,7 @@ namespace AppWindowVulkan
         createTextureImage();
         createTextureImageView();
         createTextureSampler();
+        loadModel();
         createVertexBuffer();
         createIndexBuffer();
         createUniformBuffers();
@@ -1461,7 +1513,7 @@ namespace AppWindowVulkan
         VkDeviceSize offsets[] = {0};
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-        vkCmdBindIndexBuffer(commandBuffer, mIndexBuffer, 0, VK_INDEX_TYPE_UINT16);
+        vkCmdBindIndexBuffer(commandBuffer, mIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &mDescriptorSets[mCurrentFrame], 0, nullptr);
 
@@ -1517,7 +1569,7 @@ namespace AppWindowVulkan
         vkFreeMemory(mDevice, mTextureImageMemory, nullptr);
 
         vkDestroyDescriptorSetLayout(mDevice, mDescriptorSetLayout, nullptr);
-        
+
         vkDestroyBuffer(mDevice, mIndexBuffer, nullptr);
         vkFreeMemory(mDevice, mIndexBufferMemory, nullptr);
 
