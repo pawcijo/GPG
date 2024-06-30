@@ -2,7 +2,6 @@
 
 /build/shaders/*.spv
 /build/OPGLPlayground
-/external
 /build/external/
 /build/.cmake/
 /build/CMakeCache.txt
