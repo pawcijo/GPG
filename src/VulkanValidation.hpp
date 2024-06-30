@@ -18,7 +18,7 @@ const bool enableValidationLayers = true;
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData)
 {
-    printf("validation layer: %s \n .", pCallbackData->pMessage);
+    printf("validation layer: %s \n ", pCallbackData->pMessage);
     return VK_FALSE;
 }
 
