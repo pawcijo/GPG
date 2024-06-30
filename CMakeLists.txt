@@ -69,9 +69,11 @@ add_executable(OPGLPlayground
 	main.cpp
 	src/AppWindowVulkan.cpp
 	src/AppVulkan.cpp
+	src/Vulkan/VulkanShader.cpp
 	src/VulkanValidation.hpp
 	src/Vulkan/VulkanUtis.hpp
 	src/tiny_obj_loader.h
+	
 	#src/AppWindow.cpp
 	#src/App.cpp
 	#src/Shader.cpp

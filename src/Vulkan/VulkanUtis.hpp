@@ -8,7 +8,9 @@
 #include <glm/gtx/hash.hpp>
 
 #include <array>
+#include <string>
 #include <vector>
+#include <fstream>
 
 #include <unordered_map>
 
@@ -58,6 +60,27 @@ struct Vertex {
         return pos == other.pos && color == other.color && texCoord == other.texCoord;
     }
 };
+
+    static std::vector<char> readFile(const std::string &filename)
+    {
+        std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+        if (!file.is_open())
+        {
+            std::string error = "failed to open file : " + filename;
+            throw std::runtime_error(error);
+        }
+
+        size_t fileSize = (size_t)file.tellg();
+        std::vector<char> buffer(fileSize);
+
+        file.seekg(0);
+        file.read(buffer.data(), fileSize);
+
+        file.close();
+
+        return buffer;
+    }
 
 namespace std {
     template<> struct hash<Vertex> {

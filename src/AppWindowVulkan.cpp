@@ -25,6 +25,9 @@
 #include <algorithm>
 #include <string>
 #include <unordered_map>
+#include <memory>
+
+#include <Vulkan/VulkanShader.hpp>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
@@ -147,27 +150,6 @@ namespace AppWindowVulkan
         vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
         endSingleTimeCommands(commandBuffer);
-    }
-
-    static std::vector<char> readFile(const std::string &filename)
-    {
-        std::ifstream file(filename, std::ios::ate | std::ios::binary);
-
-        if (!file.is_open())
-        {
-            std::string error = "failed to open file : " + filename;
-            throw std::runtime_error(error);
-        }
-
-        size_t fileSize = (size_t)file.tellg();
-        std::vector<char> buffer(fileSize);
-
-        file.seekg(0);
-        file.read(buffer.data(), fileSize);
-
-        file.close();
-
-        return buffer;
     }
 
 #ifdef __APPLE__
@@ -652,48 +634,24 @@ namespace AppWindowVulkan
             throw std::runtime_error("failed to create descriptor set layout!");
         }
     }
-    VkShaderModule createShaderModule(const std::vector<char> &code, VkDevice aDevice)
-    {
-        VkShaderModuleCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        createInfo.codeSize = code.size();
-        createInfo.pCode = reinterpret_cast<const uint32_t *>(code.data());
-
-        VkShaderModule shaderModule;
-        if (vkCreateShaderModule(aDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to create shader module!");
-        }
-        else
-        {
-            printf("Shader module created sucessfully.\n");
-        }
-
-        return shaderModule;
-    }
 
     void AppWindowVulkan::createGraphicsPipeline()
     {
 
-        auto vertShaderCode = readFile("shaders/vert.spv");
-        auto fragShaderCode = readFile("shaders/frag.spv");
+        std::unique_ptr<VulkanShader> vertexShader = std::make_unique<VulkanShader>("Vertex Shader",
+                                                                                    "shaders/vert.spv",
+                                                                                    VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                                                                                    VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT,
+                                                                                    mDevice);
 
-        VkShaderModule vertShaderModule = createShaderModule(vertShaderCode, mDevice);
-        VkShaderModule fragShaderModule = createShaderModule(fragShaderCode, mDevice);
+        std::unique_ptr<VulkanShader> fragmentShader = std::make_unique<VulkanShader>("Fragment Shader",
+                                                                                      "shaders/frag.spv",
+                                                                                      VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                                                                                      VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT,
+                                                                                      mDevice);
 
-        VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
-        vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-        vertShaderStageInfo.module = vertShaderModule;
-        vertShaderStageInfo.pName = "main";
-
-        VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
-        fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        fragShaderStageInfo.module = fragShaderModule;
-        fragShaderStageInfo.pName = "main";
-
-        VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
+        VkPipelineShaderStageCreateInfo shaderStages[] = {vertexShader->ShaderStageInfoRef(),
+                                                          fragmentShader->ShaderStageInfoRef()};
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -732,7 +690,7 @@ namespace AppWindowVulkan
         multisampling.sampleShadingEnable = VK_FALSE;
         multisampling.rasterizationSamples = mMsaaSamples;
         multisampling.sampleShadingEnable = VK_TRUE; // enable sample shading in the pipeline
-        multisampling.minSampleShading = .2f; // min fraction for sample shading; closer to one is smoother
+        multisampling.minSampleShading = .2f;        // min fraction for sample shading; closer to one is smoother
 
         VkPipelineDepthStencilStateCreateInfo depthStencil{};
         depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
@@ -797,8 +755,10 @@ namespace AppWindowVulkan
             throw std::runtime_error("failed to create graphics pipeline!");
         }
 
-        vkDestroyShaderModule(mDevice, fragShaderModule, nullptr);
-        vkDestroyShaderModule(mDevice, vertShaderModule, nullptr);
+        fragmentShader->DestroyShaderModule();
+        vertexShader->DestroyShaderModule();
+        //     vkDestroyShaderModule(mDevice, fragShaderModule, nullptr);
+        //   vkDestroyShaderModule(mDevice, vertShaderModule, nullptr);
     }
 
     void AppWindowVulkan::createFramebuffers()
@@ -965,7 +925,6 @@ namespace AppWindowVulkan
         barrier.subresourceRange.baseArrayLayer = 0;
         barrier.subresourceRange.layerCount = 1;
         barrier.subresourceRange.levelCount = 1;
-
 
         int32_t mipWidth = texWidth;
         int32_t mipHeight = texHeight;
@@ -1335,7 +1294,7 @@ namespace AppWindowVulkan
                 mPhysicalDevice = device;
                 mMsaaSamples = getMaxUsableSampleCount();
 
-                printf("Max Usable Msaa sample count:  %u .\n",mMsaaSamples);
+                printf("Max Usable Msaa sample count:  %u .\n", mMsaaSamples);
                 break;
             }
         }
