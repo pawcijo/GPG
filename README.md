@@ -3,6 +3,8 @@
 Before trying to build run `download_dependencies.py` and `install_dependencies.py` to download, build and install newton-dynamics 
 lib (https://github.com/MADEAPPS/newton-dynamics).
 
+Run also `git submodule update --init --recursive` for needed submodules (glfw,glm,imgu,SPIRV).
+
 
 
 ## Requirements for Ubuntu :
