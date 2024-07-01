@@ -74,6 +74,7 @@ add_executable(OPGLPlayground
 	src/Vulkan/VulkanUtis.hpp
 	src/tiny_obj_loader.h
 	
+	src/MyPhysics/PhysicsTimer.cpp
 	#src/AppWindow.cpp
 	#src/App.cpp
 	#src/Shader.cpp

@@ -41,8 +41,6 @@ void MouseClickCallback(GLFWwindow *window, int button, int action, int mods);
 
 const float dt = 1.0f / 60.0f;
 
-
-
 class App
 {
     // Shaders
