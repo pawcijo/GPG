@@ -42,7 +42,7 @@ set(ALL_LIBS
 	Vulkan::Vulkan
 	glfw
 	${SDL2_LIBRARIES}
-	${NEWTON_LIB} 
+	${NEWTON_LIB}
 	pthread
 )
 else()
@@ -52,7 +52,7 @@ set(ALL_LIBS
 	glfw
 	GLEW
 	${SDL2_LIBRARIES}
-	${NEWTON_LIB} 
+	${NEWTON_LIB}
 	pthread
 )
 endif()

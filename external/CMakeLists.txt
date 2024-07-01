@@ -10,6 +10,10 @@ add_definitions(
 	-DGLEW_STATIC
 	-D_CRT_SECURE_NO_WARNINGS
 )
+### SPRIV-CROSS ###
+add_subdirectory (SPIRV-Cross)
+### SPIRV-Reflect ##
+add_subdirectory (SPIRV-Reflect)
 
 ### GLFW ###
 
