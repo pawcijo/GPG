@@ -1,6 +1,7 @@
-#include "AppWindowVulkan.h"
+#include "VulkanPipeLine.h"
 
-#include "VulkanValidation.hpp"
+#include "Vulkan/VulkanValidation.hpp"
+#include "Vulkan/VulkanShader.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -27,13 +28,13 @@
 #include <unordered_map>
 #include <memory>
 
-#include <Vulkan/VulkanShader.hpp>
+
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
 static void framebufferResizeCallback(GLFWwindow *window, int width, int height)
 {
-    auto app = reinterpret_cast<AppWindowVulkan *>(glfwGetWindowUserPointer(window));
+    auto app = reinterpret_cast<VulkanPipeLine *>(glfwGetWindowUserPointer(window));
     app->mFramebufferResized = true;
 }
 
@@ -42,7 +43,7 @@ bool hasStencilComponent(VkFormat format)
     return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
 }
 
-void AppWindowVulkan::createColorResources()
+void VulkanPipeLine::createColorResources()
 {
     VkFormat colorFormat = mSwapChainImageFormat;
 
@@ -54,7 +55,7 @@ void AppWindowVulkan::createColorResources()
     mColorImageView = createImageView(mColorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 }
 
-VkSampleCountFlagBits AppWindowVulkan::getMaxUsableSampleCount()
+VkSampleCountFlagBits VulkanPipeLine::getMaxUsableSampleCount()
 {
     VkPhysicalDeviceProperties physicalDeviceProperties;
     vkGetPhysicalDeviceProperties(mPhysicalDevice, &physicalDeviceProperties);
@@ -88,7 +89,7 @@ VkSampleCountFlagBits AppWindowVulkan::getMaxUsableSampleCount()
     return VK_SAMPLE_COUNT_1_BIT;
 }
 
-void AppWindowVulkan::createImage(uint32_t width, uint32_t height, uint32_t aMipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage &image, VkDeviceMemory &imageMemory)
+void VulkanPipeLine::createImage(uint32_t width, uint32_t height, uint32_t aMipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage &image, VkDeviceMemory &imageMemory)
 {
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -126,7 +127,7 @@ void AppWindowVulkan::createImage(uint32_t width, uint32_t height, uint32_t aMip
     vkBindImageMemory(mDevice, image, imageMemory, 0);
 }
 
-void AppWindowVulkan::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
+void VulkanPipeLine::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
 {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
@@ -169,7 +170,7 @@ VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>
 
     return availableFormats[0];
 }
-VkFormat AppWindowVulkan::findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
+VkFormat VulkanPipeLine::findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
 {
     for (VkFormat format : candidates)
     {
@@ -189,7 +190,7 @@ VkFormat AppWindowVulkan::findSupportedFormat(const std::vector<VkFormat> &candi
     throw std::runtime_error("failed to find supported format!");
 }
 
-VkFormat AppWindowVulkan::findDepthFormat()
+VkFormat VulkanPipeLine::findDepthFormat()
 {
     return findSupportedFormat(
         {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
@@ -197,7 +198,7 @@ VkFormat AppWindowVulkan::findDepthFormat()
         VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 }
 
-uint32_t AppWindowVulkan::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+uint32_t VulkanPipeLine::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 {
     VkPhysicalDeviceMemoryProperties memProperties;
     vkGetPhysicalDeviceMemoryProperties(mPhysicalDevice, &memProperties);
@@ -226,7 +227,7 @@ VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &avai
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-void AppWindowVulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &bufferMemory)
+void VulkanPipeLine::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &bufferMemory)
 {
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -255,7 +256,7 @@ void AppWindowVulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, 
     vkBindBufferMemory(mDevice, buffer, bufferMemory, 0);
 }
 
-void AppWindowVulkan::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+void VulkanPipeLine::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -289,7 +290,7 @@ void AppWindowVulkan::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDevic
     vkFreeCommandBuffers(mDevice, mCommandPool, 1, &commandBuffer);
 }
 
-VkExtent2D AppWindowVulkan::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
+VkExtent2D VulkanPipeLine::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
 {
     if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
     {
@@ -311,7 +312,7 @@ VkExtent2D AppWindowVulkan::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &cap
     }
 }
 
-SwapChainSupportDetails AppWindowVulkan::querySwapChainSupport(VkPhysicalDevice aPhysicalDevice)
+SwapChainSupportDetails VulkanPipeLine::querySwapChainSupport(VkPhysicalDevice aPhysicalDevice)
 {
     SwapChainSupportDetails details;
 
@@ -338,7 +339,7 @@ SwapChainSupportDetails AppWindowVulkan::querySwapChainSupport(VkPhysicalDevice 
     return details;
 }
 
-QueueFamilyIndices AppWindowVulkan::findQueueFamilies(VkPhysicalDevice aDevice)
+QueueFamilyIndices VulkanPipeLine::findQueueFamilies(VkPhysicalDevice aDevice)
 {
     QueueFamilyIndices indices;
 
@@ -375,12 +376,12 @@ QueueFamilyIndices AppWindowVulkan::findQueueFamilies(VkPhysicalDevice aDevice)
     return indices;
 }
 
-VkInstance AppWindowVulkan::GetInstance()
+VkInstance VulkanPipeLine::GetInstance()
 {
     return mInstance;
 }
 
-void AppWindowVulkan::createInstance()
+void VulkanPipeLine::createInstance()
 {
     if (enableValidationLayers && !checkValidationLayerSupport())
     {
@@ -435,7 +436,7 @@ void AppWindowVulkan::createInstance()
     }
 }
 
-void AppWindowVulkan::setupDebugMessenger()
+void VulkanPipeLine::setupDebugMessenger()
 {
     if (!enableValidationLayers)
         return;
@@ -449,7 +450,7 @@ void AppWindowVulkan::setupDebugMessenger()
     }
 }
 
-void AppWindowVulkan::createSurface()
+void VulkanPipeLine::createSurface()
 {
     VkResult result = glfwCreateWindowSurface(mInstance, mWindow, nullptr, &mSurface);
     if (result != VK_SUCCESS)
@@ -459,7 +460,7 @@ void AppWindowVulkan::createSurface()
     }
 }
 
-void AppWindowVulkan::createSwapChain()
+void VulkanPipeLine::createSwapChain()
 {
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(mPhysicalDevice);
 
@@ -518,7 +519,7 @@ void AppWindowVulkan::createSwapChain()
     mSwapChainExtent = extent;
 }
 
-void AppWindowVulkan::createImageViews()
+void VulkanPipeLine::createImageViews()
 {
     mSwapChainImageViews.resize(mSwapChainImages.size());
 
@@ -528,7 +529,7 @@ void AppWindowVulkan::createImageViews()
     }
 }
 
-void AppWindowVulkan::createRenderPass()
+void VulkanPipeLine::createRenderPass()
 {
     VkAttachmentDescription colorAttachment{};
     colorAttachment.format = mSwapChainImageFormat;
@@ -603,7 +604,7 @@ void AppWindowVulkan::createRenderPass()
     }
 }
 
-void AppWindowVulkan::createDescriptorSetLayout()
+void VulkanPipeLine::createDescriptorSetLayout()
 {
     VkDescriptorSetLayoutBinding uboLayoutBinding{};
     uboLayoutBinding.binding = 0;
@@ -632,7 +633,7 @@ void AppWindowVulkan::createDescriptorSetLayout()
     }
 }
 
-void AppWindowVulkan::createGraphicsPipeline()
+void VulkanPipeLine::createGraphicsPipeline()
 {
 
     std::unique_ptr<VulkanShader> vertexShader = std::make_unique<VulkanShader>("Vertex Shader",
@@ -758,7 +759,7 @@ void AppWindowVulkan::createGraphicsPipeline()
     //   vkDestroyShaderModule(mDevice, vertShaderModule, nullptr);
 }
 
-void AppWindowVulkan::createFramebuffers()
+void VulkanPipeLine::createFramebuffers()
 {
     mSwapChainFramebuffers.resize(mSwapChainImageViews.size());
 
@@ -785,7 +786,7 @@ void AppWindowVulkan::createFramebuffers()
     }
 }
 
-void AppWindowVulkan::createCommandPool()
+void VulkanPipeLine::createCommandPool()
 {
     QueueFamilyIndices queueFamilyIndices = findQueueFamilies(mPhysicalDevice);
 
@@ -800,7 +801,7 @@ void AppWindowVulkan::createCommandPool()
     }
 }
 
-void AppWindowVulkan::createDepthResources()
+void VulkanPipeLine::createDepthResources()
 {
     VkFormat depthFormat = findDepthFormat();
     createImage(mSwapChainExtent.width, mSwapChainExtent.height, 1,
@@ -813,7 +814,7 @@ void AppWindowVulkan::createDepthResources()
     mDepthImageView = createImageView(mDepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 }
 
-VkCommandBuffer AppWindowVulkan::beginSingleTimeCommands()
+VkCommandBuffer VulkanPipeLine::beginSingleTimeCommands()
 {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -833,7 +834,7 @@ VkCommandBuffer AppWindowVulkan::beginSingleTimeCommands()
     return commandBuffer;
 }
 
-void AppWindowVulkan::endSingleTimeCommands(VkCommandBuffer commandBuffer)
+void VulkanPipeLine::endSingleTimeCommands(VkCommandBuffer commandBuffer)
 {
     vkEndCommandBuffer(commandBuffer);
 
@@ -848,7 +849,7 @@ void AppWindowVulkan::endSingleTimeCommands(VkCommandBuffer commandBuffer)
     vkFreeCommandBuffers(mDevice, mCommandPool, 1, &commandBuffer);
 }
 
-void AppWindowVulkan::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t aMipLevels)
+void VulkanPipeLine::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t aMipLevels)
 {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
@@ -900,7 +901,7 @@ void AppWindowVulkan::transitionImageLayout(VkImage image, VkFormat format, VkIm
     endSingleTimeCommands(commandBuffer);
 }
 
-void AppWindowVulkan::generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t aMipLevels)
+void VulkanPipeLine::generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t aMipLevels)
 {
     // Check if image format supports linear blitting
     VkFormatProperties formatProperties;
@@ -992,7 +993,7 @@ void AppWindowVulkan::generateMipmaps(VkImage image, VkFormat imageFormat, int32
     endSingleTimeCommands(commandBuffer);
 }
 
-void AppWindowVulkan::createTextureImage()
+void VulkanPipeLine::createTextureImage()
 {
     int texWidth, texHeight, texChannels;
     stbi_uc *pixels = stbi_load(TEXTURE_PATH.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
@@ -1032,7 +1033,7 @@ void AppWindowVulkan::createTextureImage()
     generateMipmaps(mTextureImage, VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, mMipLevels);
 }
 
-VkImageView AppWindowVulkan::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t aMipLevel)
+VkImageView VulkanPipeLine::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t aMipLevel)
 {
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -1054,12 +1055,12 @@ VkImageView AppWindowVulkan::createImageView(VkImage image, VkFormat format, VkI
     return imageView;
 }
 
-void AppWindowVulkan::createTextureImageView()
+void VulkanPipeLine::createTextureImageView()
 {
     mTextureImageView = createImageView(mTextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, mMipLevels);
 }
 
-void AppWindowVulkan::createTextureSampler()
+void VulkanPipeLine::createTextureSampler()
 {
     VkPhysicalDeviceProperties properties{};
     vkGetPhysicalDeviceProperties(mPhysicalDevice, &properties);
@@ -1088,13 +1089,13 @@ void AppWindowVulkan::createTextureSampler()
     }
 }
 
-void AppWindowVulkan::loadModel()
+void VulkanPipeLine::loadModel()
 {
     model = std::make_unique<Model>(MODEL_PATH, mDevice, mPhysicalDevice, mCommandPool, mGraphicsQueue);
 }
 
 
-void AppWindowVulkan::createCommandBuffers()
+void VulkanPipeLine::createCommandBuffers()
 {
     mCommandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
@@ -1110,7 +1111,7 @@ void AppWindowVulkan::createCommandBuffers()
     }
 }
 
-void AppWindowVulkan::createSyncObjects()
+void VulkanPipeLine::createSyncObjects()
 {
     mImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     mRenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
@@ -1134,19 +1135,19 @@ void AppWindowVulkan::createSyncObjects()
     }
 }
 
-AppWindowVulkan::AppWindowVulkan(unsigned int width, unsigned int height) : mWidth(width),
+VulkanPipeLine::VulkanPipeLine(unsigned int width, unsigned int height) : mWidth(width),
                                                                             mHeight(height)
 {
     initWindow(width, height);
     initVulkan();
 }
 
-GLFWwindow *AppWindowVulkan::GetWindow()
+GLFWwindow *VulkanPipeLine::GetWindow()
 {
     return mWindow;
 }
 
-void AppWindowVulkan::initWindow(int width, int height)
+void VulkanPipeLine::initWindow(int width, int height)
 {
 
     glfwInit();
@@ -1174,7 +1175,7 @@ bool checkDeviceExtensionSupport(VkPhysicalDevice device)
     return requiredExtensions.empty();
 }
 
-bool AppWindowVulkan::isDeviceSuitable(VkPhysicalDevice aDevice)
+bool VulkanPipeLine::isDeviceSuitable(VkPhysicalDevice aDevice)
 {
     QueueFamilyIndices indices = findQueueFamilies(aDevice);
 
@@ -1193,7 +1194,7 @@ bool AppWindowVulkan::isDeviceSuitable(VkPhysicalDevice aDevice)
     return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
 }
 
-void AppWindowVulkan::pickPhysicalDevice()
+void VulkanPipeLine::pickPhysicalDevice()
 {
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(mInstance, &deviceCount, nullptr);
@@ -1224,7 +1225,7 @@ void AppWindowVulkan::pickPhysicalDevice()
     }
 }
 
-void AppWindowVulkan::createLogicalDevice()
+void VulkanPipeLine::createLogicalDevice()
 {
     QueueFamilyIndices indices = findQueueFamilies(mPhysicalDevice);
 
@@ -1276,7 +1277,7 @@ void AppWindowVulkan::createLogicalDevice()
     vkGetDeviceQueue(mDevice, indices.presentFamily.value(), 0, &mPresentQueue);
 }
 
-void AppWindowVulkan::initVulkan()
+void VulkanPipeLine::initVulkan()
 {
 
     if (!glfwVulkanSupported())
@@ -1312,7 +1313,7 @@ void AppWindowVulkan::initVulkan()
     createSyncObjects();
 }
 
-void AppWindowVulkan::recreateSwapChain()
+void VulkanPipeLine::recreateSwapChain()
 {
     int width = 0, height = 0;
     glfwGetFramebufferSize(mWindow, &width, &height);
@@ -1333,7 +1334,7 @@ void AppWindowVulkan::recreateSwapChain()
     createFramebuffers();
 }
 
-void AppWindowVulkan::updateUniformBuffer(uint32_t currentImage)
+void VulkanPipeLine::updateUniformBuffer(uint32_t currentImage)
 {
     static auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -1349,7 +1350,7 @@ void AppWindowVulkan::updateUniformBuffer(uint32_t currentImage)
     memcpy(mUniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }
 
-void AppWindowVulkan::DrawFrame()
+void VulkanPipeLine::DrawFrame()
 {
     vkWaitForFences(mDevice, 1, &mInFlightFences[mCurrentFrame], VK_TRUE, UINT64_MAX);
 
@@ -1421,7 +1422,7 @@ void AppWindowVulkan::DrawFrame()
     mCurrentFrame = (mCurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void AppWindowVulkan::createDescriptorPool()
+void VulkanPipeLine::createDescriptorPool()
 {
     std::array<VkDescriptorPoolSize, 2> poolSizes{};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1441,7 +1442,7 @@ void AppWindowVulkan::createDescriptorPool()
     }
 }
 
-void AppWindowVulkan::createDescriptorSets()
+void VulkanPipeLine::createDescriptorSets()
 {
     std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, mDescriptorSetLayout);
     VkDescriptorSetAllocateInfo allocInfo{};
@@ -1490,7 +1491,7 @@ void AppWindowVulkan::createDescriptorSets()
     }
 }
 
-void AppWindowVulkan::createUniformBuffers()
+void VulkanPipeLine::createUniformBuffers()
 {
     VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
@@ -1506,7 +1507,7 @@ void AppWindowVulkan::createUniformBuffers()
     }
 }
 
-void AppWindowVulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+void VulkanPipeLine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 {
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -1565,7 +1566,7 @@ void AppWindowVulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
     }
 }
 
-void AppWindowVulkan::cleanupSwapChain()
+void VulkanPipeLine::cleanupSwapChain()
 {
     vkDestroyImageView(mDevice, mColorImageView, nullptr);
     vkDestroyImage(mDevice, mColorImage, nullptr);
@@ -1588,7 +1589,7 @@ void AppWindowVulkan::cleanupSwapChain()
     vkDestroySwapchainKHR(mDevice, mSwapChain, nullptr);
 }
 
-void AppWindowVulkan::CleanUp()
+void VulkanPipeLine::CleanUp()
 {
     cleanupSwapChain();
 

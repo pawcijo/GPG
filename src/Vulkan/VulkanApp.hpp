@@ -1,19 +1,17 @@
 #pragma once
 
-#include <AppWindowVulkan.h>
+#include "Vulkan/VulkanPipeLine.h"
+#include "Vulkan/VulkanUtis.hpp"
+#include "MyPhysics/PhysicsTimer.h"
 
 #include <glm/glm.hpp>
 
 #include <vector>
 #include <memory>
 
-#include <Vulkan/VulkanUtis.hpp>
-
-#include <MyPhysics/PhysicsTimer.h>
-
-class AppVulkan
+class VulkanApp
 {
-    AppWindowVulkan &mAppWindow;
+    VulkanPipeLine &mAppWindow;
 
     //Time related stuff
     bool mPause = false;
@@ -26,7 +24,7 @@ class AppVulkan
     void CleanUp();
 
 public:
-    AppVulkan(AppWindowVulkan &window);
-    ~AppVulkan();
+    VulkanApp(VulkanPipeLine &window);
+    ~VulkanApp();
     void Run();
 };

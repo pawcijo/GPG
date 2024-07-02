@@ -141,6 +141,8 @@ Model::Model(std::filesystem::path modelPath,
 
     createVertexBuffer(aDevice, aPhysicalDevice, aCommandPool, aGraphicsQueue);
     createIndexBuffer(aDevice, aPhysicalDevice, aCommandPool, aGraphicsQueue);
+
+    
 }
 
 std::vector<Vertex> &Model::Vertices()

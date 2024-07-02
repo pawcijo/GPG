@@ -67,10 +67,10 @@ add_definitions(
 
 add_executable(${PROJECT_NAME} 
 	main.cpp
-	src/AppWindowVulkan.cpp
-	src/AppVulkan.cpp
+	src/Vulkan/VulkanPipeLine.cpp
+	src/Vulkan/VulkanApp.cpp
 	src/Vulkan/VulkanShader.cpp
-	src/VulkanValidation.hpp
+	src/Vulkan/VulkanValidation.hpp
 	src/Vulkan/VulkanUtis.hpp
 	src/tiny_obj_loader.h
 	

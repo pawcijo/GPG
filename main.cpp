@@ -1,13 +1,13 @@
-#include <AppWindowVulkan.h>
-#include <AppVulkan.hpp>
+#include <Vulkan/VulkanPipeLine.h>
+#include <Vulkan/VulkanApp.hpp>
 
 #include <stdexcept>
 //#include <print>
 
 int main()
 {
-    AppWindowVulkan appWindow(1920, 1080);
-    AppVulkan app(appWindow);
+    VulkanPipeLine appWindow(1920, 1080);
+    VulkanApp app(appWindow);
 
     try
     {

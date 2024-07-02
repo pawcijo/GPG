@@ -33,7 +33,7 @@ struct QueueFamilyIndices
     }
 };
 
-class AppWindowVulkan
+class VulkanPipeLine
 {
     GLFWwindow *mWindow;
     VkInstance mInstance;
@@ -159,7 +159,7 @@ class AppWindowVulkan
     std::unique_ptr<Model> model;
 
 public:
-    AppWindowVulkan(unsigned int width, unsigned int height);
+    VulkanPipeLine(unsigned int width, unsigned int height);
     GLFWwindow *GetWindow();
     VkInstance GetInstance();
     unsigned int GetWidth() { return mWidth; }

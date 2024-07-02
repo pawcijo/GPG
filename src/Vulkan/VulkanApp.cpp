@@ -1,4 +1,4 @@
-#include "AppVulkan.hpp"
+#include "VulkanApp.hpp"
 
 #include <SDL2/SDL.h>
 
@@ -12,13 +12,13 @@ std::unique_ptr<PhysicsTimer> CreatePhysicsTimer(unsigned int alUpdatesPerSec)
     return std::make_unique<PhysicsTimer>(alUpdatesPerSec);
 }
 
-AppVulkan::AppVulkan(AppWindowVulkan &window) : mAppWindow(window)
+VulkanApp::VulkanApp(VulkanPipeLine &window) : mAppWindow(window)
 {
     mPhysicsTimerPtr = CreatePhysicsTimer(60); // 1 physics update per second
     mFrametimestart = ((float)GetApplicationTime()) / 1000.0f;
 }
 
-void AppVulkan::Run()
+void VulkanApp::Run()
 {
     while (!glfwWindowShouldClose(mAppWindow.GetWindow()))
     {
@@ -52,10 +52,10 @@ void AppVulkan::Run()
     CleanUp();
 }
 
-void AppVulkan::CleanUp()
+void VulkanApp::CleanUp()
 {
     mAppWindow.CleanUp();
     glfwTerminate();
 }
 
-AppVulkan::~AppVulkan() {}
+VulkanApp::~VulkanApp() {}

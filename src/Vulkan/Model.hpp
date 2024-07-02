@@ -33,6 +33,5 @@ public:
     std::vector<uint32_t> &Indices();
 
     VkBuffer VertexBuffer();
-
     VkBuffer IndexBuffer();
 };
