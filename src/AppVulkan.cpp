@@ -12,7 +12,7 @@ std::unique_ptr<PhysicsTimer> CreatePhysicsTimer(unsigned int alUpdatesPerSec)
     return std::make_unique<PhysicsTimer>(alUpdatesPerSec);
 }
 
-AppVulkan::AppVulkan(AppWindowVulkan::AppWindowVulkan &window) : mAppWindow(window)
+AppVulkan::AppVulkan(AppWindowVulkan &window) : mAppWindow(window)
 {
     mPhysicsTimerPtr = CreatePhysicsTimer(60); // 1 physics update per second
     mFrametimestart = ((float)GetApplicationTime()) / 1000.0f;

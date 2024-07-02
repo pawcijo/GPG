@@ -13,7 +13,7 @@
 
 class AppVulkan
 {
-    AppWindowVulkan::AppWindowVulkan &mAppWindow;
+    AppWindowVulkan &mAppWindow;
 
     //Time related stuff
     bool mPause = false;
@@ -26,7 +26,7 @@ class AppVulkan
     void CleanUp();
 
 public:
-    AppVulkan(AppWindowVulkan::AppWindowVulkan &window);
+    AppVulkan(AppWindowVulkan &window);
     ~AppVulkan();
     void Run();
 };

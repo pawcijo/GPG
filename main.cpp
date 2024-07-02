@@ -6,7 +6,7 @@
 
 int main()
 {
-    AppWindowVulkan::AppWindowVulkan appWindow(1920, 1080);
+    AppWindowVulkan appWindow(1920, 1080);
     AppVulkan app(appWindow);
 
     try

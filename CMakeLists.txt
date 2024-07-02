@@ -1,6 +1,6 @@
 # CMake entry point
 cmake_minimum_required (VERSION 3.9.3)
-project (OPGLPlayground)
+project (GPGPlayground)
 
 set(CMAKE_CXX_STANDARD 23)
 
@@ -65,7 +65,7 @@ add_definitions(
 	-D_CRT_SECURE_NO_WARNINGS
 )
 
-add_executable(OPGLPlayground 
+add_executable(${PROJECT_NAME} 
 	main.cpp
 	src/AppWindowVulkan.cpp
 	src/AppVulkan.cpp
@@ -74,43 +74,12 @@ add_executable(OPGLPlayground
 	src/Vulkan/VulkanUtis.hpp
 	src/tiny_obj_loader.h
 	
+	src/Vulkan/Model.cpp
 	src/MyPhysics/PhysicsTimer.cpp
-	#src/AppWindow.cpp
-	#src/App.cpp
-	#src/Shader.cpp
-	#src/Camera.cpp
-	#src/Transform.cpp
-	#src/SimpleShape/Square.cpp
-	#src/SimpleShape/Box.cpp
-	#src/stb_image.cpp
 
-	#src/MyPhysics/PhysicsScene.cpp
-	#src/MyPhysics/PhysicsMemory.cpp
-	#src/MyPhysics/PhysicsContactManager.cpp
-	#src/MyPhysics/PhysicsIsland.cpp
-	#src/MyPhysics/PhysicsBody.cpp
-	#src/MyPhysics/PhysicsBox.cpp
-	#src/MyPhysics/PhysicsContactSolver
-	#src/MyPhysics/PhysicsBroadPhase
-	#src/MyPhysics/PhysicsDynamicAABBTree.cpp
-	#src/MyPhysics/PhysicsContact.cpp
-	#src/MyPhysics/PhysicsCollide.cpp
-	#src/MyPhysics/PhysicsClock.cpp
-	#src/MyPhysics/PhysicsTimer.cpp
-	#src/MyPhysics/Common.cpp
-	#src/GameObject/GameObject.cpp
-	#src/GameObject/GameObjectManager.cpp
-	#src/Mesh/Mesh.cpp
-	#external/imgui/imgui.cpp
-	#external/imgui/imgui_draw.cpp
-	#external/imgui/imgui_tables.cpp
-	#external/imgui/imgui_widgets.cpp
-	#external/imgui/imgui_demo.cpp
-	#external/imgui/backends/imgui_impl_glfw.cpp 
-	#external/imgui/backends/imgui_impl_opengl3.cpp
 	
 )
 
-target_link_libraries(OPGLPlayground
+target_link_libraries(${PROJECT_NAME}
 	${ALL_LIBS}
 )
