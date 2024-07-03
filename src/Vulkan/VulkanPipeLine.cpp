@@ -28,8 +28,6 @@
 #include <unordered_map>
 #include <memory>
 
-
-
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
 static void framebufferResizeCallback(GLFWwindow *window, int width, int height)
@@ -1092,8 +1090,9 @@ void VulkanPipeLine::createTextureSampler()
 void VulkanPipeLine::loadModel()
 {
     model = std::make_unique<Model>(MODEL_PATH, mDevice, mPhysicalDevice, mCommandPool, mGraphicsQueue);
+    //Rotate transform for example model (it is broken i dont know why)
+    
 }
-
 
 void VulkanPipeLine::createCommandBuffers()
 {
@@ -1136,7 +1135,8 @@ void VulkanPipeLine::createSyncObjects()
 }
 
 VulkanPipeLine::VulkanPipeLine(unsigned int width, unsigned int height) : mWidth(width),
-                                                                            mHeight(height)
+                                                                          mHeight(height)
+
 {
     initWindow(width, height);
     initVulkan();
@@ -1334,7 +1334,7 @@ void VulkanPipeLine::recreateSwapChain()
     createFramebuffers();
 }
 
-void VulkanPipeLine::updateUniformBuffer(uint32_t currentImage)
+void VulkanPipeLine::updateUniformBuffer(uint32_t currentImage, Camera &aCamera)
 {
     static auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -1342,15 +1342,16 @@ void VulkanPipeLine::updateUniformBuffer(uint32_t currentImage)
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
     UniformBufferObject ubo{};
-    ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    ubo.proj = glm::perspective(glm::radians(45.0f), mSwapChainExtent.width / (float)mSwapChainExtent.height, 0.1f, 10.0f);
+
+    ubo.model = model->GetTransform().getTransform(); // glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.view = aCamera.GetViewMatrix(); //glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.proj = aCamera.mProjection; //glm::perspective(glm::radians(45.0f), mSwapChainExtent.width / (float)mSwapChainExtent.height, 0.1f, 10.0f);
     ubo.proj[1][1] *= -1;
 
     memcpy(mUniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }
 
-void VulkanPipeLine::DrawFrame()
+void VulkanPipeLine::DrawFrame(Camera &aCamera)
 {
     vkWaitForFences(mDevice, 1, &mInFlightFences[mCurrentFrame], VK_TRUE, UINT64_MAX);
 
@@ -1367,7 +1368,7 @@ void VulkanPipeLine::DrawFrame()
         throw std::runtime_error("failed to acquire swap chain image!");
     }
 
-    updateUniformBuffer(mCurrentFrame);
+    updateUniformBuffer(mCurrentFrame, aCamera);
 
     vkResetFences(mDevice, 1, &mInFlightFences[mCurrentFrame]);
 
@@ -1549,7 +1550,6 @@ void VulkanPipeLine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     scissor.extent = mSwapChainExtent;
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    
     VkBuffer vertexBuffers[] = {model->VertexBuffer()};
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
@@ -1614,7 +1614,7 @@ void VulkanPipeLine::CleanUp()
     vkDestroyDescriptorSetLayout(mDevice, mDescriptorSetLayout, nullptr);
 
     model->CleanUp(mDevice);
-    
+
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         vkDestroySemaphore(mDevice, mRenderFinishedSemaphores[i], nullptr);

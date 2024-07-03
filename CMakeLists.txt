@@ -73,6 +73,9 @@ add_executable(${PROJECT_NAME}
 	src/Vulkan/VulkanValidation.hpp
 	src/Vulkan/VulkanUtis.hpp
 	src/tiny_obj_loader.h
+
+	src/Common/Transform.cpp
+	src/Common/Camera.cpp
 	
 	src/Vulkan/Model.cpp
 	src/MyPhysics/PhysicsTimer.cpp

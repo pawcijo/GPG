@@ -4,8 +4,9 @@
 #include <GLFW/glfw3.h>
 
 #include <vulkan/vulkan.h>
-
 #include "Vulkan/VulkanUtis.hpp"
+
+#include "Common/Camera.h"
 
 #include <vector>
 #include <optional>
@@ -102,7 +103,8 @@ class VulkanPipeLine
     SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice aPhysicalDevice);
     void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &bufferMemory);
     void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-    void updateUniformBuffer(uint32_t currentImage);
+
+    void updateUniformBuffer(uint32_t currentImage, Camera &camera);
 
     void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
     void createImage(uint32_t width, uint32_t height, uint32_t aMipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage &image, VkDeviceMemory &imageMemory);
@@ -168,7 +170,7 @@ public:
     VkDevice GetDevice() { return mDevice; }
     bool mFramebufferResized = false;
 
-    void DrawFrame();
+    void DrawFrame(Camera &aCamera);
 
     void CleanUp();
 };

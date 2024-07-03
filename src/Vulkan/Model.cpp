@@ -97,7 +97,7 @@ Model::Model(std::filesystem::path modelPath,
              VkDevice aDevice,
              VkPhysicalDevice aPhysicalDevice,
              VkCommandPool aCommandPool,
-             VkQueue aGraphicsQueue)
+             VkQueue aGraphicsQueue):mTransform(Transform::origin())
 {
 
     tinyobj::attrib_t attrib;
@@ -142,7 +142,7 @@ Model::Model(std::filesystem::path modelPath,
     createVertexBuffer(aDevice, aPhysicalDevice, aCommandPool, aGraphicsQueue);
     createIndexBuffer(aDevice, aPhysicalDevice, aCommandPool, aGraphicsQueue);
 
-    
+
 }
 
 std::vector<Vertex> &Model::Vertices()

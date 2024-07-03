@@ -9,7 +9,6 @@ Transform::Transform()
     rotation = glm::vec3(0.0f, 0.0f, 0.0f);
     quaterion = glm::quat(rotation);
 
-
     glm::mat4 positionMatrix = glm::mat4(1.0f);
     positionMatrix = glm::scale(positionMatrix, scale);
     positionMatrix = glm::translate(positionMatrix,
