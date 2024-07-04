@@ -22,7 +22,7 @@ class VulkanApp
     double mGameTime;
 
     //Camera related
-    void CameraTest();
+    void ProcessCameraMovement();
     void SetViewAndPerspective();
     Camera mCamera;
 

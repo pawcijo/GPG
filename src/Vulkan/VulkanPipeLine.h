@@ -1,5 +1,9 @@
 #pragma once
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_vulkan.h"
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -95,6 +99,13 @@ class VulkanPipeLine
     void initWindow(int width, int height);
     void initVulkan();
 
+    // Imgui
+    //  Setup Dear ImGui context
+   
+    bool show_demo_window = true;
+    bool show_another_window = false;
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
     uint32_t mCurrentFrame = 0;
 
     QueueFamilyIndices findQueueFamilies(VkPhysicalDevice aDevice);
@@ -139,6 +150,8 @@ class VulkanPipeLine
     void createTextureImage();
     void createTextureImageView();
     void createTextureSampler();
+
+    void setupImgui();
 
     void loadModel();
 

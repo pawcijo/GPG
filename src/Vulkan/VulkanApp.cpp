@@ -1,5 +1,9 @@
 #include "VulkanApp.hpp"
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_vulkan.h"
+
 #include <SDL2/SDL.h>
 
 unsigned long GetApplicationTime()
@@ -41,7 +45,7 @@ void VulkanApp::SetViewAndPerspective()
     mCamera.updateCameraVectors();
 }
 
-void VulkanApp::CameraTest()
+void VulkanApp::ProcessCameraMovement()
 {
 
     float speed = mPhysicsTimerPtr->GetStepSize() * mCamera.MovementSpeed;
@@ -93,8 +97,7 @@ void VulkanApp::Run()
 
                 // Update Camera ? here
                 SetViewAndPerspective();
-
-                CameraTest();
+                ProcessCameraMovement();
 
                 unsigned int lDeltaTime = GetApplicationTime() - lUpdateTime;
                 mUpdateTime = (float)(lDeltaTime) / 1000.0f;
