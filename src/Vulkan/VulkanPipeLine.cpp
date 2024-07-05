@@ -1142,7 +1142,7 @@ void VulkanPipeLine::setupImgui()
     init_info.DescriptorPool = mImguiDescriptorPool;
     init_info.RenderPass = mRenderPass;
     init_info.Subpass = 0;
-    init_info.MinImageCount = swapChainSupport.capabilities.maxImageCount;
+    init_info.MinImageCount = swapChainSupport.capabilities.minImageCount;
     init_info.ImageCount = imageCount;
     init_info.MSAASamples = getMaxUsableSampleCount();
     init_info.Allocator = g_Allocator;

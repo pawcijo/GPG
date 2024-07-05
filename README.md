@@ -5,11 +5,28 @@ lib (https://github.com/MADEAPPS/newton-dynamics).
 
 Run also `git submodule update --init --recursive` for needed submodules (glfw,glm,imgu,SPIRV).
 
+In short :
+
+```
+python3 download_dependencies.py
+python3 install_dependencies.py
+git submodule update --init --recursive 
+
+```
+
+Also remember to build shaders in `build/shaders` directory.
+
+For shaders you will need Vulkan SDK for your platform: https://vulkan.lunarg.com/#new_tab.
+
 
 
 ## Requirements for Ubuntu :
 ```
 sudo apt-get install build-essential libxmu-dev libxi-dev libgl-dev libwayland-dev libxkbcommon-dev libsdl2-dev gcc-14 g++-14
+sudo apt install vulkan-tools
+sudo apt install libvulkan-dev
+sudo apt install vulkan-validationlayers-dev spirv-tools
+
 ```
 ```
 pip install python-git
