@@ -119,6 +119,10 @@ void VulkanApp::Run()
 
 void VulkanApp::CleanUp()
 {
+
+    ImGui_ImplVulkan_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     mAppWindow.CleanUp();
     glfwTerminate();
 }

@@ -42,6 +42,7 @@ class VulkanPipeLine
 {
     GLFWwindow *mWindow;
     VkInstance mInstance;
+    VkAllocationCallbacks*   g_Allocator = nullptr;
     VkDebugUtilsMessengerEXT mDebugMessenger;
 
     VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
@@ -75,6 +76,7 @@ class VulkanPipeLine
     std::vector<VkDeviceMemory> mUniformBuffersMemory;
     std::vector<void *> mUniformBuffersMapped;
 
+    VkDescriptorPool mImguiDescriptorPool;
     VkDescriptorPool mDescriptorPool;
     std::vector<VkDescriptorSet> mDescriptorSets;
 

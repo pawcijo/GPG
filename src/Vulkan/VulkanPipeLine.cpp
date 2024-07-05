@@ -41,6 +41,15 @@ bool hasStencilComponent(VkFormat format)
     return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
 }
 
+static void check_vk_result(VkResult err)
+{
+    if (err == 0)
+        return;
+    fprintf(stderr, "[vulkan] Error: VkResult = %d\n", err);
+    if (err < 0)
+        abort();
+}
+
 void VulkanPipeLine::createColorResources()
 {
     VkFormat colorFormat = mSwapChainImageFormat;
@@ -1109,6 +1118,18 @@ void VulkanPipeLine::setupImgui()
 
     QueueFamilyIndices indices = findQueueFamilies(mPhysicalDevice);
 
+    VkDescriptorPoolSize pool_sizes[] =
+        {
+            {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1},
+        };
+    VkDescriptorPoolCreateInfo pool_info = {};
+    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+    pool_info.maxSets = 1;
+    pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
+    pool_info.pPoolSizes = pool_sizes;
+    vkCreateDescriptorPool(mDevice, &pool_info, g_Allocator, &mImguiDescriptorPool);
+
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForVulkan(mWindow, true);
     ImGui_ImplVulkan_InitInfo init_info = {};
@@ -1118,14 +1139,14 @@ void VulkanPipeLine::setupImgui()
     init_info.QueueFamily = indices.graphicsFamily.value();
     init_info.Queue = mGraphicsQueue;
     // init_info.PipelineCache = g_PipelineCache;
-    init_info.DescriptorPool = mDescriptorPool;
+    init_info.DescriptorPool = mImguiDescriptorPool;
     init_info.RenderPass = mRenderPass;
     init_info.Subpass = 0;
     init_info.MinImageCount = swapChainSupport.capabilities.maxImageCount;
     init_info.ImageCount = imageCount;
     init_info.MSAASamples = getMaxUsableSampleCount();
-    // init_info.Allocator = g_Allocator;
-    // init_info.CheckVkResultFn = debugCallback;
+    init_info.Allocator = g_Allocator;
+    // init_info.CheckVkResultFn = check_vk_result;
 
     ImGui_ImplVulkan_Init(&init_info);
 }
@@ -1457,42 +1478,6 @@ void VulkanPipeLine::DrawFrame(Camera &aCamera)
 
     presentInfo.pImageIndices = &imageIndex;
 
-    ImGui_ImplVulkan_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    ImGuiIO &io = ImGui::GetIO();
-
-    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-    {
-        static float f = 0.0f;
-        static int counter = 0;
-
-        ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
-
-        ImGui::Text("This is some useful text.");          // Display some text (you can use a format strings too)
-        ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
-        ImGui::Checkbox("Another Window", &show_another_window);
-
-        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
-        ImGui::ColorEdit3("clear color", (float *)&clear_color); // Edit 3 floats representing a color
-
-        if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
-            counter++;
-        ImGui::SameLine();
-        ImGui::Text("counter = %d", counter);
-
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-        ImGui::End();
-    }
-
-    ImGui::Render();
-    ImDrawData *draw_data = ImGui::GetDrawData();
-
-    ImGui_ImplVulkan_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-
     result = vkQueuePresentKHR(mPresentQueue, &presentInfo);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || mFramebufferResized)
@@ -1619,6 +1604,39 @@ void VulkanPipeLine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
+    ImGui_ImplVulkan_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGuiIO &io = ImGui::GetIO();
+
+    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
+    {
+        static float f = 0.0f;
+        static int counter = 0;
+
+        ImGui::Begin("Hello, world!");                     // Create a window called "Hello, world!" and append into it.
+        ImGui::Text("This is some useful text.");          // Display some text (you can use a format strings too)
+        ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
+        ImGui::Checkbox("Another Window", &show_another_window);
+
+        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
+        ImGui::ColorEdit3("clear color", (float *)&clear_color); // Edit 3 floats representing a color
+
+        if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
+            counter++;
+        ImGui::SameLine();
+        ImGui::Text("counter = %d", counter);
+
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+        ImGui::End();
+    }
+
+    ImGui::Render();
+    ImDrawData *draw_data = ImGui::GetDrawData();
+
+    ImGui_ImplVulkan_RenderDrawData(draw_data, commandBuffer);
+
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mGraphicsPipeline);
 
     VkViewport viewport{};
@@ -1688,6 +1706,7 @@ void VulkanPipeLine::CleanUp()
         vkFreeMemory(mDevice, mUniformBuffersMemory[i], nullptr);
     }
 
+    vkDestroyDescriptorPool(mDevice, mImguiDescriptorPool, nullptr);
     vkDestroyDescriptorPool(mDevice, mDescriptorPool, nullptr);
 
     vkDestroySampler(mDevice, mTextureSampler, nullptr);
