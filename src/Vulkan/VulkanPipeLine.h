@@ -42,7 +42,7 @@ class VulkanPipeLine
 {
     GLFWwindow *mWindow;
     VkInstance mInstance;
-    VkAllocationCallbacks*   g_Allocator = nullptr;
+    VkAllocationCallbacks *g_Allocator = nullptr;
     VkDebugUtilsMessengerEXT mDebugMessenger;
 
     VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
@@ -103,7 +103,7 @@ class VulkanPipeLine
 
     // Imgui
     //  Setup Dear ImGui context
-   
+
     bool show_demo_window = true;
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
@@ -167,6 +167,8 @@ class VulkanPipeLine
     void cleanupSwapChain();
 
     void recreateSwapChain();
+
+    void drawImgui(VkCommandBuffer commandBuffer);
 
     // move to App or even better to config/project save file.
     const std::string MODEL_PATH = "resources/models/viking_room.obj";
