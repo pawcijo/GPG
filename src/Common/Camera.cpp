@@ -65,19 +65,7 @@ Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float u
 
 glm::mat4 Camera::GetViewMatrix()
 {
-    // printf("Pitch %f  yaw %f Position : x: %f y: %f z: %f  \n", Pitch, Yaw, Position.x, Position.y, Position.z);
-    ////glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-
     glm::vec3 direction  = Position + Front;
-    if (check)
-    {
-        printf("Up : x %f y %f z %f \n", Up.x, Up.y, Up.z);
-        printf("Front : x %f y %f z %f \n", Front.x, Front.y, Front.z);
-        printf("direction  : x %f y %f z %f \n", direction.x, direction.y, Front.z);
-
-        check = false;
-    }
-
     return glm::lookAt(Position,direction, Up);
 }
 

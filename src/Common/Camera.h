@@ -55,8 +55,6 @@ public:
   float Pitch;
   bool firstMove = false;
 
-  bool check = true;
-
   // ortho view
   OrthographicSettings orthographicSettings;
 
