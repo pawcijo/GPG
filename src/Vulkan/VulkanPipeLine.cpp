@@ -28,8 +28,6 @@
 #include <unordered_map>
 #include <memory>
 
-
-
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
 static void framebufferResizeCallback(GLFWwindow *window, int width, int height)
@@ -41,6 +39,15 @@ static void framebufferResizeCallback(GLFWwindow *window, int width, int height)
 bool hasStencilComponent(VkFormat format)
 {
     return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
+}
+
+static void check_vk_result(VkResult err)
+{
+    if (err == 0)
+        return;
+    fprintf(stderr, "[vulkan] Error: VkResult = %d\n", err);
+    if (err < 0)
+        abort();
 }
 
 void VulkanPipeLine::createColorResources()
@@ -1089,11 +1096,69 @@ void VulkanPipeLine::createTextureSampler()
     }
 }
 
+void VulkanPipeLine::setupImgui()
+{
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+
+    ImGui::StyleColorsDark();
+
+    SwapChainSupportDetails swapChainSupport = querySwapChainSupport(mPhysicalDevice);
+
+    uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+    if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
+    {
+        imageCount = swapChainSupport.capabilities.maxImageCount;
+    }
+
+    QueueFamilyIndices indices = findQueueFamilies(mPhysicalDevice);
+
+    VkDescriptorPoolSize pool_sizes[] =
+        {
+            {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1},
+        };
+    VkDescriptorPoolCreateInfo pool_info = {};
+    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+    pool_info.maxSets = 1;
+    pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
+    pool_info.pPoolSizes = pool_sizes;
+    vkCreateDescriptorPool(mDevice, &pool_info, g_Allocator, &mImguiDescriptorPool);
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForVulkan(mWindow, true);
+    ImGui_ImplVulkan_InitInfo init_info = {};
+    init_info.Instance = mInstance;
+    init_info.PhysicalDevice = mPhysicalDevice;
+    init_info.Device = mDevice;
+    init_info.QueueFamily = indices.graphicsFamily.value();
+    init_info.Queue = mGraphicsQueue;
+    // init_info.PipelineCache = g_PipelineCache;
+    init_info.DescriptorPool = mImguiDescriptorPool;
+    init_info.RenderPass = mRenderPass;
+    init_info.Subpass = 0;
+    init_info.MinImageCount = swapChainSupport.capabilities.maxImageCount;
+    init_info.ImageCount = imageCount;
+    init_info.MSAASamples = getMaxUsableSampleCount();
+    init_info.Allocator = g_Allocator;
+    // init_info.CheckVkResultFn = check_vk_result;
+
+    ImGui_ImplVulkan_Init(&init_info);
+}
+
 void VulkanPipeLine::loadModel()
 {
     model = std::make_unique<Model>(MODEL_PATH, mDevice, mPhysicalDevice, mCommandPool, mGraphicsQueue);
+    // Rotate example model
+    model->GetTransform().rotate(90, glm::vec3(1, 0, 0));
+    model->GetTransform().rotate(180, glm::vec3(0, 1, 0));
+    model->GetTransform().rotate(90, glm::vec3(0, 0, 1));
 }
-
 
 void VulkanPipeLine::createCommandBuffers()
 {
@@ -1136,7 +1201,8 @@ void VulkanPipeLine::createSyncObjects()
 }
 
 VulkanPipeLine::VulkanPipeLine(unsigned int width, unsigned int height) : mWidth(width),
-                                                                            mHeight(height)
+                                                                          mHeight(height)
+
 {
     initWindow(width, height);
     initVulkan();
@@ -1308,9 +1374,12 @@ void VulkanPipeLine::initVulkan()
 
     createUniformBuffers();
     createDescriptorPool();
+
     createDescriptorSets();
     createCommandBuffers();
     createSyncObjects();
+
+    setupImgui();
 }
 
 void VulkanPipeLine::recreateSwapChain()
@@ -1334,7 +1403,7 @@ void VulkanPipeLine::recreateSwapChain()
     createFramebuffers();
 }
 
-void VulkanPipeLine::updateUniformBuffer(uint32_t currentImage)
+void VulkanPipeLine::updateUniformBuffer(uint32_t currentImage, Camera &aCamera)
 {
     static auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -1342,16 +1411,18 @@ void VulkanPipeLine::updateUniformBuffer(uint32_t currentImage)
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
     UniformBufferObject ubo{};
-    ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    ubo.proj = glm::perspective(glm::radians(45.0f), mSwapChainExtent.width / (float)mSwapChainExtent.height, 0.1f, 10.0f);
+
+    ubo.model = model->GetTransform().getTransform(); // glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.view = aCamera.GetViewMatrix();               // glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.proj = aCamera.mProjection;                   // glm::perspective(glm::radians(45.0f), mSwapChainExtent.width / (float)mSwapChainExtent.height, 0.1f, 10.0f);
     ubo.proj[1][1] *= -1;
 
     memcpy(mUniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }
 
-void VulkanPipeLine::DrawFrame()
+void VulkanPipeLine::DrawFrame(Camera &aCamera)
 {
+
     vkWaitForFences(mDevice, 1, &mInFlightFences[mCurrentFrame], VK_TRUE, UINT64_MAX);
 
     uint32_t imageIndex;
@@ -1367,7 +1438,7 @@ void VulkanPipeLine::DrawFrame()
         throw std::runtime_error("failed to acquire swap chain image!");
     }
 
-    updateUniformBuffer(mCurrentFrame);
+    updateUniformBuffer(mCurrentFrame, aCamera);
 
     vkResetFences(mDevice, 1, &mInFlightFences[mCurrentFrame]);
 
@@ -1533,6 +1604,39 @@ void VulkanPipeLine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
+    ImGui_ImplVulkan_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGuiIO &io = ImGui::GetIO();
+
+    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
+    {
+        static float f = 0.0f;
+        static int counter = 0;
+
+        ImGui::Begin("Hello, world!");                     // Create a window called "Hello, world!" and append into it.
+        ImGui::Text("This is some useful text.");          // Display some text (you can use a format strings too)
+        ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
+        ImGui::Checkbox("Another Window", &show_another_window);
+
+        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
+        ImGui::ColorEdit3("clear color", (float *)&clear_color); // Edit 3 floats representing a color
+
+        if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
+            counter++;
+        ImGui::SameLine();
+        ImGui::Text("counter = %d", counter);
+
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+        ImGui::End();
+    }
+
+    ImGui::Render();
+    ImDrawData *draw_data = ImGui::GetDrawData();
+
+    ImGui_ImplVulkan_RenderDrawData(draw_data, commandBuffer);
+
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mGraphicsPipeline);
 
     VkViewport viewport{};
@@ -1549,7 +1653,6 @@ void VulkanPipeLine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     scissor.extent = mSwapChainExtent;
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    
     VkBuffer vertexBuffers[] = {model->VertexBuffer()};
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
@@ -1603,6 +1706,7 @@ void VulkanPipeLine::CleanUp()
         vkFreeMemory(mDevice, mUniformBuffersMemory[i], nullptr);
     }
 
+    vkDestroyDescriptorPool(mDevice, mImguiDescriptorPool, nullptr);
     vkDestroyDescriptorPool(mDevice, mDescriptorPool, nullptr);
 
     vkDestroySampler(mDevice, mTextureSampler, nullptr);
@@ -1614,7 +1718,7 @@ void VulkanPipeLine::CleanUp()
     vkDestroyDescriptorSetLayout(mDevice, mDescriptorSetLayout, nullptr);
 
     model->CleanUp(mDevice);
-    
+
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         vkDestroySemaphore(mDevice, mRenderFinishedSemaphores[i], nullptr);

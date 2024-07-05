@@ -1,6 +1,8 @@
 #pragma once
 
-#include <Vulkan/VulkanUtis.hpp>
+#include "Vulkan/VulkanUtis.hpp"
+#include "Common/Transform.h"
+
 #include <filesystem>
 
 class Model
@@ -13,6 +15,8 @@ class Model
 
     VkBuffer mIndexBuffer;
     VkDeviceMemory mIndexBufferMemory;
+
+    Transform mTransform;
 
     void createVertexBuffer(VkDevice aDevice,
                             VkPhysicalDevice aPhysicalDevice,
@@ -31,6 +35,8 @@ public:
 
     std::vector<Vertex> &Vertices();
     std::vector<uint32_t> &Indices();
+
+    Transform &GetTransform() { return mTransform; }
 
     VkBuffer VertexBuffer();
     VkBuffer IndexBuffer();

@@ -65,6 +65,8 @@ add_definitions(
 	-D_CRT_SECURE_NO_WARNINGS
 )
 
+set(IMGUI_DIR external/imgui/)
+
 add_executable(${PROJECT_NAME} 
 	main.cpp
 	src/Vulkan/VulkanPipeLine.cpp
@@ -73,11 +75,21 @@ add_executable(${PROJECT_NAME}
 	src/Vulkan/VulkanValidation.hpp
 	src/Vulkan/VulkanUtis.hpp
 	src/tiny_obj_loader.h
+
+	src/Common/Transform.cpp
+	src/Common/Camera.cpp
 	
 	src/Vulkan/Model.cpp
 	src/MyPhysics/PhysicsTimer.cpp
 
-	
+	${IMGUI_DIR}/backends/imgui_impl_glfw.cpp 
+	${IMGUI_DIR}/backends/imgui_impl_vulkan.cpp 
+	${IMGUI_DIR}/imgui.cpp 
+	${IMGUI_DIR}/imgui_draw.cpp 
+	${IMGUI_DIR}/imgui_demo.cpp 
+	${IMGUI_DIR}/imgui_tables.cpp 
+	${IMGUI_DIR}/imgui_widgets.cpp
+
 )
 
 target_link_libraries(${PROJECT_NAME}

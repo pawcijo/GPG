@@ -13,7 +13,7 @@ class VulkanApp
 {
     VulkanPipeLine &mAppWindow;
 
-    //Time related stuff
+    // Time related stuff
     bool mPause = false;
     std::unique_ptr<PhysicsTimer> mPhysicsTimerPtr;
     float mFrametimestart;
@@ -21,6 +21,12 @@ class VulkanApp
     bool mIsUpdated;
     double mGameTime;
 
+    //Camera related
+    void ProcessCameraMovement();
+    void SetViewAndPerspective();
+    Camera mCamera;
+
+    //Clean up
     void CleanUp();
 
 public:

@@ -1,11 +1,16 @@
 #pragma once
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_vulkan.h"
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 #include <vulkan/vulkan.h>
-
 #include "Vulkan/VulkanUtis.hpp"
+
+#include "Common/Camera.h"
 
 #include <vector>
 #include <optional>
@@ -37,6 +42,7 @@ class VulkanPipeLine
 {
     GLFWwindow *mWindow;
     VkInstance mInstance;
+    VkAllocationCallbacks*   g_Allocator = nullptr;
     VkDebugUtilsMessengerEXT mDebugMessenger;
 
     VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
@@ -70,6 +76,7 @@ class VulkanPipeLine
     std::vector<VkDeviceMemory> mUniformBuffersMemory;
     std::vector<void *> mUniformBuffersMapped;
 
+    VkDescriptorPool mImguiDescriptorPool;
     VkDescriptorPool mDescriptorPool;
     std::vector<VkDescriptorSet> mDescriptorSets;
 
@@ -94,6 +101,13 @@ class VulkanPipeLine
     void initWindow(int width, int height);
     void initVulkan();
 
+    // Imgui
+    //  Setup Dear ImGui context
+   
+    bool show_demo_window = true;
+    bool show_another_window = false;
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
     uint32_t mCurrentFrame = 0;
 
     QueueFamilyIndices findQueueFamilies(VkPhysicalDevice aDevice);
@@ -102,7 +116,8 @@ class VulkanPipeLine
     SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice aPhysicalDevice);
     void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &bufferMemory);
     void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-    void updateUniformBuffer(uint32_t currentImage);
+
+    void updateUniformBuffer(uint32_t currentImage, Camera &camera);
 
     void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
     void createImage(uint32_t width, uint32_t height, uint32_t aMipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage &image, VkDeviceMemory &imageMemory);
@@ -138,6 +153,8 @@ class VulkanPipeLine
     void createTextureImageView();
     void createTextureSampler();
 
+    void setupImgui();
+
     void loadModel();
 
     void createUniformBuffers();
@@ -168,7 +185,7 @@ public:
     VkDevice GetDevice() { return mDevice; }
     bool mFramebufferResized = false;
 
-    void DrawFrame();
+    void DrawFrame(Camera &aCamera);
 
     void CleanUp();
 };
