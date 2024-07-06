@@ -14,8 +14,9 @@ namespace GPGVulkan
         std::vector<SceneObject *> mChildren;
 
     public:
-        SceneObject(SceneObject *parent = nullptr,
-                    Transform *aTransform = nullptr);
+        SceneObject();
+        SceneObject(Transform *aTransform,
+                    SceneObject *parent);
 
         Transform *mTransfrom;
         Model *mModel;

@@ -41,6 +41,9 @@ namespace GPGVulkan
         }
     };
 
+
+    class Scene;
+
     class VulkanPipeLine
     {
         GLFWwindow *mWindow;
@@ -180,6 +183,8 @@ namespace GPGVulkan
         // move to app class
         std::unique_ptr<Model> model;
 
+        Scene * mScene;
+
     public:
         VulkanPipeLine(unsigned int width, unsigned int height);
         GLFWwindow *GetWindow();
@@ -189,6 +194,8 @@ namespace GPGVulkan
 
         VkDevice GetDevice() { return mDevice; }
         bool mFramebufferResized = false;
+
+        void SetScene(Scene * aScene);
 
         void DrawFrame(Camera &aCamera);
 

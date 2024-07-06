@@ -5,11 +5,16 @@
 namespace GPGVulkan
 {
 
-    SceneObject::SceneObject(SceneObject *parent,
-                             Transform *aTransform)
-        : mParent(parent),
-          mTransfrom(aTransform)
-    {
-    }
+  SceneObject::SceneObject() : mParent(nullptr),
+                               mTransfrom(new Transform())
+  {
+  }
+
+  SceneObject::SceneObject(Transform *aTransform,
+                           SceneObject *parent)
+      : mParent(parent),
+        mTransfrom(aTransform)
+  {
+  }
 
 }

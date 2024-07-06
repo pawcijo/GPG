@@ -1,5 +1,7 @@
 #include "Scene.hpp"
 
+#include "SceneObject.hpp"
+
 namespace GPGVulkan
 {
     Scene::Scene()

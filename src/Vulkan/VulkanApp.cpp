@@ -24,6 +24,7 @@ namespace GPGVulkan
     {
         mPhysicsTimerPtr = CreatePhysicsTimer(60); // 1 physics update per second
         mFrametimestart = ((float)GetApplicationTime()) / 1000.0f;
+        mGraphicPipeline.SetScene(&mScene);
     }
 
     void VulkanApp::SetViewAndPerspective()

@@ -31,7 +31,7 @@ namespace GPGVulkan
         Camera mCamera;
 
         // Scene
-        Scene scene;
+        Scene mScene;
 
         // Clean up
         void CleanUp();

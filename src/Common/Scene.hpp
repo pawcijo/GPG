@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <vector>
 
-class SceneObject;
+#include "SceneObject.hpp"
 
 namespace GPGVulkan
 {
