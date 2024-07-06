@@ -2,6 +2,7 @@
 
 #include "Vulkan/VulkanPipeLine.h"
 #include "Vulkan/VulkanUtis.hpp"
+#include "Common/Scene.hpp"
 #include "MyPhysics/PhysicsTimer.h"
 
 #include <glm/glm.hpp>
@@ -9,28 +10,36 @@
 #include <vector>
 #include <memory>
 
-class VulkanApp
+namespace GPGVulkan
 {
-    VulkanPipeLine &mAppWindow;
 
-    // Time related stuff
-    bool mPause = false;
-    std::unique_ptr<PhysicsTimer> mPhysicsTimerPtr;
-    float mFrametimestart;
-    float mUpdateTime;
-    bool mIsUpdated;
-    double mGameTime;
+    class VulkanApp
+    {
+        VulkanPipeLine &mGraphicPipeline;
 
-    //Camera related
-    void ProcessCameraMovement();
-    void SetViewAndPerspective();
-    Camera mCamera;
+        // Time related stuff
+        bool mPause = false;
+        std::unique_ptr<PhysicsTimer> mPhysicsTimerPtr;
+        float mFrametimestart;
+        float mUpdateTime;
+        bool mIsUpdated;
+        double mGameTime;
 
-    //Clean up
-    void CleanUp();
+        // Camera related
+        void ProcessCameraMovement();
+        void SetViewAndPerspective();
+        Camera mCamera;
 
-public:
-    VulkanApp(VulkanPipeLine &window);
-    ~VulkanApp();
-    void Run();
-};
+        // Scene
+        Scene scene;
+
+        // Clean up
+        void CleanUp();
+
+    public:
+        VulkanApp(VulkanPipeLine &window);
+        ~VulkanApp();
+        void Run();
+    };
+
+}

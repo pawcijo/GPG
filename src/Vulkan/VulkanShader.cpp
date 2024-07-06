@@ -2,7 +2,10 @@
 
 #include <Vulkan/VulkanUtis.hpp>
 
-       VkShaderModule createShaderModule(const std::vector<char> &code, VkDevice aDevice)
+namespace GPGVulkan
+{
+
+    VkShaderModule createShaderModule(const std::vector<char> &code, VkDevice aDevice)
     {
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -22,23 +25,25 @@
         return shaderModule;
     }
 
-VulkanShader::VulkanShader(const std::string &aName,
-                           const std::string &aPath,
-                           VkStructureType aShaderType,
-                           VkShaderStageFlagBits aShaderStage,
-                           VkDevice aDevice) : mName(aName),
-                                               mShaderType(aShaderType),
-                                               mShaderStage(aShaderStage),
-                                               mDevice(aDevice)
-{
+    VulkanShader::VulkanShader(const std::string &aName,
+                               const std::string &aPath,
+                               VkStructureType aShaderType,
+                               VkShaderStageFlagBits aShaderStage,
+                               VkDevice aDevice) : mName(aName),
+                                                   mShaderType(aShaderType),
+                                                   mShaderStage(aShaderStage),
+                                                   mDevice(aDevice)
+    {
 
-    auto shaderCode = readFile(aPath);
+        auto shaderCode = readFile(aPath);
 
-    mShaderModule = createShaderModule(shaderCode, mDevice);
+        mShaderModule = createShaderModule(shaderCode, mDevice);
 
-    mShaderStageInfo = VkPipelineShaderStageCreateInfo{};
-    mShaderStageInfo.sType = aShaderType;
-    mShaderStageInfo.stage = aShaderStage;
-    mShaderStageInfo.module = mShaderModule;
-    mShaderStageInfo.pName = "main";
+        mShaderStageInfo = VkPipelineShaderStageCreateInfo{};
+        mShaderStageInfo.sType = aShaderType;
+        mShaderStageInfo.stage = aShaderStage;
+        mShaderStageInfo.module = mShaderModule;
+        mShaderStageInfo.pName = "main";
+    }
+
 }

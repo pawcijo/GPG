@@ -2,12 +2,12 @@
 #include <Vulkan/VulkanApp.hpp>
 
 #include <stdexcept>
-//#include <print>
+// #include <print>
 
 int main()
 {
-    VulkanPipeLine appWindow(1920, 1080);
-    VulkanApp app(appWindow);
+    GPGVulkan::VulkanPipeLine appWindow(1920, 1080);
+    GPGVulkan::VulkanApp app(appWindow);
 
     try
     {
