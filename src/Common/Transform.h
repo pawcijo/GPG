@@ -49,7 +49,8 @@ public:
     glm::mat4 &getTransform();
     glm::mat4 *getTransformPtr();
 
-    void serialize(std::ofstream &outFile) const;
+    void Serialize(std::ofstream &outFile) const;
+    void Deserialize(std::ifstream &inFile) ;
 
     const glm::vec3 getPosition() const;
     glm::vec3 &getPositionRef();

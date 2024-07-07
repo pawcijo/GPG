@@ -20,17 +20,13 @@ namespace GPGVulkan
         SaveSceneBinary(aPath, this);
     }
 
-    void Scene::serialize(std::ofstream &outFile) const
+    void Scene::Serialize(std::ofstream &outFile) const
     {
-        // Write number of SceneObjects
-        size_t numObjects = mSceneObjects.size();
-        outFile.write(reinterpret_cast<const char *>(&numObjects), sizeof(numObjects));
 
-        // Write each SceneObject
-        for (const auto *obj : mSceneObjects)
-        {
-            obj->serialize(outFile);
-        }
+    }
+    void Scene::Deserialize(std::ifstream &inFile)
+    {
+        
     }
 
     void Scene::ClearScene()

@@ -25,21 +25,13 @@ Transform::Transform()
 
 Transform Transform::origin() { return Transform(); }
 
-void Transform::serialize(std::ofstream &outFile) const
+void Transform::Serialize(std::ofstream &outFile) const
 {
-    // Write mat4 (16 floats)
-    outFile.write(reinterpret_cast<const char *>(&transform), sizeof(transform));
+}
 
-    // Write vec3 (3 floats each)
-    outFile.write(reinterpret_cast<const char *>(&position), sizeof(position));
-    outFile.write(reinterpret_cast<const char *>(&scale), sizeof(scale));
-    outFile.write(reinterpret_cast<const char *>(&rotation), sizeof(rotation));
+void Transform::Deserialize(std::ifstream &inFile)
+{
 
-    // Write rotationMatrix (16 floats)
-    outFile.write(reinterpret_cast<const char *>(&rotationMatrix), sizeof(rotationMatrix));
-
-    // Write quaternion (4 floats)
-    outFile.write(reinterpret_cast<const char *>(&quaternion), sizeof(quaternion));
 }
 
 void Transform::setScale(glm::vec3 aScale)

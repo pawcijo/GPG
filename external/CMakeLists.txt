@@ -15,6 +15,9 @@ add_subdirectory (SPIRV-Cross)
 ### SPIRV-Reflect ##
 add_subdirectory (SPIRV-Reflect)
 
+### tinyxml2 ###
+add_subdirectory (tinyxml2)
+
 ### GLFW ###
 
 add_subdirectory (glfw)

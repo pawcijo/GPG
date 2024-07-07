@@ -57,8 +57,6 @@ namespace GPGVulkan
         void CleanUp(VkDevice aDevice);
         void CleanUpTextures(VkDevice aDevice);
 
-        void serialize(std::ofstream &outFile) const;
-
         std::vector<Vertex> &Vertices();
         std::vector<uint32_t> &Indices();
 

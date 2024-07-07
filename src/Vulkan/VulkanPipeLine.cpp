@@ -1285,11 +1285,6 @@ namespace GPGVulkan
 
     void VulkanPipeLine::updateUniformBuffer(uint32_t currentImage, Camera &aCamera, SceneObject *aSceneObject)
     {
-        static auto startTime = std::chrono::high_resolution_clock::now();
-
-        auto currentTime = std::chrono::high_resolution_clock::now();
-        float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
         UniformBufferObject ubo{};
 
         if (nullptr != mScene)
@@ -1623,10 +1618,13 @@ namespace GPGVulkan
         vkDestroyDescriptorPool(mDevice, mImguiDescriptorPool, nullptr);
         vkDestroyDescriptorPool(mDevice, mDescriptorPool, nullptr);
 
-        for (auto &sceneObj : mScene->SceneObjects())
+        if (nullptr != mScene)
         {
-            /// TODO add recrurive cleaning
-            sceneObj->Model()->CleanUpTextures(mDevice);
+            for (auto &sceneObj : mScene->SceneObjects())
+            {
+                /// TODO add recrurive cleaning
+                sceneObj->Model()->CleanUpTextures(mDevice);
+            }
         }
 
         vkDestroyDescriptorSetLayout(mDevice, mDescriptorSetLayout, nullptr);

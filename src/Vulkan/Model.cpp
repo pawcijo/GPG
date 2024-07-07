@@ -540,18 +540,6 @@ namespace GPGVulkan
         return mTextureSampler;
     }
 
-    void Model::serialize(std::ofstream &outFile) const
-    {
-        // Convert path to string and serialize
-        std::string pathString = mModelPath.string();
-        size_t pathLength = pathString.size();
-        outFile.write(reinterpret_cast<const char *>(&pathLength), sizeof(pathLength));
-        outFile.write(pathString.c_str(), pathLength);
-
-        // Serialize transform
-        mTransform.serialize(outFile);
-    }
-
     void Model::CleanUpTextures(VkDevice aDevice)
     {
         vkDestroySampler(aDevice, mTextureSampler, nullptr);

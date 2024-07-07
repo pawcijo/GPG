@@ -84,38 +84,12 @@ namespace GPGVulkan
     return nullptr;
   }
 
-  void SceneObject::serialize(std::ofstream &outFile) const
+  void SceneObject::Serialize(std::ofstream &outFile) const
   {
-    // Serialize mObjectId
-    outFile.write(reinterpret_cast<const char *>(&mObjectId), sizeof(mObjectId));
+  }
 
-    // Serialize mParentId
-    outFile.write(reinterpret_cast<const char *>(&mParentId), sizeof(mParentId));
-
-    // Serialize number of children
-    size_t numChildren = mChildrenIds.size();
-    outFile.write(reinterpret_cast<const char *>(&numChildren), sizeof(numChildren));
-
-    // Serialize each child's ID
-    for (const auto &childId : mChildrenIds)
-    {
-      outFile.write(reinterpret_cast<const char *>(&childId), sizeof(childId));
-    }
-
-    // Serialize mTransform
-    bool hasTransform = (mTransform != nullptr);
-    outFile.write(reinterpret_cast<const char *>(&hasTransform), sizeof(hasTransform));
-    if (hasTransform)
-    {
-      mTransform->serialize(outFile);
-    }
-
-    bool hasModel = (mModel != nullptr);
-    outFile.write(reinterpret_cast<const char *>(&hasModel), sizeof(hasModel));
-    if (hasModel)
-    {
-      mModel->serialize(outFile);
-    }
+  void SceneObject::Deserialize(std::ifstream &inFile)
+  {
   }
 
   unsigned long SceneObject::ObjectIDCounter = 0;
