@@ -1283,7 +1283,7 @@ namespace GPGVulkan
         createFramebuffers();
     }
 
-    void VulkanPipeLine::updateUniformBuffer(uint32_t currentImage, Camera &aCamera)
+    void VulkanPipeLine::updateUniformBuffer(uint32_t currentImage, Camera &aCamera, SceneObject *aSceneObject)
     {
         static auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -1294,10 +1294,13 @@ namespace GPGVulkan
 
         if (nullptr != mScene)
         {
-            ubo.model = mScene->SceneObjects()[0]->SceneObjectTransform()->getTransform(); // glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-            ubo.view = aCamera.GetViewMatrix();                                            // glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-            ubo.proj = aCamera.mProjection;                                                // glm::perspective(glm::radians(45.0f), mSwapChainExtent.width / (float)mSwapChainExtent.height, 0.1f, 10.0f);
-            ubo.proj[1][1] *= -1;
+            if (nullptr != aSceneObject && nullptr != aSceneObject->Model())
+            {
+                ubo.model = aSceneObject->Model()->GetTransform().getTransform(); // glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+            }
+            ubo.view = aCamera.GetViewMatrix(); // glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+            ubo.proj = aCamera.mProjection;     // glm::perspective(glm::radians(45.0f), mSwapChainExtent.width / (float)mSwapChainExtent.height, 0.1f, 10.0f);
+            ubo.proj[1][1] *= -1;               // OpenGl to Vulkan transition
         }
 
         memcpy(mUniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
@@ -1321,12 +1324,10 @@ namespace GPGVulkan
             throw std::runtime_error("failed to acquire swap chain image!");
         }
 
-        updateUniformBuffer(mCurrentFrame, aCamera);
-
         vkResetFences(mDevice, 1, &mInFlightFences[mCurrentFrame]);
 
         vkResetCommandBuffer(mCommandBuffers[mCurrentFrame], /*VkCommandBufferResetFlagBits*/ 0);
-        recordCommandBuffer(mCommandBuffers[mCurrentFrame], imageIndex);
+        recordCommandBuffer(mCommandBuffers[mCurrentFrame], imageIndex, aCamera);
 
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1515,7 +1516,7 @@ namespace GPGVulkan
         ImGui_ImplVulkan_RenderDrawData(draw_data, commandBuffer);
     }
 
-    void VulkanPipeLine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+    void VulkanPipeLine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex, Camera &aCamera)
     {
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -1560,6 +1561,9 @@ namespace GPGVulkan
         {
             for (auto &sceneObj : mScene->SceneObjects())
             {
+
+                updateUniformBuffer(mCurrentFrame, aCamera, sceneObj);
+
                 VkBuffer vertexBuffers[] = {sceneObj->Model()->VertexBuffer()};
                 VkDeviceSize offsets[] = {0};
                 vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);

@@ -9,6 +9,7 @@
 
 #include <vulkan/vulkan.h>
 #include "Vulkan/VulkanUtis.hpp"
+#include "Common/SceneObject.hpp"
 
 #include "Common/Camera.h"
 
@@ -125,7 +126,7 @@ namespace GPGVulkan
         void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &bufferMemory);
         void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
-        void updateUniformBuffer(uint32_t currentImage, Camera &camera);
+        void updateUniformBuffer(uint32_t currentImage, Camera &camera,SceneObject*);
 
         void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
         void createImage(uint32_t width, uint32_t height, uint32_t aMipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage &image, VkDeviceMemory &imageMemory);
@@ -159,7 +160,7 @@ namespace GPGVulkan
         void setupImgui();
 
         // Load VertexBuffer, IndexBuffer and texture buffers and samplers.
-        //void loadModel();
+        // void loadModel();
 
         void createUniformBuffers();
         void createDescriptorPool();
@@ -167,7 +168,8 @@ namespace GPGVulkan
         void createCommandBuffers();
         void createSyncObjects();
 
-        void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+        void recordCommandBuffer(VkCommandBuffer commandBuffer,
+                                 uint32_t imageIndex, Camera &aCamera );
         void cleanupSwapChain();
 
         void recreateSwapChain();
@@ -197,7 +199,6 @@ namespace GPGVulkan
         void CleanUp();
 
         friend class VulkanApp;
-    
     };
 
 }
