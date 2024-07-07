@@ -17,16 +17,16 @@ namespace GPGVulkan
 
     void Scene::SaveScene(std::filesystem::path aPath)
     {
-        SaveSceneBinary(aPath, this);
+        SaveSceneXml(aPath, this);
     }
 
     void Scene::Serialize(std::ofstream &outFile) const
     {
-
+        throw std::logic_error("Not implemented");
     }
     void Scene::Deserialize(std::ifstream &inFile)
     {
-        
+        throw std::logic_error("Not implemented");
     }
 
     void Scene::ClearScene()
@@ -38,6 +38,7 @@ namespace GPGVulkan
     {
         if (nullptr != aObject)
         {
+            aObject->mParentId = 0;
             mSceneObjects.push_back(aObject);
         }
     }

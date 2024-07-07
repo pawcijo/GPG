@@ -87,7 +87,8 @@ namespace GPGVulkan
 
     void VulkanApp::Run()
     {
-        // Move to config ?
+        // Move to config  ?
+        // TODO: do not load anything here, do it only if it is required
         const std::string MODEL_PATH = "resources/models/viking_room.obj";
         const std::string TEXTURE_PATH = "resources/textures/viking_room.png";
 
@@ -101,10 +102,18 @@ namespace GPGVulkan
         model->GetTransform().rotate(180, glm::vec3(0, 1, 0));
         model->GetTransform().rotate(90, glm::vec3(0, 0, 1));
 
-        SceneObject *scenObj = new SceneObject(new Transform(), nullptr);
-        scenObj->SetModel(model.get());
+        SceneObject *scenObj = new SceneObject(Transform(), nullptr);
+        scenObj->SetModel(std::move(model.get()));
+        mScene.AddSceneObject(std::move(scenObj));
 
-        mScene.AddSceneObject(scenObj);
+        SceneObject *emptySceneObj = new SceneObject(Transform(), nullptr);
+        emptySceneObj->SetName("EmptySceneObj");
+        scenObj->AddChild(std::move(emptySceneObj));
+
+        SceneObject *emptySceneObj2 = new SceneObject(Transform(), nullptr);
+        emptySceneObj2->SetName("EmptySceneObj");
+        mScene.AddSceneObject(std::move(emptySceneObj2));
+
         mGraphicPipeline.SetScene(&mScene);
 
         mGraphicPipeline.createUniformBuffers();

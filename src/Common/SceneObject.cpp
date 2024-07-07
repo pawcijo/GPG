@@ -11,17 +11,44 @@
 namespace GPGVulkan
 {
 
-  SceneObject::SceneObject() : mParent(nullptr), mParentId(0),
-                               mTransform(new Transform())
+  SceneObject::SceneObject() : mParent(nullptr), mParentId(0), mName("SceneObject"),
+                               mTransform(Transform())
   {
     mObjectId = ObjectIDCounter;
     ObjectIDCounter++;
+  }
+
+  Transform SceneObject::TransformValue()
+  {
+    return mTransform;
+  }
+  unsigned long SceneObject::ObjectId()
+  {
+    return mObjectId;
+  }
+
+  unsigned long SceneObject::ParentId()
+  {
+    return mParentId;
+  }
+
+  void SceneObject::SetName(const std::string &aName)
+  {
+    mName = aName;
+  }
+
+  std::vector<SceneObject *> SceneObject::Children()
+  {
+    return mChildren;
   }
 
   void SceneObject::AddChild(SceneObject *aChild)
   {
     if (nullptr != aChild)
     {
+
+      aChild->mParentId = mObjectId;
+      aChild->mParent = this;
       mChildren.push_back(aChild);
       mChildrenIds.push_back(aChild->mObjectId);
     }
@@ -34,10 +61,12 @@ namespace GPGVulkan
     }
   }
 
-  SceneObject::SceneObject(Transform *aTransform,
+  SceneObject::SceneObject(Transform aTransform,
                            SceneObject *parent)
       : mParent(parent),
-        mTransform(aTransform)
+        mTransform(aTransform),
+        mName("SceneObject")
+
   {
     mObjectId = ObjectIDCounter;
     ObjectIDCounter++;
@@ -92,6 +121,6 @@ namespace GPGVulkan
   {
   }
 
-  unsigned long SceneObject::ObjectIDCounter = 0;
+  unsigned long SceneObject::ObjectIDCounter = 1;
 
 }

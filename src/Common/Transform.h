@@ -46,15 +46,15 @@ public:
     Transform combine(Transform &other);
     void translate(glm::vec3 Value);
     void rotate(float value, glm::vec3 axis);
-    glm::mat4 &getTransform();
-    glm::mat4 *getTransformPtr();
+    glm::mat4 &TransformMat4();
+    glm::mat4 *TransformPtr();
 
     void Serialize(std::ofstream &outFile) const;
     void Deserialize(std::ifstream &inFile) ;
 
-    const glm::vec3 getPosition() const;
-    glm::vec3 &getPositionRef();
-    const glm::mat4 getRotationMatrix() const;
-    const glm::vec3 getRotation() const;
-    const glm::vec3 getScale() const;
+    const glm::vec3 Position() const;
+    glm::vec3 &PositionRef();
+    const glm::mat4 RotationMatrix() const;
+    const glm::vec3 Rotation() const;
+    const glm::vec3 Scale() const;
 };

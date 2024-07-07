@@ -5,6 +5,8 @@
 
 #include <Vulkan/VulkanUtis.hpp>
 
+#include <filesystem>
+
 namespace GPGVulkan
 {
 
@@ -538,6 +540,15 @@ namespace GPGVulkan
     VkSampler Model::TextureSampler()
     {
         return mTextureSampler;
+    }
+
+    std::filesystem::path Model::ModelPath()
+    {
+        return mModelPath;
+    }
+    std::filesystem::path Model::TexturePath()
+    {
+        return mTexturePath;
     }
 
     void Model::CleanUpTextures(VkDevice aDevice)

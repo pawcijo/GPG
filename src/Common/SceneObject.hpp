@@ -20,15 +20,16 @@ namespace GPGVulkan
         unsigned long mObjectId;
         unsigned long mParentId;
         std::vector<unsigned long> mChildrenIds;
+        std::string mName;
 
-        Transform *mTransform;
+        Transform mTransform;
         Model *mModel; // change to mesh ?
 
         static unsigned long ObjectIDCounter;
 
     public:
         SceneObject();
-        SceneObject(Transform *aTransform,
+        SceneObject(Transform aTransform,
                     SceneObject *parent);
 
         void Serialize(std::ofstream &outFile) const;
@@ -41,11 +42,16 @@ namespace GPGVulkan
         void AddChild(SceneObject *aChild);
         void SetParent(SceneObject *aParent);
         void SetModel(Model *model);
+        void SetName(const std::string& aName);
 
         Model *Model() { return mModel; };
-        Transform *SceneObjectTransform() { return mTransform; }
+        Transform TransformValue();
+        const std::string &Name() const { return mName; }
 
-        unsigned long ObjectId() { return mObjectId; }
+        std::vector<SceneObject *> Children();
+
+        unsigned long ObjectId();
+        unsigned long ParentId();
 
         friend class Scene;
     };

@@ -30,6 +30,7 @@ include_directories(
 	external/newton-4.00/sdk/dCore/
 	external/newton-4.00/sdk/dNewton/
 	external/newton-4.00/sdk/dCollision/
+	external/tinyxml2/
 	${SDL2_INCLUDE_DIRS}
 	${CMAKE_INSTALL_PREFIX}/include/ndNewton
 	${Vulkan_INCLUDE_DIRS}
@@ -43,6 +44,7 @@ set(ALL_LIBS
 	glfw
 	${SDL2_LIBRARIES}
 	${NEWTON_LIB}
+	tinyxml2
 	pthread
 )
 else()
@@ -53,6 +55,7 @@ set(ALL_LIBS
 	GLEW
 	${SDL2_LIBRARIES}
 	${NEWTON_LIB}
+	tinyxml2
 	pthread
 )
 endif()

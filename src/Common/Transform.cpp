@@ -92,9 +92,9 @@ Transform Transform::combine(Transform &other)
     t.transform = other.transform * transform;
     return t;
 }
-glm::mat4 *Transform::getTransformPtr() { return &transform; }
+glm::mat4 *Transform::TransformPtr() { return &transform; }
 
-glm::mat4 &Transform::getTransform() { return transform; }
+glm::mat4 &Transform::TransformMat4() { return transform; }
 
 void Transform::scaleTransform(GLfloat x, GLfloat y, GLfloat z)
 {
@@ -177,10 +177,10 @@ void Transform::setRotation(glm::vec3 rotation)
 
 void Transform::setTransform(glm::mat4 aTransform) { transform = aTransform; }
 
-glm::vec3 &Transform::getPositionRef() { return position; }
+glm::vec3 &Transform::PositionRef() { return position; }
 
-const glm::mat4 Transform::getRotationMatrix() const { return rotationMatrix; }
+const glm::mat4 Transform::RotationMatrix() const { return rotationMatrix; }
 
-const glm::vec3 Transform::getPosition() const { return position; }
-const glm::vec3 Transform::getRotation() const { return rotation; }
-const glm::vec3 Transform::getScale() const { return scale; }
+const glm::vec3 Transform::Position() const { return position; }
+const glm::vec3 Transform::Rotation() const { return rotation; }
+const glm::vec3 Transform::Scale() const { return scale; }

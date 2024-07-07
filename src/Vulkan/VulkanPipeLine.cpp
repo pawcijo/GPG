@@ -1291,7 +1291,7 @@ namespace GPGVulkan
         {
             if (nullptr != aSceneObject && nullptr != aSceneObject->Model())
             {
-                ubo.model = aSceneObject->Model()->GetTransform().getTransform(); // glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+                ubo.model = aSceneObject->Model()->GetTransform().TransformMat4(); // glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
             }
             ubo.view = aCamera.GetViewMatrix(); // glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
             ubo.proj = aCamera.mProjection;     // glm::perspective(glm::radians(45.0f), mSwapChainExtent.width / (float)mSwapChainExtent.height, 0.1f, 10.0f);
@@ -1552,20 +1552,23 @@ namespace GPGVulkan
         scissor.extent = mSwapChainExtent;
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+        // TODO add recursive drawing
         if (nullptr != mScene)
         {
-            for (auto &sceneObj : mScene->SceneObjects())
+            for (auto sceneObj : mScene->SceneObjects())
             {
+                if (nullptr != sceneObj->Model())
+                {
+                    updateUniformBuffer(mCurrentFrame, aCamera, sceneObj);
 
-                updateUniformBuffer(mCurrentFrame, aCamera, sceneObj);
+                    VkBuffer vertexBuffers[] = {sceneObj->Model()->VertexBuffer()};
+                    VkDeviceSize offsets[] = {0};
+                    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+                    vkCmdBindIndexBuffer(commandBuffer, sceneObj->Model()->IndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+                    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &mDescriptorSets[mCurrentFrame], 0, nullptr);
 
-                VkBuffer vertexBuffers[] = {sceneObj->Model()->VertexBuffer()};
-                VkDeviceSize offsets[] = {0};
-                vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-                vkCmdBindIndexBuffer(commandBuffer, sceneObj->Model()->IndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
-                vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &mDescriptorSets[mCurrentFrame], 0, nullptr);
-
-                vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(sceneObj->Model()->Indices().size()), 1, 0, 0, 0);
+                    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(sceneObj->Model()->Indices().size()), 1, 0, 0, 0);
+                }
             }
         }
         drawImgui(commandBuffer);
