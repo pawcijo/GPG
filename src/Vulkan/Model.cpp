@@ -100,7 +100,7 @@ namespace GPGVulkan
                  VkDevice aDevice,
                  VkPhysicalDevice aPhysicalDevice,
                  VkCommandPool aCommandPool,
-                 VkQueue aGraphicsQueue) : mTransform(Transform::origin())
+                 VkQueue aGraphicsQueue) : mPath(modelPath), mTransform(Transform::origin())
     {
 
         tinyobj::attrib_t attrib;
@@ -212,6 +212,18 @@ namespace GPGVulkan
     VkBuffer Model::IndexBuffer()
     {
         return mIndexBuffer;
+    }
+
+    void Model::serialize(std::ofstream &outFile) const
+    {
+        // Convert path to string and serialize
+        std::string pathString = mPath.string();
+        size_t pathLength = pathString.size();
+        outFile.write(reinterpret_cast<const char*>(&pathLength), sizeof(pathLength));
+        outFile.write(pathString.c_str(), pathLength);
+
+        // Serialize transform
+        mTransform.serialize(outFile);
     }
 
     void Model::CleanUp(VkDevice aDevice)

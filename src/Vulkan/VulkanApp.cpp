@@ -87,6 +87,7 @@ namespace GPGVulkan
 
     void VulkanApp::Run()
     {
+
         while (!glfwWindowShouldClose(mGraphicPipeline.GetWindow()))
         {
             glfwPollEvents();

@@ -19,6 +19,7 @@ namespace GPGVulkan
         VkBuffer mIndexBuffer;
         VkDeviceMemory mIndexBufferMemory;
 
+        std::filesystem::path mPath;
         Transform mTransform;
 
         void createVertexBuffer(VkDevice aDevice,
@@ -35,6 +36,8 @@ namespace GPGVulkan
               VkQueue aGraphicsQueue);
 
         void CleanUp(VkDevice aDevice);
+
+        void serialize(std::ofstream &outFile) const;
 
         std::vector<Vertex> &Vertices();
         std::vector<uint32_t> &Indices();

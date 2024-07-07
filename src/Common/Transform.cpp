@@ -1,23 +1,46 @@
 #include "Transform.h"
 #include <glm/gtx/euler_angles.hpp>
 
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <filesystem>
+
 Transform::Transform()
 {
-    
+
     position = glm::vec3(0.0f);
     scale = glm::vec3(1.0f);
     rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-    quaterion = glm::quat(rotation);
+    quaternion = glm::quat(rotation);
 
     glm::mat4 positionMatrix = glm::mat4(1.0f);
     positionMatrix = glm::scale(positionMatrix, scale);
     positionMatrix = glm::translate(positionMatrix,
-                              glm::vec3(position.x, position.y, position.z));
+                                    glm::vec3(position.x, position.y, position.z));
 
     transform = glm::mat4(1.0f);
 }
 
 Transform Transform::origin() { return Transform(); }
+
+void Transform::serialize(std::ofstream &outFile) const
+{
+    // Write mat4 (16 floats)
+    outFile.write(reinterpret_cast<const char *>(&transform), sizeof(transform));
+
+    // Write vec3 (3 floats each)
+    outFile.write(reinterpret_cast<const char *>(&position), sizeof(position));
+    outFile.write(reinterpret_cast<const char *>(&scale), sizeof(scale));
+    outFile.write(reinterpret_cast<const char *>(&rotation), sizeof(rotation));
+
+    // Write rotationMatrix (16 floats)
+    outFile.write(reinterpret_cast<const char *>(&rotationMatrix), sizeof(rotationMatrix));
+
+    // Write quaternion (4 floats)
+    outFile.write(reinterpret_cast<const char *>(&quaternion), sizeof(quaternion));
+}
 
 void Transform::setScale(glm::vec3 aScale)
 {
@@ -52,7 +75,7 @@ void Transform::setPosition(glm::vec3 aPosition)
 
     positionMatrix = glm::scale(positionMatrix, scale);
     positionMatrix = glm::translate(positionMatrix,
-                              glm::vec3(aPosition.x, aPosition.y, aPosition.z));
+                                    glm::vec3(aPosition.x, aPosition.y, aPosition.z));
 
     transform = positionMatrix;
 }
@@ -95,7 +118,7 @@ void Transform::translate(glm::vec3 Value)
 
 void Transform::rotate(float value, glm::vec3 axis)
 {
-     glm::vec3 rotationDelta = value * axis;
+    glm::vec3 rotationDelta = value * axis;
 
     rotation += rotationDelta;
 
@@ -104,8 +127,8 @@ void Transform::rotate(float value, glm::vec3 axis)
     rotation.z = fmod(rotation.z, 360.0f);
 
     transform = glm::rotate(transform, glm::radians(value), axis);
-    quaterion = glm::toQuat(transform);
-    rotationMatrix = glm::mat4_cast(quaterion);
+    quaternion = glm::toQuat(transform);
+    rotationMatrix = glm::mat4_cast(quaternion);
 }
 
 void Transform::setRotation(float x, float y, float z)
@@ -114,35 +137,33 @@ void Transform::setRotation(float x, float y, float z)
     glm::mat4 positionMatrix = glm::mat4(1.0f);
     rotation = glm::vec3(x, y, z);
 
-    float pie = glm::pi<float>(); 
+    float pie = glm::pi<float>();
 
     positionMatrix = glm::scale(positionMatrix, scale);
     positionMatrix = glm::translate(positionMatrix, glm::vec3(position.x, position.y, position.z));
     positionMatrix = positionMatrix * glm::eulerAngleXYZ((x / 180.0f) * pie, (y / 180.0f) * pie, (z / 180.0f) * pie);
 
     transform = positionMatrix;
-    quaterion = glm::toQuat(transform);
-    rotationMatrix = glm::mat4_cast(quaterion);
+    quaternion = glm::toQuat(transform);
+    rotationMatrix = glm::mat4_cast(quaternion);
 }
 
- void Transform::setRotation(glm::mat3 rotation)
- {
+void Transform::setRotation(glm::mat3 rotation)
+{
     glm::mat4 positionMatrix = glm::mat4(1.0f);
-    float pie = glm::pi<float>();  
+    float pie = glm::pi<float>();
 
     glm::mat4 rotationMatrix = glm::mat4(rotation);
 
     positionMatrix = glm::scale(positionMatrix, scale);
     positionMatrix = glm::translate(positionMatrix, glm::vec3(position.x, position.y, position.z));
-    
+
     positionMatrix = positionMatrix * rotationMatrix;
 
     transform = positionMatrix;
-    quaterion = glm::toQuat(transform);
-    rotationMatrix = glm::mat4_cast(quaterion);
-
-
- }
+    quaternion = glm::toQuat(transform);
+    rotationMatrix = glm::mat4_cast(quaternion);
+}
 
 void Transform::setRotation(glm::vec3 rotation)
 {
@@ -150,16 +171,16 @@ void Transform::setRotation(glm::vec3 rotation)
     glm::mat4 positionMatrix = glm::mat4(1.0f);
     rotation = glm::vec3(rotation.x, rotation.y, rotation.z);
 
-    float pie = glm::pi<float>();    
+    float pie = glm::pi<float>();
 
     positionMatrix = glm::scale(positionMatrix, scale);
     positionMatrix = glm::translate(positionMatrix, glm::vec3(position.x, position.y, position.z));
-    
+
     positionMatrix = positionMatrix * (glm::eulerAngleXYZ((rotation.x * 180.0f) / pie, (rotation.y * 180.0f) / pie, (rotation.z * 180.0f) / pie));
 
     transform = positionMatrix;
-    quaterion = glm::toQuat(transform);
-    rotationMatrix = glm::mat4_cast(quaterion);
+    quaternion = glm::toQuat(transform);
+    rotationMatrix = glm::mat4_cast(quaternion);
 }
 
 void Transform::setTransform(glm::mat4 aTransform) { transform = aTransform; }

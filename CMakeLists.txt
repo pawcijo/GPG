@@ -81,6 +81,7 @@ add_executable(${PROJECT_NAME}
 	src/Common/Camera.cpp
 	
 	src/Common/Scene.cpp
+	src/Common/SceneUtils.cpp
 	src/Common/SceneObject.cpp
 	src/Vulkan/Model.cpp
 	src/MyPhysics/PhysicsTimer.cpp

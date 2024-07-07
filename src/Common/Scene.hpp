@@ -19,6 +19,8 @@ namespace GPGVulkan
         void SaveScene(std::filesystem::path aScenePath);
         void ClearScene();
 
+        void serialize(std::ofstream &outFile) const;
+
         void AddSceneObject(SceneObject *object);
     };
 
