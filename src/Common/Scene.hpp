@@ -11,7 +11,9 @@ namespace GPGVulkan
     class Scene
     {
 
-        std::vector<SceneObject *> sceneObjects;
+        std::vector<SceneObject *> mSceneObjects;
+
+        SceneObject *FindObjectPtr(unsigned long objectId);
 
     public:
         Scene();
@@ -21,7 +23,11 @@ namespace GPGVulkan
 
         void serialize(std::ofstream &outFile) const;
 
+        void LoadPtrsAndRefs();
+
         void AddSceneObject(SceneObject *object);
+
+        friend class SceneObject;
     };
 
 }

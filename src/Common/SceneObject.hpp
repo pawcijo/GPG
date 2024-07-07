@@ -31,9 +31,14 @@ namespace GPGVulkan
 
         void serialize(std::ofstream &outFile) const;
 
+        void LoadPtrs();
+
+        SceneObject * FindObjectPtr(SceneObject * root,unsigned long objId);
+
         void AddChild(SceneObject *aChild);
         void SetParent(SceneObject *aParent);
-    };
 
+        unsigned long ObjectId() { return mObjectId; }
+    };
 
 }

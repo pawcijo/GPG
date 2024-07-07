@@ -2,16 +2,13 @@
 
 #include "Common/Transform.h"
 
-
 #include <vector>
 #include <fstream>
 
 namespace GPGVulkan
 {
 
-  
-
-  SceneObject::SceneObject() : mParent(nullptr),
+  SceneObject::SceneObject() : mParent(nullptr), mParentId(0),
                                mTransform(new Transform())
   {
     mObjectId = ObjectIDCounter;
@@ -43,6 +40,36 @@ namespace GPGVulkan
     ObjectIDCounter++;
   }
 
+  void SceneObject::LoadPtrs()
+  {
+    if ( 0 != mParentId)
+    {
+
+    }
+  }
+
+  SceneObject *SceneObject::FindObjectPtr(SceneObject *root, unsigned long objId)
+  {
+    // Check if current node is nullptr or matches the objId
+    if (root == nullptr || root->ObjectId() == objId)
+    {
+      return root;
+    }
+
+    // Recursively search in children
+    for (auto &child : root->mChildren)
+    {
+      SceneObject *result = FindObjectPtr(child, objId);
+      if (result != nullptr)
+      {
+        return result;
+      }
+    }
+
+    // ObjId not found in this subtree
+    return nullptr;
+  }
+
   void SceneObject::serialize(std::ofstream &outFile) const
   {
     // Serialize mObjectId
@@ -69,13 +96,14 @@ namespace GPGVulkan
       mTransform->serialize(outFile);
     }
 
-     bool hasModel = (mModel != nullptr);
-     outFile.write(reinterpret_cast<const char*>(&hasModel), sizeof(hasModel));
-     if (hasModel) {
-         mModel->serialize(outFile);
-     }
+    bool hasModel = (mModel != nullptr);
+    outFile.write(reinterpret_cast<const char *>(&hasModel), sizeof(hasModel));
+    if (hasModel)
+    {
+      mModel->serialize(outFile);
+    }
   }
 
-unsigned long SceneObject::ObjectIDCounter = 0;
+  unsigned long SceneObject::ObjectIDCounter = 0;
 
 }
