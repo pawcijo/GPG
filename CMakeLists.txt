@@ -73,7 +73,7 @@ add_executable(${PROJECT_NAME}
 	src/Vulkan/VulkanApp.cpp
 	src/Vulkan/VulkanShader.cpp
 	src/Vulkan/VulkanValidation.hpp
-	src/Vulkan/VulkanUtis.hpp
+	src/Vulkan/VulkanUtis.cpp
 
 	src/tiny_obj_loader.h
 

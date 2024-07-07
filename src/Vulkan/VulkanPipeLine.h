@@ -41,8 +41,8 @@ namespace GPGVulkan
         }
     };
 
-
     class Scene;
+    class VulkanApp;
 
     class VulkanPipeLine
     {
@@ -87,10 +87,12 @@ namespace GPGVulkan
         std::vector<VkDescriptorSet> mDescriptorSets;
 
         uint32_t mMipLevels;
-        VkImage mTextureImage;
-        VkDeviceMemory mTextureImageMemory;
-        VkImageView mTextureImageView;
-        VkSampler mTextureSampler;
+
+        // VkImage mTextureImage;
+        // VkDeviceMemory mTextureImageMemory;
+
+        // VkImageView mTextureImageView;
+        // VkSampler mTextureSampler;
 
         VkSampleCountFlagBits mMsaaSamples = VK_SAMPLE_COUNT_1_BIT;
 
@@ -129,8 +131,6 @@ namespace GPGVulkan
         void createImage(uint32_t width, uint32_t height, uint32_t aMipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage &image, VkDeviceMemory &imageMemory);
         void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
         void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
-        VkCommandBuffer beginSingleTimeCommands();
-        void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 
         uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
@@ -155,13 +155,11 @@ namespace GPGVulkan
         void createCommandPool();
         void createColorResources();
         void createDepthResources();
-        void createTextureImage();
-        void createTextureImageView();
-        void createTextureSampler();
 
         void setupImgui();
 
-        void loadModel();
+        // Load VertexBuffer, IndexBuffer and texture buffers and samplers.
+        //void loadModel();
 
         void createUniformBuffers();
         void createDescriptorPool();
@@ -180,10 +178,7 @@ namespace GPGVulkan
         const std::string MODEL_PATH = "resources/models/viking_room.obj";
         const std::string TEXTURE_PATH = "resources/textures/viking_room.png";
 
-        // move to app class
-        std::unique_ptr<Model> model;
-
-        Scene * mScene;
+        Scene *mScene;
 
     public:
         VulkanPipeLine(unsigned int width, unsigned int height);
@@ -195,11 +190,14 @@ namespace GPGVulkan
         VkDevice GetDevice() { return mDevice; }
         bool mFramebufferResized = false;
 
-        void SetScene(Scene * aScene);
+        void SetScene(Scene *aScene);
 
         void DrawFrame(Camera &aCamera);
 
         void CleanUp();
+
+        friend class VulkanApp;
+    
     };
 
 }

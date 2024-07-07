@@ -27,6 +27,8 @@ namespace GPGVulkan
 
         void AddSceneObject(SceneObject *object);
 
+        std::vector<SceneObject *> &SceneObjects() { return mSceneObjects; };
+
         friend class SceneObject;
     };
 

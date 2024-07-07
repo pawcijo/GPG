@@ -7,7 +7,7 @@
 namespace GPGVulkan
 {
 
-    void SaveSceneBinary(std::filesystem::path aPath);
+    void SaveSceneBinary(std::filesystem::path aPath, Scene *aScene);
     Scene *LoadSceneBinary(std::filesystem::path aPath);
 
 }

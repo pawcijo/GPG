@@ -88,6 +88,8 @@ namespace GPGVulkan
 
         return buffer;
     }
+    VkCommandBuffer BeginSingleTimeCommands(VkCommandPool aCommandPool, VkDevice aDevice);
+    void EndSingleTimeCommands(VkCommandBuffer commandBuffer, VkCommandPool aCommandPool, VkDevice aDevice, VkQueue aGraphicQueue);
 
 }
 

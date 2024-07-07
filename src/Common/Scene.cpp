@@ -1,6 +1,7 @@
 #include "Scene.hpp"
 
 #include "SceneObject.hpp"
+#include "SceneUtils.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -16,7 +17,7 @@ namespace GPGVulkan
 
     void Scene::SaveScene(std::filesystem::path aPath)
     {
-        // Save to
+        SaveSceneBinary(aPath, this);
     }
 
     void Scene::serialize(std::ofstream &outFile) const

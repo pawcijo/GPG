@@ -8,9 +8,11 @@
 namespace GPGVulkan
 {
 
+    class Scene;
     class SceneObject
     {
 
+        Scene *mScene;
         SceneObject *mParent;
         std::vector<SceneObject *> mChildren;
 
@@ -20,7 +22,7 @@ namespace GPGVulkan
         std::vector<unsigned long> mChildrenIds;
 
         Transform *mTransform;
-        Model *mModel;
+        Model *mModel; // change to mesh ?
 
         static unsigned long ObjectIDCounter;
 
@@ -33,12 +35,18 @@ namespace GPGVulkan
 
         void LoadPtrs();
 
-        SceneObject * FindObjectPtr(SceneObject * root,unsigned long objId);
+        SceneObject *FindObjectPtr(SceneObject *root, unsigned long objId);
 
         void AddChild(SceneObject *aChild);
         void SetParent(SceneObject *aParent);
+        void SetModel(Model * model);
+
+        Model *Model() { return mModel; };
+        Transform *SceneObjectTransform() { return mTransform; }
 
         unsigned long ObjectId() { return mObjectId; }
+
+        friend class Scene;
     };
 
 }

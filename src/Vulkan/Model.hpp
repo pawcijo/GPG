@@ -19,8 +19,16 @@ namespace GPGVulkan
         VkBuffer mIndexBuffer;
         VkDeviceMemory mIndexBufferMemory;
 
-        std::filesystem::path mPath;
+        std::filesystem::path mModelPath;
+        std::filesystem::path mTexturePath;
         Transform mTransform;
+
+        uint32_t mMipLevels;
+        VkImage mTextureImage;
+        VkDeviceMemory mTextureImageMemory;
+
+        VkImageView mTextureImageView;
+        VkSampler mTextureSampler;
 
         void createVertexBuffer(VkDevice aDevice,
                                 VkPhysicalDevice aPhysicalDevice,
@@ -31,11 +39,23 @@ namespace GPGVulkan
                                VkCommandPool aCommandPool,
                                VkQueue aGraphicsQueue);
 
+        void createTextureImage(VkDevice aDevice,
+                                VkPhysicalDevice aPhysicalDevice,
+                                VkCommandPool aCommandPool,
+                                VkQueue aGraphicsQueue);
+        void createTextureImageView(VkDevice aDevice);
+        void createTextureSampler(VkDevice aDevice, VkPhysicalDevice aPhysicalDevice);
+
     public:
-        Model(std::filesystem::path modelPath, VkDevice aDevice, VkPhysicalDevice aPhysicalDevice, VkCommandPool aCommandPool,
+        Model(std::filesystem::path aModelPath,
+              std::filesystem::path aTexturePath,
+              VkDevice aDevice,
+              VkPhysicalDevice aPhysicalDevice,
+              VkCommandPool aCommandPool,
               VkQueue aGraphicsQueue);
 
         void CleanUp(VkDevice aDevice);
+        void CleanUpTextures(VkDevice aDevice);
 
         void serialize(std::ofstream &outFile) const;
 
@@ -46,6 +66,9 @@ namespace GPGVulkan
 
         VkBuffer VertexBuffer();
         VkBuffer IndexBuffer();
+
+        VkImageView TextureImageView();
+        VkSampler TextureSampler();
     };
 
 }

@@ -19,6 +19,7 @@
 
 #include "Common/Scene.hpp"
 #include "Common/SceneObject.hpp"
+#include "Common/SceneUtils.hpp"
 
 #include <set>
 #include <fstream>
@@ -142,7 +143,7 @@ namespace GPGVulkan
 
     void VulkanPipeLine::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
     {
-        VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+        VkCommandBuffer commandBuffer = BeginSingleTimeCommands(mCommandPool, mDevice);
 
         VkBufferImageCopy region{};
         region.bufferOffset = 0;
@@ -160,7 +161,7 @@ namespace GPGVulkan
 
         vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
-        endSingleTimeCommands(commandBuffer);
+        EndSingleTimeCommands(commandBuffer, mCommandPool, mDevice, mGraphicsQueue);
     }
 
 #ifdef __APPLE__
@@ -827,44 +828,9 @@ namespace GPGVulkan
         mDepthImageView = createImageView(mDepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
     }
 
-    VkCommandBuffer VulkanPipeLine::beginSingleTimeCommands()
-    {
-        VkCommandBufferAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool = mCommandPool;
-        allocInfo.commandBufferCount = 1;
-
-        VkCommandBuffer commandBuffer;
-        vkAllocateCommandBuffers(mDevice, &allocInfo, &commandBuffer);
-
-        VkCommandBufferBeginInfo beginInfo{};
-        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-        vkBeginCommandBuffer(commandBuffer, &beginInfo);
-
-        return commandBuffer;
-    }
-
-    void VulkanPipeLine::endSingleTimeCommands(VkCommandBuffer commandBuffer)
-    {
-        vkEndCommandBuffer(commandBuffer);
-
-        VkSubmitInfo submitInfo{};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandBuffer;
-
-        vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-        vkQueueWaitIdle(mGraphicsQueue);
-
-        vkFreeCommandBuffers(mDevice, mCommandPool, 1, &commandBuffer);
-    }
-
     void VulkanPipeLine::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t aMipLevels)
     {
-        VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+        VkCommandBuffer commandBuffer = BeginSingleTimeCommands(mCommandPool, mDevice);
 
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -911,7 +877,7 @@ namespace GPGVulkan
             0, nullptr,
             1, &barrier);
 
-        endSingleTimeCommands(commandBuffer);
+        EndSingleTimeCommands(commandBuffer, mCommandPool, mDevice, mGraphicsQueue);
     }
 
     void VulkanPipeLine::generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t aMipLevels)
@@ -925,7 +891,7 @@ namespace GPGVulkan
             throw std::runtime_error("texture image format does not support linear blitting!");
         }
 
-        VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+        VkCommandBuffer commandBuffer = BeginSingleTimeCommands(mCommandPool, mDevice);
 
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -1003,47 +969,7 @@ namespace GPGVulkan
                              0, nullptr,
                              1, &barrier);
 
-        endSingleTimeCommands(commandBuffer);
-    }
-
-    void VulkanPipeLine::createTextureImage()
-    {
-        int texWidth, texHeight, texChannels;
-        stbi_uc *pixels = stbi_load(TEXTURE_PATH.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-        VkDeviceSize imageSize = texWidth * texHeight * 4;
-        mMipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
-
-        if (!pixels)
-        {
-            throw std::runtime_error("failed to load texture image!");
-        }
-
-        VkBuffer stagingBuffer;
-        VkDeviceMemory stagingBufferMemory;
-        createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
-
-        void *data;
-        vkMapMemory(mDevice, stagingBufferMemory, 0, imageSize, 0, &data);
-        memcpy(data, pixels, static_cast<size_t>(imageSize));
-        vkUnmapMemory(mDevice, stagingBufferMemory);
-
-        stbi_image_free(pixels);
-
-        createImage(texWidth, texHeight, mMipLevels,
-                    VK_SAMPLE_COUNT_1_BIT,
-                    VK_FORMAT_R8G8B8A8_SRGB,
-                    VK_IMAGE_TILING_OPTIMAL,
-                    VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-                    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, mTextureImage, mTextureImageMemory);
-
-        transitionImageLayout(mTextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mMipLevels);
-        copyBufferToImage(stagingBuffer, mTextureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
-        // transitioned to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL while generating mipmaps
-
-        vkDestroyBuffer(mDevice, stagingBuffer, nullptr);
-        vkFreeMemory(mDevice, stagingBufferMemory, nullptr);
-
-        generateMipmaps(mTextureImage, VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, mMipLevels);
+        EndSingleTimeCommands(commandBuffer, mCommandPool, mDevice, mGraphicsQueue);
     }
 
     VkImageView VulkanPipeLine::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t aMipLevel)
@@ -1066,40 +992,6 @@ namespace GPGVulkan
         }
 
         return imageView;
-    }
-
-    void VulkanPipeLine::createTextureImageView()
-    {
-        mTextureImageView = createImageView(mTextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, mMipLevels);
-    }
-
-    void VulkanPipeLine::createTextureSampler()
-    {
-        VkPhysicalDeviceProperties properties{};
-        vkGetPhysicalDeviceProperties(mPhysicalDevice, &properties);
-
-        VkSamplerCreateInfo samplerInfo{};
-        samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-        samplerInfo.magFilter = VK_FILTER_LINEAR;
-        samplerInfo.minFilter = VK_FILTER_LINEAR;
-        samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.anisotropyEnable = VK_TRUE;
-        samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
-        samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-        samplerInfo.unnormalizedCoordinates = VK_FALSE;
-        samplerInfo.compareEnable = VK_FALSE;
-        samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-        samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-        samplerInfo.minLod = 0.0f; // Optional
-        samplerInfo.maxLod = static_cast<float>(mMipLevels);
-        samplerInfo.mipLodBias = 0.0f; // Optional
-
-        if (vkCreateSampler(mDevice, &samplerInfo, nullptr, &mTextureSampler) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to create texture sampler!");
-        }
     }
 
     void VulkanPipeLine::setupImgui()
@@ -1155,15 +1047,6 @@ namespace GPGVulkan
         // init_info.CheckVkResultFn = check_vk_result;
 
         ImGui_ImplVulkan_Init(&init_info);
-    }
-
-    void VulkanPipeLine::loadModel()
-    {
-        model = std::make_unique<Model>(MODEL_PATH, mDevice, mPhysicalDevice, mCommandPool, mGraphicsQueue);
-        // Rotate example model
-        model->GetTransform().rotate(90, glm::vec3(1, 0, 0));
-        model->GetTransform().rotate(180, glm::vec3(0, 1, 0));
-        model->GetTransform().rotate(90, glm::vec3(0, 0, 1));
     }
 
     void VulkanPipeLine::createCommandBuffers()
@@ -1377,21 +1260,6 @@ namespace GPGVulkan
         createColorResources();
         createDepthResources();
         createFramebuffers();
-
-        createTextureImage();
-        createTextureImageView();
-        createTextureSampler();
-
-        loadModel();
-
-        createUniformBuffers();
-        createDescriptorPool();
-
-        createDescriptorSets();
-        createCommandBuffers();
-        createSyncObjects();
-
-        setupImgui();
     }
 
     void VulkanPipeLine::recreateSwapChain()
@@ -1424,10 +1292,13 @@ namespace GPGVulkan
 
         UniformBufferObject ubo{};
 
-        ubo.model = model->GetTransform().getTransform(); // glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.view = aCamera.GetViewMatrix();               // glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.proj = aCamera.mProjection;                   // glm::perspective(glm::radians(45.0f), mSwapChainExtent.width / (float)mSwapChainExtent.height, 0.1f, 10.0f);
-        ubo.proj[1][1] *= -1;
+        if (nullptr != mScene)
+        {
+            ubo.model = mScene->SceneObjects()[0]->SceneObjectTransform()->getTransform(); // glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+            ubo.view = aCamera.GetViewMatrix();                                            // glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+            ubo.proj = aCamera.mProjection;                                                // glm::perspective(glm::radians(45.0f), mSwapChainExtent.width / (float)mSwapChainExtent.height, 0.1f, 10.0f);
+            ubo.proj[1][1] *= -1;
+        }
 
         memcpy(mUniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
     }
@@ -1549,8 +1420,11 @@ namespace GPGVulkan
 
             VkDescriptorImageInfo imageInfo{};
             imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            imageInfo.imageView = mTextureImageView;
-            imageInfo.sampler = mTextureSampler;
+            if (nullptr != mScene)
+            {
+                imageInfo.imageView = mScene->SceneObjects()[0]->Model()->TextureImageView();
+                imageInfo.sampler = mScene->SceneObjects()[0]->Model()->TextureSampler();
+            }
 
             std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 
@@ -1599,22 +1473,37 @@ namespace GPGVulkan
 
         ImGuiIO &io = ImGui::GetIO();
 
+        const char *scenePath = "Scene";
+
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
             static float f = 0.0f;
             static int counter = 0;
 
-            ImGui::Begin("Hello, world!");                     // Create a window called "Hello, world!" and append into it.
-            ImGui::Text("This is some useful text.");          // Display some text (you can use a format strings too)
-
+            ImGui::Begin("Hello, world!");            // Create a window called "Hello, world!" and append into it.
+            ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
 
             ImGui::SliderFloat("float", &f, 0.0f, 1.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
             ImGui::ColorEdit3("clear color", (float *)&clear_color); // Edit 3 floats representing a color
 
-            if (ImGui::Button("AddObject")) // Buttons return true when clicked (most widgets return true when edited/activated)
+            if (ImGui::Button("Save Scene"))
+            {
+
+                mScene->SaveScene(scenePath);
+            }
+
+            if (nullptr != mScene)
+            {
+                if (ImGui::Button("Clear Scene")) // Buttons return true when clicked (most widgets return true when edited/activated)
                 {
-                    mScene->AddSceneObject(new GPGVulkan::SceneObject());
+                    mScene->ClearScene();
                 }
+            }
+
+            if (ImGui::Button("Load Scene")) // Buttons return true when clicked (most widgets return true when edited/activated)
+            {
+                mScene = LoadSceneBinary(scenePath);
+            }
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();
@@ -1667,14 +1556,19 @@ namespace GPGVulkan
         scissor.extent = mSwapChainExtent;
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-        VkBuffer vertexBuffers[] = {model->VertexBuffer()};
-        VkDeviceSize offsets[] = {0};
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-        vkCmdBindIndexBuffer(commandBuffer, model->IndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &mDescriptorSets[mCurrentFrame], 0, nullptr);
+        if (nullptr != mScene)
+        {
+            for (auto &sceneObj : mScene->SceneObjects())
+            {
+                VkBuffer vertexBuffers[] = {sceneObj->Model()->VertexBuffer()};
+                VkDeviceSize offsets[] = {0};
+                vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+                vkCmdBindIndexBuffer(commandBuffer, sceneObj->Model()->IndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+                vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &mDescriptorSets[mCurrentFrame], 0, nullptr);
 
-        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(model->Indices().size()), 1, 0, 0, 0);
-
+                vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(sceneObj->Model()->Indices().size()), 1, 0, 0, 0);
+            }
+        }
         drawImgui(commandBuffer);
 
         vkCmdEndRenderPass(commandBuffer);
@@ -1725,15 +1619,19 @@ namespace GPGVulkan
         vkDestroyDescriptorPool(mDevice, mImguiDescriptorPool, nullptr);
         vkDestroyDescriptorPool(mDevice, mDescriptorPool, nullptr);
 
-        vkDestroySampler(mDevice, mTextureSampler, nullptr);
-        vkDestroyImageView(mDevice, mTextureImageView, nullptr);
-
-        vkDestroyImage(mDevice, mTextureImage, nullptr);
-        vkFreeMemory(mDevice, mTextureImageMemory, nullptr);
+        for (auto &sceneObj : mScene->SceneObjects())
+        {
+            /// TODO add recrurive cleaning
+            sceneObj->Model()->CleanUpTextures(mDevice);
+        }
 
         vkDestroyDescriptorSetLayout(mDevice, mDescriptorSetLayout, nullptr);
 
-        model->CleanUp(mDevice);
+        for (auto &sceneObj : mScene->SceneObjects())
+        {
+            /// TODO add recrurive cleaning
+            sceneObj->Model()->CleanUp(mDevice);
+        }
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {

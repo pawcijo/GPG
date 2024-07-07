@@ -1,6 +1,9 @@
 #include "SceneObject.hpp"
 
 #include "Common/Transform.h"
+#include "Common/Scene.hpp"
+
+#include "Vulkan/Model.hpp"
 
 #include <vector>
 #include <fstream>
@@ -40,11 +43,22 @@ namespace GPGVulkan
     ObjectIDCounter++;
   }
 
+  void SceneObject::SetModel(GPGVulkan::Model *aModel)
+  {
+    mModel = aModel;
+  }
+
   void SceneObject::LoadPtrs()
   {
-    if ( 0 != mParentId)
+    if (0 != mParentId)
     {
+      mParent = mScene->FindObjectPtr(mParentId);
+    }
 
+    for (auto childId : mChildrenIds)
+    {
+      mChildren.push_back(mScene->FindObjectPtr(childId));
+      mChildren[childId]->LoadPtrs();
     }
   }
 

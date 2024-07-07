@@ -87,6 +87,33 @@ namespace GPGVulkan
 
     void VulkanApp::Run()
     {
+        // Move to config ?
+        const std::string MODEL_PATH = "resources/models/viking_room.obj";
+        const std::string TEXTURE_PATH = "resources/textures/viking_room.png";
+
+        std::unique_ptr<Model> model = std::make_unique<Model>(MODEL_PATH, TEXTURE_PATH,
+                                                               mGraphicPipeline.mDevice,
+                                                               mGraphicPipeline.mPhysicalDevice,
+                                                               mGraphicPipeline.mCommandPool,
+                                                               mGraphicPipeline.mGraphicsQueue);
+
+        model->GetTransform().rotate(90, glm::vec3(1, 0, 0));
+        model->GetTransform().rotate(180, glm::vec3(0, 1, 0));
+        model->GetTransform().rotate(90, glm::vec3(0, 0, 1));
+
+        SceneObject *scenObj = new SceneObject(new Transform(), nullptr);
+        scenObj->SetModel(model.get());
+
+        mScene.AddSceneObject(scenObj);
+        mGraphicPipeline.SetScene(&mScene);
+
+        mGraphicPipeline.createUniformBuffers();
+        mGraphicPipeline.createDescriptorPool();
+        mGraphicPipeline.createDescriptorSets();
+        mGraphicPipeline.createCommandBuffers();
+        mGraphicPipeline.createSyncObjects();
+
+        mGraphicPipeline.setupImgui();
 
         while (!glfwWindowShouldClose(mGraphicPipeline.GetWindow()))
         {
