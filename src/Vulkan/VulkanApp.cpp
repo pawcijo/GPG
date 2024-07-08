@@ -92,17 +92,27 @@ namespace GPGVulkan
         const std::string MODEL_PATH = "resources/models/viking_room.obj";
         const std::string TEXTURE_PATH = "resources/textures/viking_room.png";
 
+        const std::string MODEL_PATH_2 = "resources/models/Klocek.obj";
+        const std::string TEXTURE_PATH_2 = "resources/textures/juanP.jpg";
+
         std::unique_ptr<Model> model = std::make_unique<Model>(MODEL_PATH, TEXTURE_PATH,
                                                                mGraphicPipeline.mDevice,
                                                                mGraphicPipeline.mPhysicalDevice,
                                                                mGraphicPipeline.mCommandPool,
                                                                mGraphicPipeline.mGraphicsQueue);
 
+        std::unique_ptr<Model> model_2 = std::make_unique<Model>(MODEL_PATH_2, TEXTURE_PATH_2,
+                                                                 mGraphicPipeline.mDevice,
+                                                                 mGraphicPipeline.mPhysicalDevice,
+                                                                 mGraphicPipeline.mCommandPool,
+                                                                 mGraphicPipeline.mGraphicsQueue);
+
         model->GetTransform().rotate(90, glm::vec3(1, 0, 0));
         model->GetTransform().rotate(180, glm::vec3(0, 1, 0));
         model->GetTransform().rotate(90, glm::vec3(0, 0, 1));
 
         SceneObject *scenObj = new SceneObject(Transform(), nullptr);
+        scenObj->SetName("Dupa");
         scenObj->SetModel(std::move(model.get()));
         mScene.AddSceneObject(std::move(scenObj));
 
@@ -111,7 +121,12 @@ namespace GPGVulkan
         scenObj->AddChild(std::move(emptySceneObj));
 
         SceneObject *emptySceneObj2 = new SceneObject(Transform(), nullptr);
-        emptySceneObj2->SetName("EmptySceneObj");
+        emptySceneObj2->SetModel(std::move(model_2.get()));
+        emptySceneObj2->SetName("Klocek");
+
+        model_2->GetTransform().setScale(glm::vec3(0.1, 0.1, 0.1));
+        model_2->GetTransform().translate(glm::vec3(9, 0, 0));
+
         mScene.AddSceneObject(std::move(emptySceneObj2));
 
         mGraphicPipeline.SetScene(&mScene);
