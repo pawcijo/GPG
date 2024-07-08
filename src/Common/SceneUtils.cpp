@@ -53,15 +53,15 @@ namespace GPGVulkan
             XMLElement *sceneObjectElement = doc.NewElement("SceneObject");
             sceneObjectElement->SetAttribute("Name", sceneObj->Name().c_str());
 
-            sceneObjectElement->SetAttribute("ObjectId", (long long)sceneObj->ObjectId());
-            sceneObjectElement->SetAttribute("ParentId", (long long)sceneObj->ParentId());
+            sceneObjectElement->SetAttribute("ObjectId", (int64_t)sceneObj->ObjectId());
+            sceneObjectElement->SetAttribute("ParentId", (int64_t)sceneObj->ParentId());
 
             XMLElement *transformElement = CreateTransform(doc, sceneObj->TransformValue());
             sceneObjectElement->InsertEndChild(transformElement);
 
-            if (nullptr != sceneObj->Model())
+            if (nullptr != sceneObj->ModelPtr())
             {
-                XMLElement *modelInfo = CreateModelInfo(doc, sceneObj->Model());
+                XMLElement *modelInfo = CreateModelInfo(doc, sceneObj->ModelPtr());
                 sceneObjectElement->InsertEndChild(modelInfo);
             }
 

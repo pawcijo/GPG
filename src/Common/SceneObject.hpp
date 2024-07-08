@@ -44,7 +44,7 @@ namespace GPGVulkan
         void SetModel(Model *model);
         void SetName(const std::string& aName);
 
-        Model *Model() { return mModel; };
+        Model *ModelPtr();
         Transform TransformValue();
         const std::string &Name() const { return mName; }
 

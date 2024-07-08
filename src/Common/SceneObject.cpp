@@ -11,8 +11,20 @@
 namespace GPGVulkan
 {
 
-  SceneObject::SceneObject() : mParent(nullptr), mParentId(0), mName("SceneObject"),
+  SceneObject::SceneObject() : mParent(nullptr), mModel(nullptr), mParentId(0), mName("SceneObject"),
                                mTransform(Transform())
+  {
+    mObjectId = ObjectIDCounter;
+    ObjectIDCounter++;
+  }
+
+  SceneObject::SceneObject(Transform aTransform,
+                           SceneObject *parent)
+      : mParent(parent),
+        mTransform(aTransform),
+        mName("SceneObject"),
+        mModel(nullptr)
+
   {
     mObjectId = ObjectIDCounter;
     ObjectIDCounter++;
@@ -61,17 +73,6 @@ namespace GPGVulkan
     }
   }
 
-  SceneObject::SceneObject(Transform aTransform,
-                           SceneObject *parent)
-      : mParent(parent),
-        mTransform(aTransform),
-        mName("SceneObject")
-
-  {
-    mObjectId = ObjectIDCounter;
-    ObjectIDCounter++;
-  }
-
   void SceneObject::SetModel(GPGVulkan::Model *aModel)
   {
     mModel = aModel;
@@ -112,6 +113,11 @@ namespace GPGVulkan
     // ObjId not found in this subtree
     return nullptr;
   }
+
+  Model *SceneObject::ModelPtr()
+  {
+    return mModel;
+  };
 
   void SceneObject::Serialize(std::ofstream &outFile) const
   {

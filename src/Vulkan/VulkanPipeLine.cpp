@@ -1289,9 +1289,9 @@ namespace GPGVulkan
 
         if (nullptr != mScene)
         {
-            if (nullptr != aSceneObject && nullptr != aSceneObject->Model())
+            if (nullptr != aSceneObject && nullptr != aSceneObject->ModelPtr())
             {
-                ubo.model = aSceneObject->Model()->GetTransform().TransformMat4(); // glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+                ubo.model = aSceneObject->ModelPtr()->GetTransform().TransformMat4(); // glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
             }
             ubo.view = aCamera.GetViewMatrix(); // glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
             ubo.proj = aCamera.mProjection;     // glm::perspective(glm::radians(45.0f), mSwapChainExtent.width / (float)mSwapChainExtent.height, 0.1f, 10.0f);
@@ -1418,8 +1418,8 @@ namespace GPGVulkan
             imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
             if (nullptr != mScene)
             {
-                imageInfo.imageView = mScene->SceneObjects()[0]->Model()->TextureImageView();
-                imageInfo.sampler = mScene->SceneObjects()[0]->Model()->TextureSampler();
+                imageInfo.imageView = mScene->SceneObjects()[0]->ModelPtr()->TextureImageView();
+                imageInfo.sampler = mScene->SceneObjects()[0]->ModelPtr()->TextureSampler();
             }
 
             std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
@@ -1557,17 +1557,17 @@ namespace GPGVulkan
         {
             for (auto sceneObj : mScene->SceneObjects())
             {
-                if (nullptr != sceneObj->Model())
+                if (nullptr != sceneObj->ModelPtr())
                 {
                     updateUniformBuffer(mCurrentFrame, aCamera, sceneObj);
 
-                    VkBuffer vertexBuffers[] = {sceneObj->Model()->VertexBuffer()};
+                    VkBuffer vertexBuffers[] = {sceneObj->ModelPtr()->VertexBuffer()};
                     VkDeviceSize offsets[] = {0};
                     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-                    vkCmdBindIndexBuffer(commandBuffer, sceneObj->Model()->IndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+                    vkCmdBindIndexBuffer(commandBuffer, sceneObj->ModelPtr()->IndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
                     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &mDescriptorSets[mCurrentFrame], 0, nullptr);
 
-                    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(sceneObj->Model()->Indices().size()), 1, 0, 0, 0);
+                    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(sceneObj->ModelPtr()->Indices().size()), 1, 0, 0, 0);
                 }
             }
         }
@@ -1626,7 +1626,10 @@ namespace GPGVulkan
             for (auto &sceneObj : mScene->SceneObjects())
             {
                 /// TODO add recrurive cleaning
-                sceneObj->Model()->CleanUpTextures(mDevice);
+                if (nullptr != sceneObj->ModelPtr())
+                {
+                    sceneObj->ModelPtr()->CleanUpTextures(mDevice);
+                }
             }
         }
 
@@ -1635,7 +1638,10 @@ namespace GPGVulkan
         for (auto &sceneObj : mScene->SceneObjects())
         {
             /// TODO add recrurive cleaning
-            sceneObj->Model()->CleanUp(mDevice);
+            if (nullptr != sceneObj->ModelPtr())
+            {
+                sceneObj->ModelPtr()->CleanUp(mDevice);
+            }
         }
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
