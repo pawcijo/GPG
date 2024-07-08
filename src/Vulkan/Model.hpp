@@ -28,7 +28,6 @@ namespace GPGVulkan
         VkDeviceMemory mTextureImageMemory;
 
         VkImageView mTextureImageView;
-        VkSampler mTextureSampler;
 
         void createVertexBuffer(VkDevice aDevice,
                                 VkPhysicalDevice aPhysicalDevice,
@@ -44,7 +43,6 @@ namespace GPGVulkan
                                 VkCommandPool aCommandPool,
                                 VkQueue aGraphicsQueue);
         void createTextureImageView(VkDevice aDevice);
-        void createTextureSampler(VkDevice aDevice, VkPhysicalDevice aPhysicalDevice);
 
     public:
         Model(std::filesystem::path aModelPath,
@@ -69,7 +67,7 @@ namespace GPGVulkan
         VkBuffer IndexBuffer();
 
         VkImageView TextureImageView();
-        VkSampler TextureSampler();
+
     };
 
 }

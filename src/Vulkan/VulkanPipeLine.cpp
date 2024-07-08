@@ -740,6 +740,19 @@ namespace GPGVulkan
         pipelineLayoutInfo.setLayoutCount = 1;
         pipelineLayoutInfo.pSetLayouts = &mDescriptorSetLayout;
 
+        /*Push constants*/
+        // setup push constants
+        VkPushConstantRange push_constant;
+        // this push constant range starts at the beginning
+        push_constant.offset = 0;
+        // this push constant range takes up the size of a MeshPushConstants struct
+        push_constant.size = sizeof(MeshPushConstants);
+        // this push constant range is accessible only in the vertex shader
+        push_constant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+        pipelineLayoutInfo.pPushConstantRanges = &push_constant;
+        pipelineLayoutInfo.pushConstantRangeCount = 1;
+
         if (vkCreatePipelineLayout(mDevice, &pipelineLayoutInfo, nullptr, &mPipelineLayout) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create pipeline layout!");
@@ -1256,6 +1269,7 @@ namespace GPGVulkan
         createDescriptorSetLayout();
         createGraphicsPipeline();
         createCommandPool();
+        createTextureSampler();
 
         createColorResources();
         createDepthResources();
@@ -1283,20 +1297,13 @@ namespace GPGVulkan
         createFramebuffers();
     }
 
-    void VulkanPipeLine::updateUniformBuffer(uint32_t currentImage, Camera &aCamera, SceneObject *aSceneObject)
+    void VulkanPipeLine::updateUniformBuffer(uint32_t currentImage, Camera &aCamera)
     {
         UniformBufferObject ubo{};
 
-        if (nullptr != mScene)
-        {
-            if (nullptr != aSceneObject && nullptr != aSceneObject->ModelPtr())
-            {
-                ubo.model = aSceneObject->ModelPtr()->GetTransform().TransformMat4(); // glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-            }
-            ubo.view = aCamera.GetViewMatrix(); // glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-            ubo.proj = aCamera.mProjection;     // glm::perspective(glm::radians(45.0f), mSwapChainExtent.width / (float)mSwapChainExtent.height, 0.1f, 10.0f);
-            ubo.proj[1][1] *= -1;               // OpenGl to Vulkan transition
-        }
+        ubo.view = aCamera.GetViewMatrix(); // glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        ubo.proj = aCamera.mProjection;     // glm::perspective(glm::radians(45.0f), mSwapChainExtent.width / (float)mSwapChainExtent.height, 0.1f, 10.0f);
+        ubo.proj[1][1] *= -1;               // OpenGl to Vulkan transition
 
         memcpy(mUniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
     }
@@ -1392,6 +1399,35 @@ namespace GPGVulkan
         }
     }
 
+    void VulkanPipeLine::createTextureSampler()
+    {
+        VkPhysicalDeviceProperties properties{};
+        vkGetPhysicalDeviceProperties(mPhysicalDevice, &properties);
+
+        VkSamplerCreateInfo samplerInfo{};
+        samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        samplerInfo.magFilter = VK_FILTER_LINEAR;
+        samplerInfo.minFilter = VK_FILTER_LINEAR;
+        samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.anisotropyEnable = VK_TRUE;
+        samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+        samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+        samplerInfo.unnormalizedCoordinates = VK_FALSE;
+        samplerInfo.compareEnable = VK_FALSE;
+        samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+        samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+        samplerInfo.minLod = 0.0f; // Optional
+        samplerInfo.maxLod = static_cast<float>(mMipLevels);
+        samplerInfo.mipLodBias = 0.0f; // Optional
+
+        if (vkCreateSampler(mDevice, &samplerInfo, nullptr, &mTextureSampler) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create texture sampler!");
+        }
+    }
+
     void VulkanPipeLine::createDescriptorSets()
     {
         std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, mDescriptorSetLayout);
@@ -1419,7 +1455,7 @@ namespace GPGVulkan
             if (nullptr != mScene)
             {
                 imageInfo.imageView = mScene->SceneObjects()[0]->ModelPtr()->TextureImageView();
-                imageInfo.sampler = mScene->SceneObjects()[0]->ModelPtr()->TextureSampler();
+                imageInfo.sampler = mTextureSampler;
             }
 
             std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
@@ -1552,6 +1588,8 @@ namespace GPGVulkan
         scissor.extent = mSwapChainExtent;
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+        updateUniformBuffer(mCurrentFrame, aCamera);
+
         // TODO add recursive drawing
         if (nullptr != mScene)
         {
@@ -1559,13 +1597,18 @@ namespace GPGVulkan
             {
                 if (nullptr != sceneObj->ModelPtr())
                 {
-                    updateUniformBuffer(mCurrentFrame, aCamera, sceneObj);
 
                     VkBuffer vertexBuffers[] = {sceneObj->ModelPtr()->VertexBuffer()};
+
                     VkDeviceSize offsets[] = {0};
                     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
                     vkCmdBindIndexBuffer(commandBuffer, sceneObj->ModelPtr()->IndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
                     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &mDescriptorSets[mCurrentFrame], 0, nullptr);
+
+                    MeshPushConstants constants;
+                    constants.render_matrix = sceneObj->ModelPtr()->GetTransform().TransformMat4();
+
+                    vkCmdPushConstants(commandBuffer, mPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(MeshPushConstants), &constants);
 
                     vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(sceneObj->ModelPtr()->Indices().size()), 1, 0, 0, 0);
                 }
@@ -1607,6 +1650,8 @@ namespace GPGVulkan
     void VulkanPipeLine::CleanUp()
     {
         cleanupSwapChain();
+
+        vkDestroySampler(mDevice, mTextureSampler, nullptr);
 
         vkDestroyPipeline(mDevice, mGraphicsPipeline, nullptr);
         vkDestroyPipelineLayout(mDevice, mPipelineLayout, nullptr);

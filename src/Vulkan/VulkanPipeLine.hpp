@@ -89,11 +89,9 @@ namespace GPGVulkan
 
         uint32_t mMipLevels;
 
-        // VkImage mTextureImage;
-        // VkDeviceMemory mTextureImageMemory;
 
         // VkImageView mTextureImageView;
-        // VkSampler mTextureSampler;
+        VkSampler mTextureSampler;
 
         VkSampleCountFlagBits mMsaaSamples = VK_SAMPLE_COUNT_1_BIT;
 
@@ -109,6 +107,7 @@ namespace GPGVulkan
         unsigned int mHeight;
         void initWindow(int width, int height);
         void initVulkan();
+
 
         // Imgui
         //  Setup Dear ImGui context
@@ -157,6 +156,8 @@ namespace GPGVulkan
         void createColorResources();
         void createDepthResources();
 
+        void createTextureSampler();
+
         void setupImgui();
 
         // Load VertexBuffer, IndexBuffer and texture buffers and samplers.
@@ -166,6 +167,9 @@ namespace GPGVulkan
         void createDescriptorPool();
         void createDescriptorSets();
         void createCommandBuffers();
+
+        
+
         void createSyncObjects();
 
         void recordCommandBuffer(VkCommandBuffer commandBuffer,
