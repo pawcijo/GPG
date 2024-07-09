@@ -50,6 +50,8 @@ namespace GPGVulkan
 
         std::vector<SceneObject *> Children();
 
+        void Destroy();
+
         unsigned long ObjectId();
         unsigned long ParentId();
 

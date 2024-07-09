@@ -119,6 +119,29 @@ namespace GPGVulkan
     return mModel;
   };
 
+  void SceneObject::Destroy()
+  {
+    // Recursively destroy all children
+    for (SceneObject *child : mChildren)
+    {
+      child->Destroy();
+      delete child;
+    }
+    mChildren.clear();
+
+    // Perform any other necessary cleanup here
+
+    // Optionally, if this object is owned by a parent, remove it from the parent's child list
+    if (mParent)
+    {
+      auto it = std::find(mParent->mChildren.begin(), mParent->mChildren.end(), this);
+      if (it != mParent->mChildren.end())
+      {
+        mParent->mChildren.erase(it);
+      }
+    }
+  }
+
   void SceneObject::Serialize(std::ofstream &outFile) const
   {
   }

@@ -1101,9 +1101,14 @@ namespace GPGVulkan
         }
     }
 
-    void VulkanPipeLine::SetScene(Scene *aScene)
+    void VulkanPipeLine::SetScenePtr(Scene *aScene)
     {
         mScene = aScene;
+    }
+
+    void VulkanPipeLine::SetAppPtr(VulkanApp *aApp)
+    {
+        mApp = aApp;
     }
 
     VulkanPipeLine::VulkanPipeLine(unsigned int width, unsigned int height) : mWidth(width),
@@ -1486,7 +1491,11 @@ namespace GPGVulkan
 
             if (ImGui::Button("Load Scene")) // Buttons return true when clicked (most widgets return true when edited/activated)
             {
-                mScene = LoadSceneBinary(scenePath);
+                if (nullptr != mScene)
+                {
+                    mScene->ClearScene();
+                }
+                mScene = LoadSceneXml(scenePath);
             }
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);

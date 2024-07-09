@@ -26,7 +26,8 @@ namespace GPGVulkan
     {
         mPhysicsTimerPtr = CreatePhysicsTimer(60); // 1 physics update per second
         mFrametimestart = ((float)GetApplicationTime()) / 1000.0f;
-        mGraphicPipeline.SetScene(&mScene);
+        mGraphicPipeline.SetScenePtr(&mScene);
+        mGraphicPipeline.SetAppPtr(this);
     }
 
     void VulkanApp::SetViewAndPerspective()
@@ -100,35 +101,35 @@ namespace GPGVulkan
         mGraphicPipeline.createDescriptorPool(2);
         mGraphicPipeline.createUniformBuffers();
 
-        std::unique_ptr<Model> model = std::make_unique<Model>(MODEL_PATH, TEXTURE_PATH,
-                                                               mGraphicPipeline.mVulkanContext);
+        mModels.push_back(new Model(MODEL_PATH, TEXTURE_PATH,
+                                    mGraphicPipeline.mVulkanContext));
 
-        std::unique_ptr<Model> model_2 = std::make_unique<Model>(MODEL_PATH_2, TEXTURE_PATH_2,
-                                                                  mGraphicPipeline.mVulkanContext);
+        mModels.push_back(new Model(MODEL_PATH_2, TEXTURE_PATH_2,
+                                    mGraphicPipeline.mVulkanContext));
 
-        model->GetTransform().rotate(90, glm::vec3(1, 0, 0));
-        model->GetTransform().rotate(180, glm::vec3(0, 1, 0));
-        model->GetTransform().rotate(90, glm::vec3(0, 0, 1));
+        mModels[0]->GetTransform().rotate(90, glm::vec3(1, 0, 0));
+        mModels[0]->GetTransform().rotate(180, glm::vec3(0, 1, 0));
+        mModels[0]->GetTransform().rotate(90, glm::vec3(0, 0, 1));
 
         SceneObject *scenObj = new SceneObject(Transform(), nullptr);
         scenObj->SetName("Dupa");
-        scenObj->SetModel(std::move(model.get()));
-        mScene.AddSceneObject(std::move(scenObj));
+        scenObj->SetModel(mModels[0]);
+        mScene.AddSceneObject(scenObj);
 
         SceneObject *emptySceneObj = new SceneObject(Transform(), nullptr);
         emptySceneObj->SetName("EmptySceneObj");
-        scenObj->AddChild(std::move(emptySceneObj));
+        scenObj->AddChild(emptySceneObj);
 
         SceneObject *emptySceneObj2 = new SceneObject(Transform(), nullptr);
-        emptySceneObj2->SetModel(std::move(model_2.get()));
+        emptySceneObj2->SetModel(mModels[1]);
         emptySceneObj2->SetName("Klocek");
 
-        model_2->GetTransform().setScale(glm::vec3(0.1, 0.1, 0.1));
-        model_2->GetTransform().translate(glm::vec3(9, 0, 0));
+        mModels[1]->GetTransform().setScale(glm::vec3(0.1, 0.1, 0.1));
+        mModels[1]->GetTransform().translate(glm::vec3(9, 0, 0));
 
-        mScene.AddSceneObject(std::move(emptySceneObj2));
+        mScene.AddSceneObject(emptySceneObj2);
 
-        mGraphicPipeline.SetScene(&mScene);
+        mGraphicPipeline.SetScenePtr(&mScene);
 
         // move them to model  mGraphicPipeline.createDescriptorSets();
         mGraphicPipeline.createCommandBuffers();

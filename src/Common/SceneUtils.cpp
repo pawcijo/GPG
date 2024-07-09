@@ -23,6 +23,21 @@ namespace GPGVulkan
         throw std::runtime_error("Not implemented");
     }
 
+    Scene *LoadSceneXml(std::filesystem::path aPath)
+    {
+        XMLDocument doc;
+
+        // Load the XML file
+        tinyxml2::XMLError eResult = doc.LoadFile("example.xml");
+        if (eResult != tinyxml2::XML_SUCCESS)
+        {
+            std::string error = "Error loading file: " + std::string(doc.ErrorIDToName(eResult));
+            throw std::runtime_error(error);
+        }
+
+        return nullptr;
+    }
+
     void SaveSceneXml(std::filesystem::path aPath, Scene *aScene)
     {
 

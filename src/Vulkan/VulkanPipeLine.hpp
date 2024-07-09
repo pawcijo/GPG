@@ -124,6 +124,7 @@ namespace GPGVulkan
         void drawImgui(VkCommandBuffer commandBuffer);
 
         Scene *mScene;
+        VulkanApp *mApp;
 
     public:
         VulkanPipeLine(unsigned int width, unsigned int height);
@@ -144,7 +145,8 @@ namespace GPGVulkan
         }
         bool mFramebufferResized = false;
 
-        void SetScene(Scene *aScene);
+        void SetScenePtr(Scene *aScene);
+        void SetAppPtr(VulkanApp *aScene);
 
         void DrawFrame(Camera &aCamera);
 

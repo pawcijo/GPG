@@ -13,6 +13,7 @@
 namespace GPGVulkan
 {
 
+    class Model;
     class VulkanApp
     {
         VulkanPipeLine &mGraphicPipeline;
@@ -32,6 +33,10 @@ namespace GPGVulkan
 
         // Scene
         Scene mScene;
+        std::vector<Model*> mModels;
+        //move textures here ?
+
+
 
         // Clean up
         void CleanUp();
@@ -40,6 +45,8 @@ namespace GPGVulkan
         VulkanApp(VulkanPipeLine &window);
         ~VulkanApp();
         void Run();
+
+        friend class VulkanPipeline;
     };
 
 }

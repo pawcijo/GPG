@@ -31,6 +31,12 @@ namespace GPGVulkan
 
     void Scene::ClearScene()
     {
+
+        for (auto sceneObj : mSceneObjects)
+        {
+            sceneObj->Destroy();
+        }
+
         mSceneObjects.clear();
     }
 
