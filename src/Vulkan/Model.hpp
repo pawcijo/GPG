@@ -26,8 +26,9 @@ namespace GPGVulkan
         uint32_t mMipLevels;
         VkImage mTextureImage;
         VkDeviceMemory mTextureImageMemory;
-
         VkImageView mTextureImageView;
+
+        std::vector<VkDescriptorSet> mDescriptorSets; // texture defaulted to null
 
         void createVertexBuffer(VkDevice aDevice,
                                 VkPhysicalDevice aPhysicalDevice,
@@ -44,13 +45,24 @@ namespace GPGVulkan
                                 VkQueue aGraphicsQueue);
         void createTextureImageView(VkDevice aDevice);
 
+        void createDescriptorSets(VkDevice aDevice,
+                                  VkSampler aSampler,
+                                  VkDescriptorPool aDescriptorPool,
+                                  VkDescriptorSetLayout aDescriptorSetLayout,
+                                  std::vector<VkBuffer> mUniformBuffers);
+
     public:
         Model(std::filesystem::path aModelPath,
               std::filesystem::path aTexturePath,
               VkDevice aDevice,
               VkPhysicalDevice aPhysicalDevice,
               VkCommandPool aCommandPool,
-              VkQueue aGraphicsQueue);
+              VkQueue aGraphicsQueue,
+              VkPipelineLayout pipelineLayout,
+              VkSampler aSampler,
+              VkDescriptorPool aDescriptorPool,
+              VkDescriptorSetLayout aDescriptorSetLayout,
+              std::vector<VkBuffer> mUniformBuffers);
 
         void CleanUp(VkDevice aDevice);
         void CleanUpTextures(VkDevice aDevice);
@@ -67,6 +79,7 @@ namespace GPGVulkan
         VkBuffer IndexBuffer();
 
         VkImageView TextureImageView();
+        std::vector<VkDescriptorSet> DescriptorSets();
 
     };
 

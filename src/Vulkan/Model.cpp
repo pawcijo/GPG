@@ -382,13 +382,17 @@ namespace GPGVulkan
         mTextureImageView = CreateImageView(aDevice, mTextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, mMipLevels);
     }
 
-
     Model::Model(std::filesystem::path modelPath,
                  std::filesystem::path aTexturePath,
                  VkDevice aDevice,
                  VkPhysicalDevice aPhysicalDevice,
                  VkCommandPool aCommandPool,
-                 VkQueue aGraphicsQueue) : mModelPath(modelPath), mTexturePath(aTexturePath), mTransform(Transform::origin())
+                 VkQueue aGraphicsQueue,
+                 VkPipelineLayout pipelineLayout,
+                 VkSampler aSampler,
+                 VkDescriptorPool aDescriptorPool,
+                 VkDescriptorSetLayout aDescriptorSetLayout,
+                 std::vector<VkBuffer> aUniformBuffers) : mModelPath(modelPath), mTexturePath(aTexturePath), mTransform(Transform::origin())
     {
 
         tinyobj::attrib_t attrib;
@@ -435,6 +439,8 @@ namespace GPGVulkan
 
         createTextureImage(aDevice, aPhysicalDevice, aCommandPool, aGraphicsQueue);
         createTextureImageView(aDevice);
+
+        createDescriptorSets(aDevice, aSampler, aDescriptorPool, aDescriptorSetLayout, aUniformBuffers);
     }
 
     std::vector<Vertex> &Model::Vertices()
@@ -496,6 +502,68 @@ namespace GPGVulkan
         vkFreeMemory(aDevice, stagingBufferMemory, nullptr);
     }
 
+    void Model::createDescriptorSets(VkDevice aDevice,
+                                     VkSampler aSampler,
+                                     VkDescriptorPool aDescriptorPool,
+                                     VkDescriptorSetLayout aDescriptorSetLayout,
+                                     std::vector<VkBuffer> aUniformBuffers)
+    {
+        int MAX_FRAMES_IN_FLIGHT = 2;
+        std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, aDescriptorSetLayout);
+        VkDescriptorSetAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        allocInfo.descriptorPool = aDescriptorPool;
+        allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        allocInfo.pSetLayouts = layouts.data();
+
+        mDescriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+        VkResult result = vkAllocateDescriptorSets(aDevice, &allocInfo, mDescriptorSets.data());
+        if (result != VK_SUCCESS)
+        {
+            
+            throw std::runtime_error("failed to allocate descriptor sets!");
+        }
+
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        {
+            VkDescriptorBufferInfo bufferInfo{};
+            bufferInfo.buffer = aUniformBuffers[i];
+            bufferInfo.offset = 0;
+            bufferInfo.range = sizeof(UniformBufferObject);
+
+            VkDescriptorImageInfo imageInfo{};
+            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+            imageInfo.imageView = mTextureImageView;
+            imageInfo.sampler = aSampler;
+
+            std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+
+            descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[0].dstSet = mDescriptorSets[i];
+            descriptorWrites[0].dstBinding = 0;
+            descriptorWrites[0].dstArrayElement = 0;
+            descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            descriptorWrites[0].descriptorCount = 1;
+            descriptorWrites[0].pBufferInfo = &bufferInfo;
+
+            descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[1].dstSet = mDescriptorSets[i];
+            descriptorWrites[1].dstBinding = 1;
+            descriptorWrites[1].dstArrayElement = 0;
+            descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            descriptorWrites[1].descriptorCount = 1;
+            descriptorWrites[1].pImageInfo = &imageInfo;
+
+            vkUpdateDescriptorSets(aDevice, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+        }
+    }
+
+    std::vector<VkDescriptorSet> Model::DescriptorSets()
+    {
+        return mDescriptorSets;
+    }
+
     VkBuffer Model::VertexBuffer()
     {
         return mVertexBuffer;
@@ -521,7 +589,7 @@ namespace GPGVulkan
 
     void Model::CleanUpTextures(VkDevice aDevice)
     {
-        
+
         vkDestroyImageView(aDevice, mTextureImageView, nullptr);
 
         vkDestroyImage(aDevice, mTextureImage, nullptr);

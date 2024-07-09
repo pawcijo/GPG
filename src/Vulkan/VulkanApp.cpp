@@ -95,17 +95,30 @@ namespace GPGVulkan
         const std::string MODEL_PATH_2 = "resources/models/Klocek.obj";
         const std::string TEXTURE_PATH_2 = "resources/textures/juanP.jpg";
 
+        mGraphicPipeline.createDescriptorPool(2);
+        mGraphicPipeline.createUniformBuffers();
+
         std::unique_ptr<Model> model = std::make_unique<Model>(MODEL_PATH, TEXTURE_PATH,
                                                                mGraphicPipeline.mDevice,
                                                                mGraphicPipeline.mPhysicalDevice,
                                                                mGraphicPipeline.mCommandPool,
-                                                               mGraphicPipeline.mGraphicsQueue);
+                                                               mGraphicPipeline.mGraphicsQueue,
+                                                               mGraphicPipeline.mPipelineLayout,
+                                                               mGraphicPipeline.mTextureSampler,
+                                                               mGraphicPipeline.mDescriptorPool,
+                                                               mGraphicPipeline.mDescriptorSetLayout,
+                                                               mGraphicPipeline.mUniformBuffers);
 
         std::unique_ptr<Model> model_2 = std::make_unique<Model>(MODEL_PATH_2, TEXTURE_PATH_2,
                                                                  mGraphicPipeline.mDevice,
                                                                  mGraphicPipeline.mPhysicalDevice,
                                                                  mGraphicPipeline.mCommandPool,
-                                                                 mGraphicPipeline.mGraphicsQueue);
+                                                                 mGraphicPipeline.mGraphicsQueue,
+                                                                 mGraphicPipeline.mPipelineLayout,
+                                                                 mGraphicPipeline.mTextureSampler,
+                                                                 mGraphicPipeline.mDescriptorPool,
+                                                                 mGraphicPipeline.mDescriptorSetLayout,
+                                                                 mGraphicPipeline.mUniformBuffers);
 
         model->GetTransform().rotate(90, glm::vec3(1, 0, 0));
         model->GetTransform().rotate(180, glm::vec3(0, 1, 0));
@@ -131,9 +144,7 @@ namespace GPGVulkan
 
         mGraphicPipeline.SetScene(&mScene);
 
-        mGraphicPipeline.createUniformBuffers();
-        mGraphicPipeline.createDescriptorPool();
-        mGraphicPipeline.createDescriptorSets();
+        // move them to model  mGraphicPipeline.createDescriptorSets();
         mGraphicPipeline.createCommandBuffers();
         mGraphicPipeline.createSyncObjects();
 

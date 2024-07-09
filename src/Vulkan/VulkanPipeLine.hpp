@@ -89,7 +89,6 @@ namespace GPGVulkan
 
         uint32_t mMipLevels;
 
-
         // VkImageView mTextureImageView;
         VkSampler mTextureSampler;
 
@@ -108,7 +107,6 @@ namespace GPGVulkan
         void initWindow(int width, int height);
         void initVulkan();
 
-
         // Imgui
         //  Setup Dear ImGui context
 
@@ -126,6 +124,8 @@ namespace GPGVulkan
         void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
         void updateUniformBuffer(uint32_t currentImage, Camera &camera);
+
+        void updateDescriptorSets(VkImageView imageView);
 
         void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
         void createImage(uint32_t width, uint32_t height, uint32_t aMipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage &image, VkDeviceMemory &imageMemory);
@@ -164,25 +164,19 @@ namespace GPGVulkan
         // void loadModel();
 
         void createUniformBuffers();
-        void createDescriptorPool();
-        void createDescriptorSets();
+        void createDescriptorPool(unsigned numberOfModels);
+        //void createDescriptorSets();
         void createCommandBuffers();
-
-        
 
         void createSyncObjects();
 
         void recordCommandBuffer(VkCommandBuffer commandBuffer,
-                                 uint32_t imageIndex, Camera &aCamera );
+                                 uint32_t imageIndex, Camera &aCamera);
         void cleanupSwapChain();
 
         void recreateSwapChain();
 
         void drawImgui(VkCommandBuffer commandBuffer);
-
-        // move to App or even better to config/project save file.
-        const std::string MODEL_PATH = "resources/models/viking_room.obj";
-        const std::string TEXTURE_PATH = "resources/textures/viking_room.png";
 
         Scene *mScene;
 
@@ -190,10 +184,13 @@ namespace GPGVulkan
         VulkanPipeLine(unsigned int width, unsigned int height);
         GLFWwindow *GetWindow();
         VkInstance GetInstance();
-        unsigned int GetWidth() { return mWidth; }
-        unsigned int Getheight() { return mHeight; }
+        unsigned int GetWidth() {
+            return mWidth; }
+        unsigned int Getheight() {
+            return mHeight; }
 
-        VkDevice GetDevice() { return mDevice; }
+        VkDevice GetDevice() {
+            return mDevice; }
         bool mFramebufferResized = false;
 
         void SetScene(Scene *aScene);
