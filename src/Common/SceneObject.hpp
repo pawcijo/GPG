@@ -3,12 +3,12 @@
 #include <vector>
 
 #include "Common/Transform.h"
-#include "Vulkan/Model.hpp"
 
 namespace GPGVulkan
 {
 
     class Scene;
+    class Model;
     class SceneObject
     {
 

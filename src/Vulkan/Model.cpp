@@ -384,15 +384,7 @@ namespace GPGVulkan
 
     Model::Model(std::filesystem::path modelPath,
                  std::filesystem::path aTexturePath,
-                 VkDevice aDevice,
-                 VkPhysicalDevice aPhysicalDevice,
-                 VkCommandPool aCommandPool,
-                 VkQueue aGraphicsQueue,
-                 VkPipelineLayout pipelineLayout,
-                 VkSampler aSampler,
-                 VkDescriptorPool aDescriptorPool,
-                 VkDescriptorSetLayout aDescriptorSetLayout,
-                 std::vector<VkBuffer> aUniformBuffers) : mModelPath(modelPath), mTexturePath(aTexturePath), mTransform(Transform::origin())
+                 VulkanContext aContext) : mModelPath(modelPath), mTexturePath(aTexturePath), mTransform(Transform::origin())
     {
 
         tinyobj::attrib_t attrib;
@@ -434,13 +426,13 @@ namespace GPGVulkan
             }
         }
 
-        createVertexBuffer(aDevice, aPhysicalDevice, aCommandPool, aGraphicsQueue);
-        createIndexBuffer(aDevice, aPhysicalDevice, aCommandPool, aGraphicsQueue);
+        createVertexBuffer(aContext.mDevice, aContext.mPhysicalDevice, aContext.mCommandPool, aContext.mGraphicsQueue);
+        createIndexBuffer(aContext.mDevice, aContext.mPhysicalDevice, aContext.mCommandPool, aContext.mGraphicsQueue);
 
-        createTextureImage(aDevice, aPhysicalDevice, aCommandPool, aGraphicsQueue);
-        createTextureImageView(aDevice);
+        createTextureImage(aContext.mDevice, aContext.mPhysicalDevice, aContext.mCommandPool, aContext.mGraphicsQueue);
+        createTextureImageView(aContext.mDevice);
 
-        createDescriptorSets(aDevice, aSampler, aDescriptorPool, aDescriptorSetLayout, aUniformBuffers);
+        createDescriptorSets(aContext.mDevice, aContext.mTextureSampler, aContext.mDescriptorPool, aContext.mDescriptorSetLayout, aContext.mUniformBuffers);
     }
 
     std::vector<Vertex> &Model::Vertices()
@@ -520,7 +512,7 @@ namespace GPGVulkan
         VkResult result = vkAllocateDescriptorSets(aDevice, &allocInfo, mDescriptorSets.data());
         if (result != VK_SUCCESS)
         {
-            
+
             throw std::runtime_error("failed to allocate descriptor sets!");
         }
 

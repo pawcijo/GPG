@@ -4,6 +4,8 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 
+#include "Model.hpp"
+
 #include <SDL2/SDL.h>
 
 unsigned long GetApplicationTime()
@@ -99,26 +101,10 @@ namespace GPGVulkan
         mGraphicPipeline.createUniformBuffers();
 
         std::unique_ptr<Model> model = std::make_unique<Model>(MODEL_PATH, TEXTURE_PATH,
-                                                               mGraphicPipeline.mDevice,
-                                                               mGraphicPipeline.mPhysicalDevice,
-                                                               mGraphicPipeline.mCommandPool,
-                                                               mGraphicPipeline.mGraphicsQueue,
-                                                               mGraphicPipeline.mPipelineLayout,
-                                                               mGraphicPipeline.mTextureSampler,
-                                                               mGraphicPipeline.mDescriptorPool,
-                                                               mGraphicPipeline.mDescriptorSetLayout,
-                                                               mGraphicPipeline.mUniformBuffers);
+                                                               mGraphicPipeline.mVulkanContext);
 
         std::unique_ptr<Model> model_2 = std::make_unique<Model>(MODEL_PATH_2, TEXTURE_PATH_2,
-                                                                 mGraphicPipeline.mDevice,
-                                                                 mGraphicPipeline.mPhysicalDevice,
-                                                                 mGraphicPipeline.mCommandPool,
-                                                                 mGraphicPipeline.mGraphicsQueue,
-                                                                 mGraphicPipeline.mPipelineLayout,
-                                                                 mGraphicPipeline.mTextureSampler,
-                                                                 mGraphicPipeline.mDescriptorPool,
-                                                                 mGraphicPipeline.mDescriptorSetLayout,
-                                                                 mGraphicPipeline.mUniformBuffers);
+                                                                  mGraphicPipeline.mVulkanContext);
 
         model->GetTransform().rotate(90, glm::vec3(1, 0, 0));
         model->GetTransform().rotate(180, glm::vec3(0, 1, 0));

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vulkan/VulkanUtis.hpp"
+#include "Vulkan/VulkanPipeLine.hpp"
 #include "Common/Transform.h"
 
 #include <filesystem>
@@ -54,15 +55,7 @@ namespace GPGVulkan
     public:
         Model(std::filesystem::path aModelPath,
               std::filesystem::path aTexturePath,
-              VkDevice aDevice,
-              VkPhysicalDevice aPhysicalDevice,
-              VkCommandPool aCommandPool,
-              VkQueue aGraphicsQueue,
-              VkPipelineLayout pipelineLayout,
-              VkSampler aSampler,
-              VkDescriptorPool aDescriptorPool,
-              VkDescriptorSetLayout aDescriptorSetLayout,
-              std::vector<VkBuffer> mUniformBuffers);
+              VulkanContext aContext);
 
         void CleanUp(VkDevice aDevice);
         void CleanUpTextures(VkDevice aDevice);

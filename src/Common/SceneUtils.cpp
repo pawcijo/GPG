@@ -6,6 +6,8 @@
 #include <string>
 #include <ranges>
 
+#include "Vulkan/Model.hpp"
+
 #include <tinyxml2.h>
 
 namespace GPGVulkan

@@ -16,6 +16,61 @@
 
 namespace GPGVulkan
 {
+    struct VulkanContext
+    {
+
+        VkInstance mInstance;
+        VkAllocationCallbacks *g_Allocator = nullptr;
+        VkDebugUtilsMessengerEXT mDebugMessenger;
+
+        VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
+        VkDevice mDevice;
+
+        VkQueue mGraphicsQueue;
+        VkQueue mPresentQueue;
+
+        VkSurfaceKHR mSurface;
+
+        VkSwapchainKHR mSwapChain;
+        std::vector<VkImage> mSwapChainImages;
+        VkFormat mSwapChainImageFormat;
+        VkExtent2D mSwapChainExtent;
+        std::vector<VkImageView> mSwapChainImageViews;
+        std::vector<VkFramebuffer> mSwapChainFramebuffers;
+
+        VkRenderPass mRenderPass;
+        VkDescriptorSetLayout mDescriptorSetLayout;
+        VkPipelineLayout mPipelineLayout;
+        VkPipeline mGraphicsPipeline;
+
+        VkCommandPool mCommandPool;
+        std::vector<VkCommandBuffer> mCommandBuffers;
+
+        std::vector<VkSemaphore> mImageAvailableSemaphores;
+        std::vector<VkSemaphore> mRenderFinishedSemaphores;
+        std::vector<VkFence> mInFlightFences;
+
+        std::vector<VkBuffer> mUniformBuffers;
+        std::vector<VkDeviceMemory> mUniformBuffersMemory;
+        std::vector<void *> mUniformBuffersMapped;
+
+        VkDescriptorPool mImguiDescriptorPool;
+        VkDescriptorPool mDescriptorPool;
+        std::vector<VkDescriptorSet> mDescriptorSets;
+
+        uint32_t mMipLevels;
+        VkSampler mTextureSampler;
+
+        VkSampleCountFlagBits mMsaaSamples = VK_SAMPLE_COUNT_1_BIT;
+
+        VkImage mDepthImage;
+        VkDeviceMemory mDepthImageMemory;
+        VkImageView mDepthImageView;
+
+        VkImage mColorImage;
+        VkDeviceMemory mColorImageMemory;
+        VkImageView mColorImageView;
+    };
 
     struct UniformBufferObject
     {
