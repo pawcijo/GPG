@@ -88,6 +88,31 @@ namespace GPGVulkan
         }
     }
 
+    Model * VulkanApp::GetModel(std::filesystem::path aPath)
+    {
+          for(auto model : mModels)
+        {
+            if(model->ModelPath() == aPath )
+            {
+                return model;
+            }
+        }
+        return nullptr;
+    }
+
+    void VulkanApp::AddModel(Model * aModel)
+    {
+        for(auto model : mModels)
+        {
+            if(model->ModelPath() == aModel->ModelPath() )
+            {
+                printf("Model already exist, skipping .\n");
+                return;
+            }
+        }
+        mModels.push_back(aModel);
+    }
+
     void VulkanApp::Run()
     {
         // Move to config  ?
@@ -172,9 +197,13 @@ namespace GPGVulkan
         CleanUp();
     }
 
+     std::vector<Model*>& VulkanApp::LoadedModels()
+     {
+        return mModels;
+     }
+
     void VulkanApp::CleanUp()
     {
-
         ImGui_ImplVulkan_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();

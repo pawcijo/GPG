@@ -142,13 +142,23 @@ namespace GPGVulkan
     }
   }
 
-  void SceneObject::Serialize(std::ofstream &outFile) const
+  std::vector<unsigned long> SceneObject::ChildrenIds()
+  {
+    return mChildrenIds;
+  }
+
+  SceneObject::SceneObject(unsigned long aObjectId,
+                           unsigned long aParentId,
+                           std::string aName,
+                           Transform aTransform,
+                           Model *aModel) : mObjectId(aObjectId), mParentId(aParentId), mName(aName), mTransform(aTransform), mModel(aModel)
   {
   }
 
-  void SceneObject::Deserialize(std::ifstream &inFile)
+  SceneObject::~SceneObject()
   {
-  }
+    ObjectIDCounter = ObjectIDCounter - 1;
+  };
 
   unsigned long SceneObject::ObjectIDCounter = 1;
 
