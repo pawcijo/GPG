@@ -17,7 +17,6 @@
 #include <optional>
 #include <string>
 
-#include "Vulkan/Model.hpp"
 
 namespace GPGVulkan
 {
@@ -44,6 +43,7 @@ namespace GPGVulkan
 
     class Scene;
     class VulkanApp;
+    class Model;
 
     class VulkanPipeLine
     {
@@ -88,8 +88,6 @@ namespace GPGVulkan
         std::vector<VkDescriptorSet> mDescriptorSets;
 
         uint32_t mMipLevels;
-
-        // VkImageView mTextureImageView;
         VkSampler mTextureSampler;
 
         VkSampleCountFlagBits mMsaaSamples = VK_SAMPLE_COUNT_1_BIT;
@@ -160,12 +158,9 @@ namespace GPGVulkan
 
         void setupImgui();
 
-        // Load VertexBuffer, IndexBuffer and texture buffers and samplers.
-        // void loadModel();
-
         void createUniformBuffers();
         void createDescriptorPool(unsigned numberOfModels);
-        //void createDescriptorSets();
+
         void createCommandBuffers();
 
         void createSyncObjects();
@@ -200,6 +195,7 @@ namespace GPGVulkan
         void CleanUp();
 
         friend class VulkanApp;
+        friend class Model;
     };
 
 }
