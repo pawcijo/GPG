@@ -34,7 +34,7 @@ namespace GPGVulkan
         Camera mCamera;
 
         // Scene
-        Scene mScene;
+        Scene* mScene;
         std::vector<Model *> mModels;
         // move textures here ?
 

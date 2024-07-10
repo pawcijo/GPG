@@ -1476,10 +1476,13 @@ namespace GPGVulkan
             ImGui::SliderFloat("float", &f, 0.0f, 1.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
             ImGui::ColorEdit3("clear color", (float *)&clear_color); // Edit 3 floats representing a color
 
-            if (ImGui::Button("Save Scene"))
+            if (nullptr != mScene)
             {
+                if (ImGui::Button("Save Scene"))
+                {
 
-                mScene->SaveScene(scenePath);
+                    mScene->SaveScene(scenePath);
+                }
             }
 
             if (nullptr != mScene)
@@ -1488,6 +1491,7 @@ namespace GPGVulkan
                 {
 
                     mScene->ClearScene();
+                    mScene = nullptr;
                 }
             }
 
@@ -1497,8 +1501,6 @@ namespace GPGVulkan
                 {
                     mScene->ClearScene();
                 }
-                vkDeviceWaitIdle(mVulkanContext.mDevice);
-                VkResult result = vkResetDescriptorPool(mVulkanContext.mDevice, mVulkanContext.mDescriptorPool, 0);
 
                 mScene = LoadSceneXml(scenePath, *mApp, *this);
 
