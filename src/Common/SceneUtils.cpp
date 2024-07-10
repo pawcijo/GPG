@@ -237,7 +237,7 @@ namespace GPGVulkan
             for (const auto &childId : sceneObj->ChildrenIds())
             {
                 tinyxml2::XMLElement *childIdElement = doc.NewElement("ChildId");
-                childIdElement->SetText(childId);
+                childIdElement->SetText((int64_t)childId);
                 childrenIdsElement->InsertEndChild(childIdElement);
             }
             sceneObjectElement->InsertEndChild(childrenIdsElement);
