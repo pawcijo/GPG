@@ -1463,7 +1463,7 @@ namespace GPGVulkan
 
         ImGuiIO &io = ImGui::GetIO();
 
-        const char *scenePath = "Scene";
+        const char *scenePath = "Scene.xml";
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
