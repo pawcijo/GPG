@@ -16,6 +16,7 @@
 
 #include "Vulkan/VulkanValidation.hpp"
 #include "Vulkan/VulkanShader.hpp"
+#include "Vulkan/VulkanApp.hpp"
 #include "Vulkan/Model.hpp"
 
 #include "Common/Scene.hpp"
@@ -1475,17 +1476,22 @@ namespace GPGVulkan
             ImGui::SliderFloat("float", &f, 0.0f, 1.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
             ImGui::ColorEdit3("clear color", (float *)&clear_color); // Edit 3 floats representing a color
 
-            if (ImGui::Button("Save Scene"))
+            if (nullptr != mScene)
             {
+                if (ImGui::Button("Save Scene"))
+                {
 
-                mScene->SaveScene(scenePath);
+                    mScene->SaveScene(scenePath);
+                }
             }
 
             if (nullptr != mScene)
             {
                 if (ImGui::Button("Clear Scene")) // Buttons return true when clicked (most widgets return true when edited/activated)
                 {
+
                     mScene->ClearScene();
+                    mScene = nullptr;
                 }
             }
 
@@ -1495,7 +1501,10 @@ namespace GPGVulkan
                 {
                     mScene->ClearScene();
                 }
-                mScene = LoadSceneXml(scenePath);
+
+                mScene = LoadSceneXml(scenePath, *mApp, *this);
+
+                printf("Dupa \n");
             }
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
@@ -1610,6 +1619,11 @@ namespace GPGVulkan
         vkDestroySwapchainKHR(mVulkanContext.mDevice, mVulkanContext.mSwapChain, nullptr);
     }
 
+    VulkanContext &VulkanPipeLine::GetVulkanContext()
+    {
+        return mVulkanContext;
+    }
+
     void VulkanPipeLine::CleanUp()
     {
         cleanupSwapChain();
@@ -1629,27 +1643,16 @@ namespace GPGVulkan
         vkDestroyDescriptorPool(mVulkanContext.mDevice, mVulkanContext.mImguiDescriptorPool, nullptr);
         vkDestroyDescriptorPool(mVulkanContext.mDevice, mVulkanContext.mDescriptorPool, nullptr);
 
-        if (nullptr != mScene)
+        for (auto model : mApp->mModels)
         {
-            for (auto &sceneObj : mScene->SceneObjects())
-            {
-                /// TODO add recrurive cleaning
-                if (nullptr != sceneObj->ModelPtr())
-                {
-                    sceneObj->ModelPtr()->CleanUpTextures(mVulkanContext.mDevice);
-                }
-            }
+            model->CleanUpTextures(mVulkanContext.mDevice);
         }
 
         vkDestroyDescriptorSetLayout(mVulkanContext.mDevice, mVulkanContext.mDescriptorSetLayout, nullptr);
 
-        for (auto &sceneObj : mScene->SceneObjects())
+        for (auto model : mApp->mModels)
         {
-            /// TODO add recrurive cleaning
-            if (nullptr != sceneObj->ModelPtr())
-            {
-                sceneObj->ModelPtr()->CleanUp(mVulkanContext.mDevice);
-            }
+            model->CleanUp(mVulkanContext.mDevice);
         }
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)

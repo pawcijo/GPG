@@ -41,12 +41,14 @@ namespace GPGVulkan
     };
 
     class Scene;
-    class VulkanApp;
     class Model;
+    class VulkanApp;
 
     class VulkanPipeLine
     {
+    private:
         GLFWwindow *mWindow;
+        VulkanApp *mApp;
 
         VulkanContext mVulkanContext;
 
@@ -105,26 +107,19 @@ namespace GPGVulkan
         void createDepthResources();
 
         void createTextureSampler();
-
         void setupImgui();
-
         void createUniformBuffers();
         void createDescriptorPool(unsigned numberOfModels);
 
         void createCommandBuffers();
-
         void createSyncObjects();
-
         void recordCommandBuffer(VkCommandBuffer commandBuffer,
                                  uint32_t imageIndex, Camera &aCamera);
         void cleanupSwapChain();
-
         void recreateSwapChain();
-
         void drawImgui(VkCommandBuffer commandBuffer);
 
         Scene *mScene;
-        VulkanApp *mApp;
 
     public:
         VulkanPipeLine(unsigned int width, unsigned int height);
@@ -147,8 +142,8 @@ namespace GPGVulkan
 
         void SetScenePtr(Scene *aScene);
         void SetAppPtr(VulkanApp *aScene);
-
         void DrawFrame(Camera &aCamera);
+        VulkanContext& GetVulkanContext();
 
         void CleanUp();
 

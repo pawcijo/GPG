@@ -22,11 +22,12 @@ namespace GPGVulkan
 {
 
     VulkanApp::VulkanApp(VulkanPipeLine &aGraphicPipeline)
-        : mGraphicPipeline(aGraphicPipeline), mCamera(Camera())
+        : mGraphicPipeline(aGraphicPipeline), mScene(nullptr), mCamera(Camera())
     {
         mPhysicsTimerPtr = CreatePhysicsTimer(60); // 1 physics update per second
         mFrametimestart = ((float)GetApplicationTime()) / 1000.0f;
-        mGraphicPipeline.SetScenePtr(&mScene);
+
+        mGraphicPipeline.SetScenePtr(mScene);
         mGraphicPipeline.SetAppPtr(this);
     }
 
@@ -88,18 +89,42 @@ namespace GPGVulkan
         }
     }
 
+    Model *VulkanApp::GetModel(std::filesystem::path aPath)
+    {
+        for (auto model : mModels)
+        {
+            if (model->ModelPath() == aPath)
+            {
+                return model;
+            }
+        }
+        return nullptr;
+    }
+
+    void VulkanApp::AddModel(Model *aModel)
+    {
+        for (auto model : mModels)
+        {
+            if (model->ModelPath() == aModel->ModelPath())
+            {
+                printf("Model already exist, skipping .\n");
+                return;
+            }
+        }
+        mModels.push_back(aModel);
+    }
+
     void VulkanApp::Run()
     {
         // Move to config  ?
         // TODO: do not load anything here, do it only if it is required
-        const std::string MODEL_PATH = "resources/models/viking_room.obj";
+        /*const std::string MODEL_PATH = "resources/models/viking_room.obj";
         const std::string TEXTURE_PATH = "resources/textures/viking_room.png";
 
         const std::string MODEL_PATH_2 = "resources/models/Klocek.obj";
         const std::string TEXTURE_PATH_2 = "resources/textures/juanP.jpg";
 
-        mGraphicPipeline.createDescriptorPool(2);
-        mGraphicPipeline.createUniformBuffers();
+
 
         mModels.push_back(new Model(MODEL_PATH, TEXTURE_PATH,
                                     mGraphicPipeline.mVulkanContext));
@@ -130,11 +155,15 @@ namespace GPGVulkan
         mScene.AddSceneObject(emptySceneObj2);
 
         mGraphicPipeline.SetScenePtr(&mScene);
+        */
 
         // move them to model  mGraphicPipeline.createDescriptorSets();
+
+        mGraphicPipeline.createDescriptorPool(1000);
+        mGraphicPipeline.createUniformBuffers();
+
         mGraphicPipeline.createCommandBuffers();
         mGraphicPipeline.createSyncObjects();
-
         mGraphicPipeline.setupImgui();
 
         while (!glfwWindowShouldClose(mGraphicPipeline.GetWindow()))
@@ -172,9 +201,13 @@ namespace GPGVulkan
         CleanUp();
     }
 
+    std::vector<Model *> &VulkanApp::LoadedModels()
+    {
+        return mModels;
+    }
+
     void VulkanApp::CleanUp()
     {
-
         ImGui_ImplVulkan_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();

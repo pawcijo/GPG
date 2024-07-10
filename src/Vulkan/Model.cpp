@@ -382,9 +382,62 @@ namespace GPGVulkan
         mTextureImageView = CreateImageView(aDevice, mTextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, mMipLevels);
     }
 
+    Model::Model(std::filesystem::path aModelPath,
+                 std::filesystem::path aTexturePath,
+                 Transform aTransform,
+                 VulkanContext &aContext) : mModelPath(aModelPath), mTexturePath(aTexturePath), mTransform(aTransform)
+    {
+        tinyobj::attrib_t attrib;
+        std::vector<tinyobj::shape_t> shapes;
+        std::vector<tinyobj::material_t> materials;
+        std::string warn, err;
+
+        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, aModelPath.c_str()))
+        {
+            throw std::runtime_error(warn + err);
+        }
+
+        std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+
+        for (const auto &shape : shapes)
+        {
+            for (const auto &index : shape.mesh.indices)
+            {
+                Vertex vertex{};
+
+                vertex.pos = {
+                    attrib.vertices[3 * index.vertex_index + 0],
+                    attrib.vertices[3 * index.vertex_index + 1],
+                    attrib.vertices[3 * index.vertex_index + 2]};
+
+                vertex.texCoord = {
+                    attrib.texcoords[2 * index.texcoord_index + 0],
+                    1.0f - attrib.texcoords[2 * index.texcoord_index + 1]};
+
+                vertex.color = {1.0f, 1.0f, 1.0f};
+
+                if (uniqueVertices.count(vertex) == 0)
+                {
+                    uniqueVertices[vertex] = static_cast<uint32_t>(mVertices.size());
+                    mVertices.push_back(vertex);
+                }
+
+                mIndices.push_back(uniqueVertices[vertex]);
+            }
+        }
+
+        createVertexBuffer(aContext.mDevice, aContext.mPhysicalDevice, aContext.mCommandPool, aContext.mGraphicsQueue);
+        createIndexBuffer(aContext.mDevice, aContext.mPhysicalDevice, aContext.mCommandPool, aContext.mGraphicsQueue);
+
+        createTextureImage(aContext.mDevice, aContext.mPhysicalDevice, aContext.mCommandPool, aContext.mGraphicsQueue);
+        createTextureImageView(aContext.mDevice);
+
+        createDescriptorSets(aContext.mDevice, aContext.mTextureSampler, aContext.mDescriptorPool, aContext.mDescriptorSetLayout, aContext.mUniformBuffers);
+    }
+
     Model::Model(std::filesystem::path modelPath,
                  std::filesystem::path aTexturePath,
-                 VulkanContext aContext) : mModelPath(modelPath), mTexturePath(aTexturePath), mTransform(Transform::origin())
+                 VulkanContext &aContext) : mModelPath(modelPath), mTexturePath(aTexturePath), mTransform(Transform::origin())
     {
 
         tinyobj::attrib_t attrib;

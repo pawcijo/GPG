@@ -38,6 +38,7 @@ namespace GPGVulkan
         }
 
         mSceneObjects.clear();
+
     }
 
     void Scene::AddSceneObject(SceneObject *aObject)

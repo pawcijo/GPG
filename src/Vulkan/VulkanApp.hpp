@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Vulkan/VulkanPipeLine.hpp"
 #include "Vulkan/VulkanUtis.hpp"
 #include "Common/Scene.hpp"
+#include "Common/Camera.h"
 #include "MyPhysics/PhysicsTimer.h"
 
 #include <glm/glm.hpp>
@@ -14,8 +14,10 @@ namespace GPGVulkan
 {
 
     class Model;
+    class VulkanPipeLine;
     class VulkanApp
     {
+    private:
         VulkanPipeLine &mGraphicPipeline;
 
         // Time related stuff
@@ -32,11 +34,9 @@ namespace GPGVulkan
         Camera mCamera;
 
         // Scene
-        Scene mScene;
-        std::vector<Model*> mModels;
-        //move textures here ?
-
-
+        Scene* mScene;
+        std::vector<Model *> mModels;
+        // move textures here ?
 
         // Clean up
         void CleanUp();
@@ -46,7 +46,11 @@ namespace GPGVulkan
         ~VulkanApp();
         void Run();
 
-        friend class VulkanPipeline;
+        std::vector<Model *> &LoadedModels();
+        Model *GetModel(std::filesystem::path aPath);
+        void AddModel(Model *);
+
+        friend class VulkanPipeLine;
     };
 
 }

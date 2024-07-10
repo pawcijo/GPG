@@ -9,6 +9,8 @@
 namespace GPGVulkan
 {
 
+    class VulkanApp;
+    class VulkanPipeline;
     class Model
     {
         std::vector<Vertex> mVertices;
@@ -55,7 +57,12 @@ namespace GPGVulkan
     public:
         Model(std::filesystem::path aModelPath,
               std::filesystem::path aTexturePath,
-              VulkanContext aContext);
+              VulkanContext &aContext);
+
+        Model(std::filesystem::path aModelPath,
+              std::filesystem::path aTexturePath,
+              Transform aTransform,
+              VulkanContext &aContext);
 
         void CleanUp(VkDevice aDevice);
         void CleanUpTextures(VkDevice aDevice);
@@ -74,6 +81,10 @@ namespace GPGVulkan
         VkImageView TextureImageView();
         std::vector<VkDescriptorSet> DescriptorSets();
 
+        
+
+        friend class VulkanApp;
+        friend class VulkanPipeline;
     };
 
 }

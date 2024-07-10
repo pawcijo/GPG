@@ -32,8 +32,13 @@ namespace GPGVulkan
         SceneObject(Transform aTransform,
                     SceneObject *parent);
 
-        void Serialize(std::ofstream &outFile) const;
-        void Deserialize(std::ifstream &inFile);
+        SceneObject(unsigned long aObjectId,
+                    unsigned long aParentId, 
+                    std::string aName, 
+                    Transform aTransform,
+                     Model *aModel);
+
+        ~SceneObject();
 
         void LoadPtrs();
 
@@ -42,13 +47,14 @@ namespace GPGVulkan
         void AddChild(SceneObject *aChild);
         void SetParent(SceneObject *aParent);
         void SetModel(Model *model);
-        void SetName(const std::string& aName);
+        void SetName(const std::string &aName);
 
         Model *ModelPtr();
         Transform TransformValue();
         const std::string &Name() const { return mName; }
 
         std::vector<SceneObject *> Children();
+        std::vector<unsigned long> ChildrenIds();
 
         void Destroy();
 
