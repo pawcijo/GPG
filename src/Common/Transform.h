@@ -16,14 +16,14 @@
 class Transform
 {
 
-    glm::mat4 transform;
+    glm::mat4 mTransform;
 
-    glm::vec3 position;
-    glm::vec3 scale;
-    glm::vec3 rotation;
+    glm::vec3 mPosition;
+    glm::vec3 mScale;
+    glm::vec3 mRotation;
 
-    glm::mat4 rotationMatrix;
-    glm::quat quaternion;
+    glm::mat4 mRotationMatrix;
+    glm::quat mQuaternion;
 
 public:
     Transform();

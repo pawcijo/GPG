@@ -85,7 +85,8 @@ namespace GPGVulkan
                 float rotX = rotationElement->FloatAttribute("x");
                 float rotY = rotationElement->FloatAttribute("y");
                 float rotZ = rotationElement->FloatAttribute("z");
-                transform.setRotation(glm::vec3(rotX, rotY, rotZ)); // Example using glm for vectors
+
+                transform.setRotation(rotX, rotY, rotZ);
             }
         }
 
@@ -131,7 +132,8 @@ namespace GPGVulkan
                         float rotX = modelRotationElement->FloatAttribute("x");
                         float rotY = modelRotationElement->FloatAttribute("y");
                         float rotZ = modelRotationElement->FloatAttribute("z");
-                        modelTransform.setRotation(glm::vec3(rotX, rotY, rotZ)); // Example using glm for vectors
+
+                        modelTransform.setRotation(rotX, rotY, rotZ);
                     }
 
                     model = aApp.GetModel(std::filesystem::path(modelPathAttr));
