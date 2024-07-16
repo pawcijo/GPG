@@ -632,6 +632,15 @@ namespace GPGVulkan
         return mTexturePath;
     }
 
+    long long Model::GetModelSizeInBytes()
+    {
+        long long modelSizeInBytes = 0;
+
+        throw std::logic_error("Unimplemented");
+
+        return modelSizeInBytes;
+    }
+
     void Model::CleanUpTextures(VkDevice aDevice)
     {
 

@@ -58,6 +58,10 @@ namespace GPGVulkan
 
         void Destroy();
 
+        void DrawSceneObjectGraph();
+
+        long long SceneObjectSizeInBytes();
+
         unsigned long ObjectId();
         unsigned long ParentId();
 

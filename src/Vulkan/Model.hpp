@@ -81,7 +81,7 @@ namespace GPGVulkan
         VkImageView TextureImageView();
         std::vector<VkDescriptorSet> DescriptorSets();
 
-        
+        long long GetModelSizeInBytes();    
 
         friend class VulkanApp;
         friend class VulkanPipeline;

@@ -28,6 +28,8 @@ namespace GPGVulkan
 
         void AddSceneObject(SceneObject *object);
 
+        long long SceneSizeInBytes();
+
         std::vector<SceneObject *> &SceneObjects() { return mSceneObjects; };
 
         friend class SceneObject;

@@ -1,8 +1,11 @@
 #include "SceneObject.hpp"
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_vulkan.h"
+
 #include "Common/Transform.h"
 #include "Common/Scene.hpp"
-
 #include "Vulkan/Model.hpp"
 
 #include <vector>
@@ -16,6 +19,38 @@ namespace GPGVulkan
   {
     mObjectId = ObjectIDCounter;
     ObjectIDCounter++;
+  }
+
+  long long SceneObject::SceneObjectSizeInBytes()
+  {
+    long long sceneObjectSize = 0;
+
+    sceneObjectSize += sizeof(Transform);
+    sceneObjectSize += (sizeof(mName) + mName.capacity());
+    sceneObjectSize += sizeof(mObjectId);
+    sceneObjectSize += sizeof(mParentId);
+    sceneObjectSize += sizeof(mChildrenIds);
+
+    for (auto objects : mChildren)
+    {
+      sceneObjectSize += objects->SceneObjectSizeInBytes();
+    }
+
+    return sceneObjectSize;
+  }
+  void SceneObject::DrawSceneObjectGraph()
+  {
+    // Imgui::Begin somewhere in pipeline
+
+    if (ImGui::TreeNode(mName.c_str()))
+    {
+      for (auto child : mChildren)
+      {
+        child->DrawSceneObjectGraph();
+      }
+      ImGui::TreePop();
+      // ImGui::End somewhere in pipeline
+    }
   }
 
   SceneObject::SceneObject(Transform aTransform,
@@ -161,5 +196,4 @@ namespace GPGVulkan
   };
 
   unsigned long SceneObject::ObjectIDCounter = 1;
-
 }

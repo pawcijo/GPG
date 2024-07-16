@@ -38,7 +38,6 @@ namespace GPGVulkan
         }
 
         mSceneObjects.clear();
-
     }
 
     void Scene::AddSceneObject(SceneObject *aObject)
@@ -69,6 +68,18 @@ namespace GPGVulkan
         {
             sceneObj->LoadPtrs();
         }
+    }
+
+    long long Scene::SceneSizeInBytes()
+    {
+        long long wholeSize = 0;
+
+        for (auto sceneobject : mSceneObjects)
+        {
+            wholeSize += sceneobject->SceneObjectSizeInBytes();
+        }
+
+        return wholeSize;
     }
 
 }
