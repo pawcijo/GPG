@@ -201,6 +201,18 @@ namespace GPGVulkan
         CleanUp();
     }
 
+    long long VulkanApp::GetModelsSizeInBytes()
+    {
+        long long wholeSize = 0;
+
+        for (auto model : mModels)
+        {
+            wholeSize += model->GetModelSizeInBytes();
+        }
+
+        return wholeSize;
+    }
+
     std::vector<Model *> &VulkanApp::LoadedModels()
     {
         return mModels;

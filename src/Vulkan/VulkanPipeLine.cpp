@@ -1517,7 +1517,8 @@ namespace GPGVulkan
             ImGui::Begin("Profiler:");
             if (nullptr != mScene)
             {
-                ImGui::Text("Scene size in bytes: %iB.", mScene->SceneSizeInBytes());
+                ImGui::Text("Scene size in bytes: %lli.", mScene->SceneSizeInBytes());
+                ImGui::Text("Models size : %lli kB.", mApp->GetModelsSizeInBytes() / 100);
             }
             ImGui::End();
         }
@@ -1571,30 +1572,13 @@ namespace GPGVulkan
 
         updateUniformBuffer(mCurrentFrame, aCamera);
 
-        // TODO add recursive drawing
-        // or search all things that needs to be drawn and write ptrs of them to the list !
-        // STILL TODO
         if (nullptr != mScene)
         {
             for (auto sceneObj : mScene->SceneObjects())
             {
-                if (nullptr != sceneObj->ModelPtr())
-                {
-
-                    VkBuffer vertexBuffers[] = {sceneObj->ModelPtr()->VertexBuffer()};
-
-                    VkDeviceSize offsets[] = {0};
-                    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-                    vkCmdBindIndexBuffer(commandBuffer, sceneObj->ModelPtr()->IndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
-                    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mVulkanContext.mPipelineLayout, 0, 1,
-                                            &sceneObj->ModelPtr()->DescriptorSets()[mCurrentFrame], 0, nullptr);
-
-                    MeshPushConstants constants;
-                    constants.render_matrix = sceneObj->ModelPtr()->GetTransform().TransformMat4();
-
-                    vkCmdPushConstants(commandBuffer, mVulkanContext.mPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(MeshPushConstants), &constants);
-                    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(sceneObj->ModelPtr()->Indices().size()), 1, 0, 0, 0);
-                }
+                sceneObj->RecordDraw(commandBuffer,
+                                     mCurrentFrame,
+                                     mVulkanContext.mPipelineLayout);
             }
         }
         drawImgui(commandBuffer);

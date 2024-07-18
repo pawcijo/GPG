@@ -4,6 +4,8 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 
+#include <vulkan/vulkan.h>
+
 #include "Common/Transform.h"
 #include "Common/Scene.hpp"
 #include "Vulkan/Model.hpp"
@@ -188,6 +190,20 @@ namespace GPGVulkan
                            Transform aTransform,
                            Model *aModel) : mObjectId(aObjectId), mParentId(aParentId), mName(aName), mTransform(aTransform), mModel(aModel)
   {
+  }
+
+  void SceneObject::RecordDraw(VkCommandBuffer aCommandBuffer,
+                               uint32_t aCurrentFrame, VkPipelineLayout aPipelineLayout)
+  {
+    if (nullptr != mModel)
+    {
+      mModel->RecordModelDraw(aCommandBuffer, aCurrentFrame, aPipelineLayout);
+    }
+
+    for (auto child : mChildren)
+    {
+      child->RecordDraw(aCommandBuffer, aCurrentFrame, aPipelineLayout);
+    }
   }
 
   SceneObject::~SceneObject()

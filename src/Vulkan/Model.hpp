@@ -81,7 +81,10 @@ namespace GPGVulkan
         VkImageView TextureImageView();
         std::vector<VkDescriptorSet> DescriptorSets();
 
-        long long GetModelSizeInBytes();    
+        void RecordModelDraw(VkCommandBuffer aCommandBuffer,
+                             uint32_t aCurrentFrame, VkPipelineLayout aPipelineLayout);
+
+        long long GetModelSizeInBytes();
 
         friend class VulkanApp;
         friend class VulkanPipeline;

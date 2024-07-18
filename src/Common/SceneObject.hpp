@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vulkan/vulkan.h>
 #include <vector>
 
 #include "Common/Transform.h"
@@ -21,8 +22,8 @@ namespace GPGVulkan
         unsigned long mParentId;
         std::vector<unsigned long> mChildrenIds;
         std::string mName;
-
         Transform mTransform;
+
         Model *mModel; // change to mesh ?
 
         static unsigned long ObjectIDCounter;
@@ -33,10 +34,10 @@ namespace GPGVulkan
                     SceneObject *parent);
 
         SceneObject(unsigned long aObjectId,
-                    unsigned long aParentId, 
-                    std::string aName, 
+                    unsigned long aParentId,
+                    std::string aName,
                     Transform aTransform,
-                     Model *aModel);
+                    Model *aModel);
 
         ~SceneObject();
 
@@ -52,6 +53,9 @@ namespace GPGVulkan
         Model *ModelPtr();
         Transform TransformValue();
         const std::string &Name() const { return mName; }
+
+        void RecordDraw(VkCommandBuffer aCommandBuffer,
+                        uint32_t aCurrentFrame, VkPipelineLayout aPipelineLayout);
 
         std::vector<SceneObject *> Children();
         std::vector<unsigned long> ChildrenIds();

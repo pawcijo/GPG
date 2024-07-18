@@ -3,6 +3,7 @@
 #include <tiny_obj_loader.h>
 #include <stb_image.h>
 
+#include <vulkan/vulkan.h>
 #include <Vulkan/VulkanUtis.hpp>
 
 #include <filesystem>
@@ -452,6 +453,9 @@ namespace GPGVulkan
 
         std::unordered_map<Vertex, uint32_t> uniqueVertices{};
 
+        std::vector<Vertex> mVertices;
+        std::vector<uint32_t> mIndices;
+
         for (const auto &shape : shapes)
         {
             for (const auto &index : shape.mesh.indices)
@@ -636,7 +640,13 @@ namespace GPGVulkan
     {
         long long modelSizeInBytes = 0;
 
-        throw std::logic_error("Unimplemented");
+        modelSizeInBytes += sizeof(mModelPath);
+        modelSizeInBytes += sizeof(mTexturePath);
+
+        modelSizeInBytes += sizeof(mVertices[0]) * mVertices.size();
+        modelSizeInBytes += sizeof(mIndices[0]) * mIndices.size();
+
+        // TODO add missing texture stuff
 
         return modelSizeInBytes;
     }
@@ -657,6 +667,26 @@ namespace GPGVulkan
 
         vkDestroyBuffer(aDevice, mVertexBuffer, nullptr);
         vkFreeMemory(aDevice, mVertexBufferMemory, nullptr);
+    }
+
+    void Model::RecordModelDraw(VkCommandBuffer aCommandBuffer,
+                                uint32_t aCurrentFrame,
+                                VkPipelineLayout aPipelineLayout)
+    {
+
+        VkBuffer vertexBuffers[] = {mVertexBuffer};
+
+        VkDeviceSize offsets[] = {0};
+        vkCmdBindVertexBuffers(aCommandBuffer, 0, 1, vertexBuffers, offsets);
+        vkCmdBindIndexBuffer(aCommandBuffer, mIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
+        vkCmdBindDescriptorSets(aCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, aPipelineLayout, 0, 1,
+                                &mDescriptorSets[aCurrentFrame], 0, nullptr);
+
+        MeshPushConstants constants;
+        constants.render_matrix = mTransform.TransformMat4();
+
+        vkCmdPushConstants(aCommandBuffer, aPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(MeshPushConstants), &constants);
+        vkCmdDrawIndexed(aCommandBuffer, static_cast<uint32_t>(mIndices.size()), 1, 0, 0, 0);
     }
 
 }

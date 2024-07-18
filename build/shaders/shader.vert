@@ -14,7 +14,6 @@ layout(location = 1) out vec2 fragTexCoord;
 
 layout( push_constant ) uniform constants
 {
-    vec4 data;
     mat4 render_matrix;
 } PushConstants;
 
