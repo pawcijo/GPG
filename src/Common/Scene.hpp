@@ -4,19 +4,24 @@
 #include <vector>
 
 #include "SceneObject.hpp"
+#include "Physics/PhysicsEntityManager.hpp"
 
 namespace GPGVulkan
 {
 
     class Scene
     {
-
+    private:
         std::vector<SceneObject *> mSceneObjects;
 
+        PhysicsEntityManager mEntityManager;
+        PhysicsWorld *mPhysicsWorld;
         SceneObject *FindObjectPtr(unsigned long objectId);
 
     public:
         Scene();
+
+        PhysicsWorld *PhysicsWorldPtr();
 
         void SaveScene(std::filesystem::path aScenePath);
         void ClearScene();

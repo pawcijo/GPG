@@ -8,18 +8,17 @@
 
 #include <SDL2/SDL.h>
 
-unsigned long GetApplicationTime()
-{
-    return SDL_GetTicks();
-}
-
-std::unique_ptr<PhysicsTimer> CreatePhysicsTimer(unsigned int alUpdatesPerSec)
-{
-    return std::make_unique<PhysicsTimer>(alUpdatesPerSec);
-}
-
 namespace GPGVulkan
 {
+    unsigned long GetApplicationTime()
+    {
+        return SDL_GetTicks();
+    }
+
+    std::unique_ptr<PhysicsTimer> CreatePhysicsTimer(unsigned int alUpdatesPerSec)
+    {
+        return std::make_unique<PhysicsTimer>(alUpdatesPerSec);
+    }
 
     VulkanApp::VulkanApp(VulkanPipeLine &aGraphicPipeline)
         : mGraphicPipeline(aGraphicPipeline), mScene(nullptr), mCamera(Camera())

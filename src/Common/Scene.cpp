@@ -9,15 +9,23 @@
 #include <filesystem>
 #include <ranges>
 
+#include "Physics/PhysicsWorld.hpp"
+
 namespace GPGVulkan
 {
     Scene::Scene()
     {
+    
     }
 
     void Scene::SaveScene(std::filesystem::path aPath)
     {
         SaveSceneXml(aPath, this);
+    }
+
+    PhysicsWorld* Scene::PhysicsWorldPtr()
+    {
+        return mPhysicsWorld;
     }
 
     void Scene::Serialize(std::ofstream &outFile) const

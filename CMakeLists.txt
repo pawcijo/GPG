@@ -87,7 +87,9 @@ add_executable(${PROJECT_NAME}
 	src/Common/SceneUtils.cpp
 	src/Common/SceneObject.cpp
 	src/Vulkan/Model.cpp
-	src/MyPhysics/PhysicsTimer.cpp
+	src/Physics/PhysicsTimer.cpp
+	src/Physics/PhysicsWorld.cpp
+	src/Physics/PhysicsUtils.cpp
 
 	${IMGUI_DIR}/backends/imgui_impl_glfw.cpp 
 	${IMGUI_DIR}/backends/imgui_impl_vulkan.cpp 

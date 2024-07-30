@@ -24,6 +24,7 @@ namespace GPGVulkan
         std::string mName;
         Transform mTransform;
 
+        
         Model *mModel; // change to mesh ?
 
         static unsigned long ObjectIDCounter;
