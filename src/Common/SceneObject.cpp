@@ -174,6 +174,7 @@ namespace GPGVulkan
       auto it = std::find(mParent->mChildren.begin(), mParent->mChildren.end(), this);
       if (it != mParent->mChildren.end())
       {
+
         mParent->mChildren.erase(it);
       }
     }
@@ -190,6 +191,7 @@ namespace GPGVulkan
                            Transform aTransform,
                            Model *aModel) : mObjectId(aObjectId), mParentId(aParentId), mName(aName), mTransform(aTransform), mModel(aModel)
   {
+    printf("SceneObject Created id: %lu \n",mObjectId);
   }
 
   void SceneObject::RecordDraw(VkCommandBuffer aCommandBuffer,
@@ -197,7 +199,7 @@ namespace GPGVulkan
   {
     if (nullptr != mModel)
     {
-      mModel->RecordModelDraw(aCommandBuffer, aCurrentFrame, aPipelineLayout);
+      mModel->RecordModelDraw(aCommandBuffer, mTransform, aCurrentFrame, aPipelineLayout);
     }
 
     for (auto child : mChildren)
@@ -208,6 +210,7 @@ namespace GPGVulkan
 
   SceneObject::~SceneObject()
   {
+    printf("SceneObject Destroyed id: %lu \n",mObjectId);
     ObjectIDCounter = ObjectIDCounter - 1;
   };
 

@@ -670,6 +670,7 @@ namespace GPGVulkan
     }
 
     void Model::RecordModelDraw(VkCommandBuffer aCommandBuffer,
+                                Transform & aSceneObjectTransform,
                                 uint32_t aCurrentFrame,
                                 VkPipelineLayout aPipelineLayout)
     {
@@ -683,7 +684,7 @@ namespace GPGVulkan
                                 &mDescriptorSets[aCurrentFrame], 0, nullptr);
 
         MeshPushConstants constants;
-        constants.render_matrix = mTransform.TransformMat4();
+        constants.render_matrix = aSceneObjectTransform.TransformMat4() * mTransform.TransformMat4();
 
         vkCmdPushConstants(aCommandBuffer, aPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(MeshPushConstants), &constants);
         vkCmdDrawIndexed(aCommandBuffer, static_cast<uint32_t>(mIndices.size()), 1, 0, 0, 0);

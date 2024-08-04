@@ -11,6 +11,8 @@ find_package(OpenGL REQUIRED)
 find_package(SDL2 REQUIRED)
 
 
+
+
 set(CMAKE_LIBRARY_PATH ${CMAKE_INSTALL_PREFIX}/lib)
 
 find_library(NEWTON_LIB ndNewton REQUIRED)

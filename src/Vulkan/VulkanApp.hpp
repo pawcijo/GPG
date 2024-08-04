@@ -50,6 +50,7 @@ namespace GPGVulkan
         Model *GetModel(std::filesystem::path aPath);
         long long GetModelsSizeInBytes();
         void AddModel(Model *);
+        bool CheckIfModelExist(std::filesystem::path aPath);
 
         friend class VulkanPipeLine;
     };

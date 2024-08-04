@@ -168,33 +168,37 @@ namespace GPGVulkan
         return sceneObj;
     }
 
-    Scene *LoadSceneXml(std::filesystem::path aPath, VulkanApp &app, VulkanPipeLine &aPipeline)
+    void LoadSceneXml(std::filesystem::path aPath, VulkanApp &app, VulkanPipeLine &aPipeline, Scene *aScene)
     {
         tinyxml2::XMLDocument doc;
         if (doc.LoadFile(aPath.c_str()) != tinyxml2::XML_SUCCESS)
         {
             std::cerr << "Failed to load XML file: " << aPath << std::endl;
-            return nullptr;
+            return;
         }
 
         tinyxml2::XMLElement *sceneElement = doc.FirstChildElement("Scene");
         if (!sceneElement)
         {
             std::cerr << "No <Scene> element found in XML file: " << aPath << std::endl;
-            return nullptr;
+            return;
         }
 
-        Scene *scene = new Scene();
+        if (nullptr == aScene)
+        {
+            printf("Scene empty, creating new scene .\n");
+            aScene = new Scene();
+            aPipeline.SetScenePtr(aScene);
+        }
 
         // Parse each SceneObject in the Scene
         for (tinyxml2::XMLElement *sceneObjectElement = sceneElement->FirstChildElement("SceneObject"); sceneObjectElement; sceneObjectElement = sceneObjectElement->NextSiblingElement("SceneObject"))
         {
             SceneObject *sceneObject = ParseSceneObjectRecursive(sceneObjectElement, nullptr, app, aPipeline);
-            scene->AddSceneObject(sceneObject);
+            aScene->AddSceneObject(sceneObject);
         }
 
         printf("Scene Loaded: %s .\n", aPath.c_str());
-        return scene;
     }
 
     void SaveSceneXml(std::filesystem::path aPath, Scene *aScene)

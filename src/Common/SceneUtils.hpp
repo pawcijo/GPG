@@ -15,7 +15,7 @@ namespace GPGVulkan
 
     void SaveSceneXml(std::filesystem::path aPath, Scene *aScene);
 
-    Scene *LoadSceneXml(std::filesystem::path aPath, VulkanApp &app, VulkanPipeLine &aPipeline);
+    void LoadSceneXml(std::filesystem::path aPath, VulkanApp &app, VulkanPipeLine &aPipeline, Scene * aScne);
 
     using namespace tinyxml2;
     XMLElement *CreateTransform(XMLDocument &document, Transform aTransform);

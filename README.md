@@ -52,7 +52,11 @@ Dont know yet xD
 TODO:
 - [ ] Finish Vulkan implementation. (make it simpler ?)  
 - [ ] Create physics system with NewtonLibrary.  
-- [ ] Try to build and run on windows.  
+- [ ] Try to build and run on windows. 
+
+TODO ASAP:
+- [ ] Fix memory leak for loading xml scene
+- [ ] Fix rotation for reloading scene
 
 Helper: 
 

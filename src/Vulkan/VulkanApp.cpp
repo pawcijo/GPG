@@ -102,10 +102,11 @@ namespace GPGVulkan
 
     void VulkanApp::AddModel(Model *aModel)
     {
-        for (auto model : mModels)
+        for (Model *model : mModels)
         {
             if (model->ModelPath() == aModel->ModelPath())
             {
+                model->mTransform = aModel->mTransform;
                 printf("Model already exist, skipping .\n");
                 return;
             }
@@ -113,49 +114,20 @@ namespace GPGVulkan
         mModels.push_back(aModel);
     }
 
+    bool VulkanApp::CheckIfModelExist(std::filesystem::path aPath)
+    {
+        for (Model *model : mModels)
+        {
+            if (model->ModelPath() == aPath)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void VulkanApp::Run()
     {
-        // Move to config  ?
-        // TODO: do not load anything here, do it only if it is required
-        /*const std::string MODEL_PATH = "resources/models/viking_room.obj";
-        const std::string TEXTURE_PATH = "resources/textures/viking_room.png";
-
-        const std::string MODEL_PATH_2 = "resources/models/Klocek.obj";
-        const std::string TEXTURE_PATH_2 = "resources/textures/juanP.jpg";
-
-
-
-        mModels.push_back(new Model(MODEL_PATH, TEXTURE_PATH,
-                                    mGraphicPipeline.mVulkanContext));
-
-        mModels.push_back(new Model(MODEL_PATH_2, TEXTURE_PATH_2,
-                                    mGraphicPipeline.mVulkanContext));
-
-        mModels[0]->GetTransform().rotate(90, glm::vec3(1, 0, 0));
-        mModels[0]->GetTransform().rotate(180, glm::vec3(0, 1, 0));
-        mModels[0]->GetTransform().rotate(90, glm::vec3(0, 0, 1));
-
-        SceneObject *scenObj = new SceneObject(Transform(), nullptr);
-        scenObj->SetName("Dupa");
-        scenObj->SetModel(mModels[0]);
-        mScene.AddSceneObject(scenObj);
-
-        SceneObject *emptySceneObj = new SceneObject(Transform(), nullptr);
-        emptySceneObj->SetName("EmptySceneObj");
-        scenObj->AddChild(emptySceneObj);
-
-        SceneObject *emptySceneObj2 = new SceneObject(Transform(), nullptr);
-        emptySceneObj2->SetModel(mModels[1]);
-        emptySceneObj2->SetName("Klocek");
-
-        mModels[1]->GetTransform().setScale(glm::vec3(0.1, 0.1, 0.1));
-        mModels[1]->GetTransform().translate(glm::vec3(9, 0, 0));
-
-        mScene.AddSceneObject(emptySceneObj2);
-
-        mGraphicPipeline.SetScenePtr(&mScene);
-        */
-
         // move them to model  mGraphicPipeline.createDescriptorSets();
 
         mGraphicPipeline.createDescriptorPool(1000);

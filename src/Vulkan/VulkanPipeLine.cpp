@@ -1486,7 +1486,6 @@ namespace GPGVulkan
                 if (ImGui::Button("Clear Scene")) // Buttons return true when clicked (most widgets return true when edited/activated)
                 {
                     mScene->ClearScene();
-                    mScene = nullptr;
                 }
             }
 
@@ -1496,7 +1495,8 @@ namespace GPGVulkan
                 {
                     mScene->ClearScene();
                 }
-                mScene = LoadSceneXml(scenePath, *mApp, *this);
+                
+                LoadSceneXml(scenePath, *mApp, *this,mScene);
             }
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);

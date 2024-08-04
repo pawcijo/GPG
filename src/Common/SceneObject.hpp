@@ -71,6 +71,7 @@ namespace GPGVulkan
         unsigned long ParentId();
 
         friend class Scene;
+        friend class Model;
     };
 
 }
