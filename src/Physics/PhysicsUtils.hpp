@@ -3,7 +3,4 @@
 class PhysicsEntityManager;
 class ndBodyKinematic;
 
-namespace GPGVulkan
-{
-    ndBodyKinematic *BuildFlatPlane(PhysicsEntityManager * scene, bool optimized);
-}
+::ndBodyKinematic *BuildFlatPlane(PhysicsEntityManager *scene, bool optimized);

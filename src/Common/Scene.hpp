@@ -6,6 +6,8 @@
 #include "SceneObject.hpp"
 #include "Physics/PhysicsEntityManager.hpp"
 
+class PhysicsWorld;
+
 namespace GPGVulkan
 {
 
@@ -21,7 +23,7 @@ namespace GPGVulkan
     public:
         Scene();
 
-        PhysicsWorld *PhysicsWorldPtr();
+       // PhysicsWorld *PhysicsWorldPtr();
 
         void SaveScene(std::filesystem::path aScenePath);
         void ClearScene();

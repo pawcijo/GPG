@@ -11,8 +11,9 @@
 
 #include "PhysicsContactCallback.hpp"
 
-namespace GPGVulkan
-{
+#include <ndShapeInstance.h>
+
+
 
 	ndApplicationMaterial::ndApplicationMaterial()
 		: ndMaterial()
@@ -68,20 +69,20 @@ namespace GPGVulkan
 		}
 	}
 
-	ndContactCallback::ndContactCallback()
+	PhysicsContactCallback::PhysicsContactCallback()
 		: ndContactNotify(), m_materialGraph(), m_defaultMaterial()
 	{
 	}
 
-	void ndContactCallback::OnBodyAdded(ndBodyKinematic *const) const
+	void PhysicsContactCallback::OnBodyAdded(ndBodyKinematic *const) const
 	{
 	}
 
-	void ndContactCallback::OnBodyRemoved(ndBodyKinematic *const) const
+	void PhysicsContactCallback::OnBodyRemoved(ndBodyKinematic *const) const
 	{
 	}
 
-	void ndContactCallback::PlaySoundTest(const ndContact *const contactJoint)
+	void PhysicsContactCallback::PlaySoundTest(const ndContact *const contactJoint)
 	{
 		const ndBodyKinematic *const body0 = contactJoint->GetBody0();
 		const ndBodyKinematic *const body1 = contactJoint->GetBody1();
@@ -130,7 +131,7 @@ namespace GPGVulkan
 		}
 	}
 
-	ndApplicationMaterial &ndContactCallback::RegisterMaterial(const ndApplicationMaterial &material, ndUnsigned32 id0, ndUnsigned32 id1)
+	ndApplicationMaterial &PhysicsContactCallback::RegisterMaterial(const ndApplicationMaterial &material, ndUnsigned32 id0, ndUnsigned32 id1)
 	{
 		ndMaterailKey key(id0, id1);
 		ndMaterialGraph::ndNode *node = m_materialGraph.Find(key);
@@ -142,14 +143,14 @@ namespace GPGVulkan
 		return *node->GetInfo();
 	}
 
-	ndMaterial *ndContactCallback::GetMaterial(const ndContact *const, const ndShapeInstance &instance0, const ndShapeInstance &instance1) const
+	ndMaterial *PhysicsContactCallback::GetMaterial(const ndContact *const, const ndShapeInstance &instance0, const ndShapeInstance &instance1) const
 	{
 		ndMaterailKey key(ndUnsigned32(instance0.GetMaterial().m_userId), ndUnsigned32(instance1.GetMaterial().m_userId));
 		ndMaterialGraph::ndNode *const node = m_materialGraph.Find(key);
 		return node ? node->GetInfo() : (ndMaterial *)&m_defaultMaterial;
 	}
 
-	bool ndContactCallback::OnAabbOverlap(const ndContact *const contactJoint, ndFloat32 timestep)
+	bool PhysicsContactCallback::OnAabbOverlap(const ndContact *const contactJoint, ndFloat32 timestep)
 	{
 		const ndApplicationMaterial *const material = (ndApplicationMaterial *)contactJoint->GetMaterial();
 		ndAssert(material);
@@ -161,20 +162,20 @@ namespace GPGVulkan
 		return material->OnAabbOverlap(contactJoint, timestep, instanceShape0, instanceShape1);
 	}
 
-	// bool ndContactCallback::OnCompoundSubShapeOverlap(const ndContact* const contactJoint, const ndShapeInstance& instance0, const ndShapeInstance& instance1)
-	bool ndContactCallback::OnCompoundSubShapeOverlap(const ndContact *const contactJoint, ndFloat32 timestep, const ndShapeInstance *const instance0, const ndShapeInstance *const instance1)
+	// bool PhysicsContactCallback::OnCompoundSubShapeOverlap(const ndContact* const contactJoint, const ndShapeInstance& instance0, const ndShapeInstance& instance1)
+	bool PhysicsContactCallback::OnCompoundSubShapeOverlap(const ndContact *const contactJoint, ndFloat32 timestep, const ndShapeInstance *const instance0, const ndShapeInstance *const instance1)
 	{
 		const ndApplicationMaterial *const material = (ndApplicationMaterial *)contactJoint->GetMaterial();
 		ndAssert(material);
 		return material->OnAabbOverlap(contactJoint, timestep, *instance0, *instance1);
 	}
 
-	// void ndContactCallback::OnContactCallback(ndInt32 threadIndex, const ndContact* const contactJoint, ndFloat32 timestep)
-	void ndContactCallback::OnContactCallback(const ndContact *const contactJoint, ndFloat32 timestep)
+	// void PhysicsContactCallback::OnContactCallback(ndInt32 threadIndex, const ndContact* const contactJoint, ndFloat32 timestep)
+	void PhysicsContactCallback::OnContactCallback(const ndContact *const contactJoint, ndFloat32 timestep)
 	{
 		const ndApplicationMaterial *const material = (ndApplicationMaterial *)contactJoint->GetMaterial();
 		ndAssert(material);
 		material->OnContactCallback(contactJoint, timestep);
 	}
 
-}
+

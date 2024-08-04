@@ -2,74 +2,70 @@
 
 #include "SDL.h"
 
-namespace GPGVulkan
+PhysicsTimer::PhysicsTimer(int aUpdatesPerSec)
 {
+    mMaxUpdates = aUpdatesPerSec;
+    mUpdateCount = 0;
 
-    PhysicsTimer::PhysicsTimer(int aUpdatesPerSec)
-    {
-        mMaxUpdates = aUpdatesPerSec;
-        mUpdateCount = 0;
+    SetUpdatesPerSec(aUpdatesPerSec);
+}
 
-        SetUpdatesPerSec(aUpdatesPerSec);
-    }
+PhysicsTimer::~PhysicsTimer()
+{
+}
 
-    PhysicsTimer::~PhysicsTimer()
-    {
-    }
+void PhysicsTimer::Reset()
+{
+    mLocalTime = (double)SDL_GetTicks();
+}
 
-    void PhysicsTimer::Reset()
-    {
-        mLocalTime = (double)SDL_GetTicks();
-    }
-
-    bool PhysicsTimer::WantUpdate()
-    {
-        ++mUpdateCount;
-        if (mUpdateCount > mMaxUpdates)
-            return false;
-
-        if (mLocalTime < (double)SDL_GetTicks())
-        {
-            Update();
-            return true;
-        }
+bool PhysicsTimer::WantUpdate()
+{
+    ++mUpdateCount;
+    if (mUpdateCount > mMaxUpdates)
         return false;
-    }
 
-    void PhysicsTimer::EndUpdateLoop()
+    if (mLocalTime < (double)SDL_GetTicks())
     {
-        if (mUpdateCount > mMaxUpdates)
-        {
-            Reset();
-        }
-
-        mUpdateCount = 0;
+        Update();
+        return true;
     }
+    return false;
+}
 
-    void PhysicsTimer::SetUpdatesPerSec(int aUpdatesPerSec)
+void PhysicsTimer::EndUpdateLoop()
+{
+    if (mUpdateCount > mMaxUpdates)
     {
-        mLocalTimeAdd = 1000.0 / ((double)aUpdatesPerSec);
         Reset();
     }
 
-    void PhysicsTimer::SetMaxUpdates(int alMax)
-    {
-        mMaxUpdates = alMax;
-    }
+    mUpdateCount = 0;
+}
 
-    int PhysicsTimer::GetUpdatesPerSec()
-    {
-        return (int)(1000.0 / ((double)mLocalTimeAdd));
-    }
+void PhysicsTimer::SetUpdatesPerSec(int aUpdatesPerSec)
+{
+    mLocalTimeAdd = 1000.0 / ((double)aUpdatesPerSec);
+    Reset();
+}
 
-    float PhysicsTimer::GetStepSize()
-    {
-        return ((float)mLocalTimeAdd) / 1000.0f;
-    }
+void PhysicsTimer::SetMaxUpdates(int alMax)
+{
+    mMaxUpdates = alMax;
+}
 
-    // Private
-    void PhysicsTimer::Update()
-    {
-        mLocalTime += mLocalTimeAdd;
-    }
+int PhysicsTimer::GetUpdatesPerSec()
+{
+    return (int)(1000.0 / ((double)mLocalTimeAdd));
+}
+
+float PhysicsTimer::GetStepSize()
+{
+    return ((float)mLocalTimeAdd) / 1000.0f;
+}
+
+// Private
+void PhysicsTimer::Update()
+{
+    mLocalTime += mLocalTimeAdd;
 }

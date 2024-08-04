@@ -11,10 +11,10 @@
 
 #pragma once
 
-#include <ndContactNotify.h>
+#include <ndNewton.h>
 
-namespace GPGVulkan
-{
+
+class ndShapeInstance;
 
 class ndApplicationMaterial : public ndMaterial
 {
@@ -91,10 +91,10 @@ class ndMaterialGraph : public ndTree<ndApplicationMaterial*, ndMaterailKey>
 	~ndMaterialGraph();
 };
 
-class ndContactCallback: public ndContactNotify
+class PhysicsContactCallback: public ndContactNotify
 {
 	public: 
-	ndContactCallback();
+	PhysicsContactCallback();
 
 	enum
 	{
@@ -122,5 +122,4 @@ class ndContactCallback: public ndContactNotify
 	ndApplicationMaterial m_defaultMaterial;
 };
 
-}
 

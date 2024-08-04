@@ -19,8 +19,6 @@ class ndAnimKeyframe;
 class ndShaderCache;
 class ndDemoMeshInterface;
 
-namespace GPGVulkan
-{
 
 class PhysicsEntityNotify: public ndBodyNotify
 {
@@ -67,5 +65,5 @@ class ndBindingRagdollEntityNotify : public PhysicsEntityNotify
 	ndMatrix m_bindMatrix;
 	ndFloat32 m_capSpeed;
 };
-}
+
 
