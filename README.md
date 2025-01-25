@@ -41,7 +41,7 @@ pip install python-git
 
 Running binary on mac:
 ```
-DYLD_LIBRARY_PATH=${VulkanSdkPath}/macOS/lib ./OPGLPlayground
+DYLD_LIBRARY_PATH=${VULKAN_SDK_PATH}/macOS/lib ./GPGPlayground
 ```
 
 ## Requirements for Windows :

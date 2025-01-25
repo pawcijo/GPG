@@ -6,6 +6,8 @@
 
 #include "Model.hpp"
 
+#include "Physics/PhysicsEntityManager.hpp"
+
 #include <SDL2/SDL.h>
 
 namespace GPGVulkan
@@ -136,6 +138,7 @@ namespace GPGVulkan
         mGraphicPipeline.createCommandBuffers();
         mGraphicPipeline.createSyncObjects();
         mGraphicPipeline.setupImgui();
+       
 
         while (!glfwWindowShouldClose(mGraphicPipeline.GetWindow()))
         {

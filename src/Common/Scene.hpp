@@ -23,7 +23,8 @@ namespace GPGVulkan
     public:
         Scene();
 
-       // PhysicsWorld *PhysicsWorldPtr();
+        PhysicsWorld *PhysicsWorldPtr();
+
 
         void SaveScene(std::filesystem::path aScenePath);
         void ClearScene();

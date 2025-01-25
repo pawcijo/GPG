@@ -11,7 +11,6 @@
 #include "Vulkan/Model.hpp"
 
 #include <vector>
-#include <fstream>
 
 namespace GPGVulkan
 {
@@ -31,7 +30,7 @@ namespace GPGVulkan
     sceneObjectSize += (sizeof(mName) + mName.capacity());
     sceneObjectSize += sizeof(mObjectId);
     sceneObjectSize += sizeof(mParentId);
-    sceneObjectSize += sizeof(mChildrenIds);
+    sceneObjectSize += sizeof(unsigned int) * mChildrenIds.size();
 
     for (auto objects : mChildren)
     {
@@ -191,7 +190,7 @@ namespace GPGVulkan
                            Transform aTransform,
                            Model *aModel) : mObjectId(aObjectId), mParentId(aParentId), mName(aName), mTransform(aTransform), mModel(aModel)
   {
-    printf("SceneObject Created id: %lu \n",mObjectId);
+    //printf("SceneObject Created id: %lu \n",mObjectId);
   }
 
   void SceneObject::RecordDraw(VkCommandBuffer aCommandBuffer,
@@ -210,9 +209,9 @@ namespace GPGVulkan
 
   SceneObject::~SceneObject()
   {
-    printf("SceneObject Destroyed id: %lu \n",mObjectId);
+   printf("SceneObject Destroyed id: %lu \n",mObjectId);
     ObjectIDCounter = ObjectIDCounter - 1;
   };
 
-  unsigned long SceneObject::ObjectIDCounter = 1;
+  unsigned long SceneObject::ObjectIDCounter = 0;
 }

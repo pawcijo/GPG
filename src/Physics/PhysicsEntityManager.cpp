@@ -20,6 +20,8 @@
 
 #include <ndBodyListView.h>
 
+#include <iostream>
+
 // #define ENABLE_REPLAY
 #ifdef ENABLE_REPLAY
 // #define REPLAY_RECORD
@@ -40,32 +42,10 @@ PhysicsEntityManager::PhysicsEntityManager()
 	  m_solverMode(ndWorld::ndSimdSoaSolver), m_replayLogFile(nullptr)
 {
 
-	// initialized the physics world for the new scene
-	// m_showUI = false;
-	// m_showAABB = true;
-	// m_hideVisualMeshes = true;
-	// m_showScene = true;
-	// m_showConcaveEdge = true;
-	// m_autoSleepMode = false;
-	// m_solverMode = ndWorld::ndOpenclSolver1;
-	// m_solverMode = ndWorld::ndOpenclSolver2;
-	// m_solverMode = ndWorld::ndSimdSoaSolver;
-	// m_solverMode = ndWorld::ndCudaSolver;
-	// m_solverMode = ndWorld::ndSimdAvx2Solver;
+	std::cout<<"PhysicsEntityManager Initialised. \n";
+
 	m_solverMode = ndWorld::ndStandardSolver;
-	// m_solverPasses = 4;
 	m_workerThreads = 1;
-	// m_solverSubSteps = 2;
-	// m_showRaycastHit = true;
-	// m_showCenterOfMass = false;
-	// m_showNormalForces = true;
-	// m_showContactPoints = true;
-	// m_showJointDebugInfo = true;
-	// m_showModelsDebugInfo = true;
-	// m_collisionDisplayMode = 1;
-	// m_collisionDisplayMode = 2;
-	// m_collisionDisplayMode = 3;		// solid wire frame
-	// m_synchronousPhysicsUpdate = false;
 
 	Cleanup();
 	ResetTimer();

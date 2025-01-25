@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Vulkan/VulkanUtis.hpp"
 #include "Common/Scene.hpp"
 #include "Common/Camera.h"
 #include "Physics/PhysicsTimer.hpp"
@@ -8,7 +7,6 @@
 #include <glm/glm.hpp>
 
 #include <vector>
-#include <memory>
 
 namespace GPGVulkan
 {

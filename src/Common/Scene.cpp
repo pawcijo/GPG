@@ -9,7 +9,7 @@
 #include <filesystem>
 #include <ranges>
 
-//#include "Physics/PhysicsWorld.hpp"
+#include "Physics/PhysicsWorld.hpp"
 
 namespace GPGVulkan
 {
